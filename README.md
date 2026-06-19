@@ -1,5 +1,7 @@
 🪄 Lesson Loom
+
 Outil de planification pédagogique pour professeurs de langues
+
 Lesson Loom est une application web autonome (un seul fichier HTML, aucune installation requise) conçue pour les professeurs d'anglais au lycée.
 
 ✨ Fonctionnalités
