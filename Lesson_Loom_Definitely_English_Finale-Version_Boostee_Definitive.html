@@ -55630,21 +55630,46 @@ const LYCEE_ORDER = ['Seconde_LVAB', 'Seconde_LVC', 'Première_LVAB', 'Première
 
 // Aplati toutes les listes lycée en une seule (dédupliquée, ordre conservé).
 // Utilisé par la checkbox "Tous niveaux" du référentiel grammaire/phonologie.
-const flattenAll = db => {
+const flattenAll = (db, collSrc) => {
   const seen = new Set();
   const out = [];
+  const nivLabels = {
+    'Seconde_LVAB':'Seconde LV A/B','Seconde_LVC':'Seconde LV C',
+    'Première_LVAB':'Première LV A/B','Première_LVC':'Première LV C',
+    'Terminale_LVAB':'Terminale LV A/B','Terminale_LVC':'Terminale LV C',
+    'Première_AMC':'Première AMC','Terminale_AMC':'Terminale AMC',
+    'Première_LLCER':'Première LLCER','Terminale_LLCER':'Terminale LLCER',
+    'Seconde':'Seconde','Première':'Première','Terminale':'Terminale','DNL':'DNL'
+  };
+  const skipLevels = new Set(['Terminale_LVC','Première_AMC','Terminale_AMC','Première_LLCER','Terminale_LLCER']);
   for (const k of LYCEE_ORDER) {
-    for (const item of db[k] || []) {
-      if (!seen.has(item)) {
-        seen.add(item);
-        out.push(item);
+    if (skipLevels.has(k)) continue;
+    const items = db[k] || [];
+    if (items.length > 0) {
+      out.push('▸ ' + (nivLabels[k] || k) + ' ◂');
+      for (const item of items) {
+        if (!seen.has(item)) { seen.add(item); out.push(item); }
+      }
+    }
+  }
+  if (collSrc && typeof window !== 'undefined' && window[collSrc]) {
+    var collLevels = ['6ème','5ème','4ème','3ème'];
+    for (var ci=0; ci<collLevels.length; ci++) {
+      var lv = collLevels[ci];
+      var citems = window[collSrc][lv] || [];
+      if (citems.length > 0) {
+        out.push('▸ Collège · ' + lv + ' ◂');
+        for (var ii=0; ii<citems.length; ii++) {
+          var it = citems[ii];
+          if (!seen.has(it)) { seen.add(it); out.push(it); }
+        }
       }
     }
   }
   return out;
 };
-const getAllGrammar = () => flattenAll(GRAMMAR_BO);
-const getAllPhono = () => flattenAll(PHONO_BO);
+const getAllGrammar = () => flattenAll(GRAMMAR_BO, 'LL_DG_EN');
+const getAllPhono = () => flattenAll(PHONO_BO, 'LL_DP_EN');
 
 // Récupère le bon set de descripteurs selon niveau lycée + LVA/B vs LVC
 const getGrammarFor = (niveau, lv, allLevels = false) => {
@@ -59580,6 +59605,12 @@ const CalendrierView = () => {
   function lV(){try{return JSON.parse(localStorage.getItem(VK)||'[]')}catch(e){return[]}}
   function sV(a){localStorage.setItem(VK,JSON.stringify(a))}
 
+  function llCalWeekStart(d){
+    var day=d.getDay();
+    var diff=(day===0)?-6:1-day;
+    var s=new Date(d);s.setDate(d.getDate()+diff);
+    s.setHours(0,0,0,0);return s;
+  }
   function render(){
     var el=containerRef.current;if(!el)return;
     var curData=dataRef.current;
@@ -59596,7 +59627,7 @@ const CalendrierView = () => {
 
     // ── TOOLBAR ──
     h+='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 14px;background:var(--card);border-radius:10px;border:1px solid var(--border);margin-bottom:14px">';
-    h+='<div style="display:flex;background:var(--bg,var(--panel));border-radius:8px;padding:3px;border:1px solid var(--border);gap:2px"><button class="btn btn-sm '+(ST.view==='month'?'btn-violet':'btn-ghost')+'" data-cv="month">Mois</button><button class="btn btn-sm '+(ST.view==='year'?'btn-violet':'btn-ghost')+'" data-cv="year">Ann\u00E9e</button></div>';
+    h+='<div style="display:flex;background:var(--bg,var(--panel));border-radius:8px;padding:3px;border:1px solid var(--border);gap:2px"><button class="btn btn-sm '+(ST.view==='week'?'btn-violet':'btn-ghost')+'" data-cv="week">Semaine</button><button class="btn btn-sm '+(ST.view==='month'?'btn-violet':'btn-ghost')+'" data-cv="month">Mois</button><button class="btn btn-sm '+(ST.view==='year'?'btn-violet':'btn-ghost')+'" data-cv="year">Ann\u00E9e</button></div>';
     h+='<div style="display:flex;flex-direction:column;gap:1px"><span style="font-size:8px;font-weight:700;color:var(--text-muted);text-transform:uppercase">Ann\u00E9e scolaire</span><select class="fs" data-csy style="max-width:130px;padding:3px 24px 3px 8px;font-size:11px">';
     syO.forEach(function(s){h+='<option value="'+s+'"'+(s===sy?' selected':'')+'>'+s+'</option>'});
     h+='</select></div>';
@@ -59609,6 +59640,16 @@ const CalendrierView = () => {
       h+='<button class="btn btn-ghost btn-sm" data-cnav="-1">\u25C0</button>';
       h+='<div style="font-weight:800;min-width:150px;text-align:center;font-size:14px">'+MS[ST.mc.getMonth()]+' '+ST.mc.getFullYear()+'</div>';
       h+='<button class="btn btn-ghost btn-sm" data-cnav="1">\u25B6</button>';
+      h+='<button class="btn btn-green btn-sm" data-ctod>Auj.</button></div>';
+    }
+    if(ST.view==='week'){
+      var wStart=llCalWeekStart(ST.mc);
+      var wEnd=new Date(wStart);wEnd.setDate(wEnd.getDate()+4);
+      var wLabel=(wStart.getDate()+' '+MS[wStart.getMonth()])+(wStart.getMonth()!==wEnd.getMonth()?' – ':' — ')+(wEnd.getDate()+' '+MS[wEnd.getMonth()]+' '+wEnd.getFullYear());
+      h+='<div style="display:flex;align-items:center;gap:6px;margin-left:auto">';
+      h+='<button class="btn btn-ghost btn-sm" data-cnav="-7">\u25C0</button>';
+      h+='<div style="font-weight:800;min-width:200px;text-align:center;font-size:13px">Semaine du '+wLabel+'</div>';
+      h+='<button class="btn btn-ghost btn-sm" data-cnav="7">\u25B6</button>';
       h+='<button class="btn btn-green btn-sm" data-ctod>Auj.</button></div>';
     }
     h+='</div>';
@@ -59658,6 +59699,31 @@ const CalendrierView = () => {
     var nEvts=evts.length;if(nEvts)h+='<span style="color:var(--accent2);font-weight:600">'+nEvts+' \u00E9v\u00E9nement'+(nEvts>1?'s':'')+'</span>';
     if(cust.length)h+='<span style="color:var(--accent);font-weight:600">'+cust.length+' p\u00E9riode(s)</span>';
     h+='</div>';
+
+    // ── WEEK VIEW ──
+    if(ST.view==='week'){
+      var wS=llCalWeekStart(ST.mc);
+      var WDAYS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
+      h+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">';
+      for(var wd=0;wd<5;wd++){
+        var wDay=new Date(wS);wDay.setDate(wDay.getDate()+wd);
+        var wDI=toI(wDay);
+        var isToday=wDI===tI;var isHol=allH.has(wDI);
+        var isVac=iV(wDI);var dayEvts=eF(wDI);var vacLabel=vL(wDI);
+        h+='<div style="background:var(--card);border-radius:12px;border:2px solid '+(isToday?'var(--accent2)':'var(--border)')+';padding:12px;min-height:160px">';
+        h+='<div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px">'+WDAYS[wd]+'</div>';
+        h+='<div style="font-size:22px;font-weight:800;color:'+(isToday?'var(--accent2)':'var(--text)')+';margin-bottom:8px">'+wDay.getDate()+'<span style="font-size:12px;font-weight:400;color:var(--text-muted);margin-left:4px">'+MS[wDay.getMonth()]+'</span></div>';
+        if(isHol)h+='<div style="font-size:11px;background:rgba(239,68,68,.12);color:#ef4444;border-radius:6px;padding:3px 7px;margin-bottom:4px">Férié</div>';
+        if(isVac)h+='<div style="font-size:11px;background:rgba(249,115,22,.12);color:#f97316;border-radius:6px;padding:3px 7px;margin-bottom:4px">🏖 '+esc(vacLabel)+'</div>';
+        dayEvts.forEach(function(ev){
+          var sq=seqs.find(function(s){return s.id===ev.seqId;});
+          var col=(sq&&sq.couleur)||ev.color||'var(--accent2)';
+          h+='<div style="font-size:11px;background:'+col+'22;border-left:3px solid '+col+';border-radius:4px;padding:4px 8px;margin-bottom:4px;cursor:pointer" data-cev="'+esc(ev.id||'')+'">'+esc(ev.label||ev.title||'')+'</div>';
+        });
+        h+='</div>';
+      }
+      h+='</div>';
+    }
 
     // ── YEAR VIEW (sept y1 → juin y2) ──
     if(ST.view==='year'){
@@ -59718,7 +59784,7 @@ const CalendrierView = () => {
         function selCol(cid){var btns=document.querySelectorAll('#'+cid+' [data-col]');var c=null;btns.forEach(function(b){if(b.style.borderColor!=='var(--border)')c=b.dataset.col});return c}
         t=e.target.closest('[data-cv]');if(t){ST.view=t.dataset.cv;localStorage.setItem('ll-cal-v3',ST.view);renderRef.current();return}
         t=e.target.closest('[data-cm]');if(t){var p=t.dataset.cm.split('-');ST.mc=new Date(+p[0],+p[1],1);ST.view='month';localStorage.setItem('ll-cal-v3','month');renderRef.current();return}
-        t=e.target.closest('[data-cnav]');if(t){ST.mc=new Date(ST.mc.getFullYear(),ST.mc.getMonth()+ +t.dataset.cnav,1);renderRef.current();return}
+        t=e.target.closest('[data-cnav]');if(t){var _n=+t.dataset.cnav;if(ST.view==='week'){ST.mc=new Date(ST.mc);ST.mc.setDate(ST.mc.getDate()+_n);}else{ST.mc=new Date(ST.mc.getFullYear(),ST.mc.getMonth()+_n,1);}renderRef.current();return}
         t=e.target.closest('[data-ctod]');if(t){ST.mc=new Date();renderRef.current();return}
         t=e.target.closest('[data-cadd]');if(t){ST.form='vac';renderRef.current();return}
         t=e.target.closest('[data-cseq]');if(t){ST.form='seq';renderRef.current();return}
@@ -72106,6 +72172,13 @@ function hookSeanceExport(){
     if(!sea){alert('Ouvrez d\'abord une séance.');return}
     if(typeof llOpenQuizLoomPicker==='function')llOpenQuizLoomPicker(sea,sq);
   }));
+  var sep2=document.createElement('div');sep2.style.cssText='height:1px;background:var(--border);margin:4px 6px';
+  menu.appendChild(sep2);
+  menu.appendChild(mkItem('⚡','Copier pour QuizLoom','Sélectionner 1 ou plusieurs séances',function(){
+    var sea=window.__ll_activeSeance,sq=window.__ll_activeSeq;
+    if(!sea){alert('Ouvrez d\'abord une séance.');return}
+    if(typeof llOpenQuizLoomPicker==='function')llOpenQuizLoomPicker(sea,sq);
+  }));
   wrap.appendChild(menu);
   trigger.onclick=function(e){e.preventDefault();e.stopPropagation();var vis=menu.style.display!=='none';menu.style.display=vis?'none':'flex'};
   document.addEventListener('click',function(e){if(!wrap.contains(e.target))menu.style.display='none'},{passive:true});
@@ -72332,7 +72405,7 @@ function hookCecrlCustomDesc(){
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // ── Base grammaire anglais ────────────────────────────────────────────────────
-var LL_DG_EN = {
+var LL_DG_EN = window.LL_DG_EN = {
       "6ème": [
         "G01 · (A1) Présent simple : he sleeps, she rides her bike,…",
         "G02 · (A1) 3e personne du singulier : he goes, she brushes,…",
@@ -72762,7 +72835,7 @@ var LL_DG_EN = {
     };
 
 // ── Base phonétique anglais ───────────────────────────────────────────────────
-var LL_DP_EN = {
+var LL_DP_EN = window.LL_DP_EN = {
       "6ème": [
         "PH01 · (A1) Prononciation du -s : 3e pers. (/s/, /z/, /ɪz/), génitif (Jack's /dʒæks/), pluriel (ghosts /ɡəʊsts/,…)",
         "PH02 · (A1) Voyelles courtes avant doublement consonantique",
@@ -73215,16 +73288,14 @@ var LL_NIV_ORDER = ['6ème','5ème','4ème','3ème',
   'Terminale_LVAB','Terminale_LVC',
   'Première_AMC','Terminale_AMC',
   'Première_LLCER','Terminale_LLCER',
-  'Seconde','Première','Terminale',
-  'Autre'];
+  'Seconde','Première','Terminale'];
 
 var LL_NIV_LABELS = {
   'Seconde_LVAB':'Seconde LV A/B','Seconde_LVC':'Seconde LV C',
   'Première_LVAB':'Première LV A/B','Première_LVC':'Première LV C',
   'Terminale_LVAB':'Terminale LV A/B','Terminale_LVC':'Terminale LV C',
   'Première_AMC':'Première AMC','Terminale_AMC':'Terminale AMC',
-  'Première_LLCER':'Première LLCER','Terminale_LLCER':'Terminale LLCER',
-  'Autre':'Autre (BTS, collège…)'
+  'Première_LLCER':'Première LLCER','Terminale_LLCER':'Terminale LLCER'
 };
 function llNivLabel(n){ return LL_NIV_LABELS[n]||n; }
 
@@ -78210,6 +78281,7 @@ window.addEventListener('load', function(){
 
 
 
+
 // ═══ QUIZLOOM EXPORT ════════════════════════════════════════════════
 
 function llStripHtml(v){
@@ -78899,6 +78971,7 @@ llHookAll = function() {
   _llPreTourHookAll();
   llHookDemoBtn();
 };
+
 
 
 obs.observe(document.body,{childList:true,subtree:true});
