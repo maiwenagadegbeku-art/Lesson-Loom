@@ -47595,7 +47595,13 @@ const IdentiteSection = ({
             fileName: _jsxFileName,
             lineNumber: 188,
             columnNumber: 13
-          }, undefined)]
+          }, undefined), (0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxDEV)("optgroup", {
+            label: "── Autre ──",
+            children: [(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxDEV)("option", {
+              value: "Autre",
+              children: "Autre (BTS, collège…)"
+            }, void 0, false)]
+          }, void 0, true)]
         }, void 0, true, {
           fileName: _jsxFileName,
           lineNumber: 180,
@@ -55752,6 +55758,10 @@ const NIVEAUX_LYCEE = [{
   value: 'Terminale_LLCER',
   label: 'Terminale LLCER',
   group: 'Spécialités'
+}, {
+  value: 'Autre',
+  label: 'Autre (BTS, collège…)',
+  group: 'Autre'
 }];
 
 // AXES & OBJETS D'ÉTUDE (Programmes BO anglais lycée)
@@ -69507,7 +69517,7 @@ const SequenceurView = () => {
 
   // ============ HOME ============
   if (stage === 'home') {
-    const groups = ['Tronc Commun', 'Spécialités'];
+    const groups = ['Tronc Commun', 'Spécialités', 'Autre'];
     return /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxDEV)("div", {
       className: "app-view",
       style: {
@@ -73205,14 +73215,16 @@ var LL_NIV_ORDER = ['6ème','5ème','4ème','3ème',
   'Terminale_LVAB','Terminale_LVC',
   'Première_AMC','Terminale_AMC',
   'Première_LLCER','Terminale_LLCER',
-  'Seconde','Première','Terminale'];
+  'Seconde','Première','Terminale',
+  'Autre'];
 
 var LL_NIV_LABELS = {
   'Seconde_LVAB':'Seconde LV A/B','Seconde_LVC':'Seconde LV C',
   'Première_LVAB':'Première LV A/B','Première_LVC':'Première LV C',
   'Terminale_LVAB':'Terminale LV A/B','Terminale_LVC':'Terminale LV C',
   'Première_AMC':'Première AMC','Terminale_AMC':'Terminale AMC',
-  'Première_LLCER':'Première LLCER','Terminale_LLCER':'Terminale LLCER'
+  'Première_LLCER':'Première LLCER','Terminale_LLCER':'Terminale LLCER',
+  'Autre':'Autre (BTS, collège…)'
 };
 function llNivLabel(n){ return LL_NIV_LABELS[n]||n; }
 
