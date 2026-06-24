@@ -72107,8 +72107,8 @@ function hookSauvegardeBtn(){
   if(!hdrActions||hdrActions.querySelector('.__ll_save_btn'))return;
   var btn=document.createElement('button');
   btn.className='btn btn-ghost __ll_save_btn';
-  btn.style.cssText='gap:6px;border:1px solid var(--border);font-size:12px;font-weight:700;padding:7px 13px;border-radius:10px';
-  btn.innerHTML='<span style="font-size:15px">💾</span> Sauvegarde';
+  btn.style.cssText='gap:4px;border:1px solid var(--border);font-size:11px;font-weight:700;padding:5px 8px;border-radius:9px';
+  btn.innerHTML='<span style="font-size:14px">💾</span>';
   btn.title='Sauvegarde et restauration des données';
   btn.onclick=function(e){e.preventDefault();openSaveModal()};
   hdrActions.insertBefore(btn,hdrActions.firstChild);
@@ -78357,6 +78357,537 @@ function llOpenQuizLoomPicker(sea, sq){
   document.body.appendChild(overlay);
   overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.remove();},{passive:true});
 }
+
+
+
+// ═══════════════════════════════════════════════════════════════
+// LESSON LOOM — TOUR GUIDÉ INTERACTIF
+// 20 étapes, séquence démo Fairy Tales / Seconde B1+
+// ═══════════════════════════════════════════════════════════════
+
+var LL_TOUR_STEP = 0;
+var LL_TOUR_ACTIVE = false;
+var LL_TOUR_DEMO_SEQ_ID = '__ll_tour_demo__';
+var LL_TOUR_DEMO_SEA1_ID = '__ll_tour_sea1__';
+var LL_TOUR_DEMO_SEA2_ID = '__ll_tour_sea2__';
+
+// ── Séquence démo ────────────────────────────────────────────
+function llTourDemoSeq() {
+  return {
+    id: LL_TOUR_DEMO_SEQ_ID,
+    titre: 'Fairy Tales Revisited',
+    niveau: '2NDE', annee: '2025-2026',
+    axe: 'Fictions et r\u00e9alit\u00e9s',
+    problematique: 'How and why do contemporary artists reinterpret traditional fairy tales?',
+    objectifCulturel: 'Discover how modern culture reinterprets fairy tales through film, art and literature',
+    couleur: '#8b5cf6',
+    tags: {
+      grammar: [{text:'Passive voice',level:'B1+'},{text:'Reported speech',level:'B1+'}],
+      lexique: [{text:'villain'},{text:'betrayal'},{text:'redemption'},{text:'curse'},{text:'subvert'}],
+      phono: [], pragma: [], task: [{text:'Debate',level:'B1+'}], inter: [], docs: [],
+      culture: [{text:'Maleficent (2014)'},{text:'Into the Woods (1986)'}]
+    },
+    seances: [
+      {
+        id: LL_TOUR_DEMO_SEA1_ID,
+        titre: 'Maleficent \u2014 Rewriting the Villain',
+        objectif: 'Understand how the film Maleficent reinterprets Sleeping Beauty by giving voice to the villain',
+        duree: 55,
+        objLex: [{text:'curse'},{text:'villain'},{text:'betrayal'},{text:'redemption'},{text:'spell'},{text:'enchanted forest'}],
+        objGram: [{text:'Passive voice \u2014 she was betrayed / her wings were stolen'}],
+        objPhon: [{text:'/v\u026al\u0259n/ villain'}],
+        compActs: [{text:'CO'},{text:'CE'},{text:'IO'}],
+        supportsList: [{id:'s1',label:'Film Maleficent (2014) \u2014 sc\u00e8ne des ailes vol\u00e9es',url:'https://www.imdb.com/title/tt1587310/'}],
+        activites: [
+          {id:'a1',label:'Compr\u00e9hension orale',duree:15,contenu:'Extrait Maleficent \u2014 sc\u00e8ne des ailes vol\u00e9es, questions de compr\u00e9hension'},
+          {id:'a2',label:'Lecture',duree:20,contenu:'Article \u00ab From villain to hero: retelling Maleficent\'s story \u00bb'},
+          {id:'a3',label:'D\u00e9bat guid\u00e9',duree:15,contenu:'\u00ab Who is the real villain in this story? \u00bb'},
+          {id:'a4',label:'Trace \u00e9crite',duree:5,contenu:'R\u00e9daction collective au tableau'}
+        ],
+        trace: 'In the film Maleficent (2014), the traditional villain from Sleeping Beauty is reinterpreted as a victim of betrayal and loss. By giving her a voice and a backstory, the film challenges our perception of good and evil in fairy tales.',
+        devoirs: 'Watch the opening scene of Maleficent and note 3 differences with the original Sleeping Beauty.',
+        imageUrl:'', imageShape:'banner', font:'', fontScale:1, objPrag:[], parentObjectives:[], createdAt: Date.now()-86400000
+      },
+      {
+        id: LL_TOUR_DEMO_SEA2_ID,
+        titre: 'Into the Woods \u2014 Subverting Fairy Tale Endings',
+        objectif: 'Analyse how the musical "Into the Woods" deconstructs classic fairy tale narratives',
+        duree: 55,
+        objLex: [{text:'subvert'},{text:'quest'},{text:'consequence'},{text:'ambiguous'},{text:'morality'}],
+        objGram: [{text:'Reported speech \u2014 She said that she had always wanted\u2026'}],
+        objPhon: [],
+        compActs: [{text:'CE'},{text:'PO'}],
+        supportsList: [{id:'s2',label:'Into the Woods \u2014 livret extraits',url:''}],
+        activites: [
+          {id:'b1',label:'Warm-up',duree:10,contenu:'What happens after \u00ab happily ever after \u00bb?'},
+          {id:'b2',label:'Lecture',duree:20,contenu:'Extraits du livret de Into the Woods'},
+          {id:'b3',label:'Production orale',duree:20,contenu:'Debate: Are fairy tales harmful or helpful?'},
+          {id:'b4',label:'Trace \u00e9crite',duree:5,contenu:'R\u00e9daction individuelle'}
+        ],
+        trace: '"Into the Woods" (1986) combines several fairy tales to explore the consequences of wishes and choices. Unlike traditional fairy tales, it shows that "happily ever after" is rarely simple or permanent.',
+        devoirs: 'Find another modern fairy tale reinterpretation and prepare a short presentation.',
+        imageUrl:'', imageShape:'banner', font:'', fontScale:1, objPrag:[], parentObjectives:[], createdAt: Date.now()-43200000
+      }
+    ],
+    grilles: [{
+      id:'__ll_tour_grille1__',
+      name:'Expression orale \u2014 D\u00e9bat',
+      type:'critere', competence:'PO', iCan:false, totalPoints:20,
+      rows:['Pertinence des arguments','Richesse lexicale','Correction grammaticale','Fluidit\u00e9 et interaction'],
+      rowsPoints:[5,5,5,5],
+      cols:['A2+','B1','B1+'], colsPoints:[], cells:{}
+    }],
+    evaluations:{formatives:[],sommatives:[],notesAttendues:[]},
+    issues:[], supportsPlus:[], createdAt: Date.now()-172800000
+  };
+}
+
+// ── Injection démo ────────────────────────────────────────────
+function llTourInjectDemo(cb) {
+  var attempts = 0;
+  function tryInject() {
+    if (typeof window.__ll_upsertSequence !== 'function') {
+      if (++attempts > 30) { if(cb)cb(); return; }
+      setTimeout(tryInject, 200); return;
+    }
+    if (typeof window.__ll_getData === 'function') {
+      var d = window.__ll_getData();
+      if ((d.sequences||[]).some(function(s){return s.id===LL_TOUR_DEMO_SEQ_ID;})) { if(cb)cb(); return; }
+    }
+    window.__ll_upsertSequence(llTourDemoSeq());
+    setTimeout(function(){if(cb)cb();}, 300);
+  }
+  tryInject();
+}
+
+// ── Navigation ────────────────────────────────────────────────
+function llTourNavTo(tabId, cb) {
+  var tab = document.querySelector('[data-testid="nav-tab-'+tabId+'"]');
+  if (tab) { tab.click(); setTimeout(function(){if(cb)cb();}, 500); }
+  else { if(cb)cb(); }
+}
+
+function llTourOpenDemoSeq(cb) {
+  llTourNavTo('seq', function() {
+    setTimeout(function() {
+      if (typeof window.__ll_openSeqEditor === 'function') {
+        window.__ll_openSeqEditor(LL_TOUR_DEMO_SEQ_ID);
+        setTimeout(function(){if(cb)cb();}, 700);
+      } else { if(cb)cb(); }
+    }, 200);
+  });
+}
+
+function llTourGoSeaTab(withSeance, cb) {
+  llTourInjectDemo(function() {
+    if (typeof window.__ll_openSeanceInView === 'function') {
+      window.__ll_openSeanceInView(LL_TOUR_DEMO_SEQ_ID, withSeance ? LL_TOUR_DEMO_SEA1_ID : null);
+    }
+    var att = 0;
+    function waitCards() {
+      var cards = document.querySelectorAll('.pcard:not(.pcard-new)');
+      if (cards.length > 0) {
+        if (withSeance) {
+          cards[0].dispatchEvent(new MouseEvent('click', {bubbles:true, cancelable:true}));
+          setTimeout(function(){ if(cb)cb(); }, 800);
+        } else {
+          if(cb)cb();
+        }
+      } else if (++att < 20) {
+        setTimeout(waitCards, 300);
+      } else {
+        if(cb)cb();
+      }
+    }
+    setTimeout(waitCards, 700);
+  });
+}
+
+function llTourOpenDemoSea(cb) { llTourGoSeaTab(true, cb); }
+
+function llTourWaitFor(sel, cb) {
+  var n = 0;
+  function poll() {
+    var el = document.querySelector(sel);
+    if (el) { if(cb)cb(el); return; }
+    if (++n > 20) { if(cb)cb(null); return; }
+    setTimeout(poll, 150);
+  }
+  poll();
+}
+
+// ── Steps ─────────────────────────────────────────────────────
+var LL_TOUR_STEPS = [
+  {
+    num:'1/19', title:'Bienvenue dans Lesson Loom',
+    text:'Voici le tour guidé complet de l\'application \u2014 20 étapes pour découvrir toutes les fonctionnalités. Tu peux naviguer avec les boutons ou appuyer sur Passer pour quitter.',
+    target: null
+  },
+  {
+    num:'2/19', title:'La navigation principale',
+    text:'Six onglets pour accéder à toutes les sections\u00a0: 📝 Séquences, 🎓 Séances, 📈 Progression, 📅 Calendrier, 📊 Évaluations et 📚 Bibliothèque.',
+    target: '.nav-tabs',
+    prep: function(cb){ llTourNavTo('seq', cb); }
+  },
+  {
+    num:'3/19', title:'La liste des séquences',
+    text:'Toutes tes séquences didactiques apparaissent ici, organisées par niveau. Chaque carte affiche le titre, l\'axe culturel, le niveau CECRL et le nombre de séances.',
+    target: '.sc',
+    prep: function(cb){ llTourNavTo('seq', cb); }
+  },
+  {
+    num:'4/19', title:'Créer une séquence',
+    text:'Ce bouton crée une nouvelle séquence. Tu renseignes le titre, le niveau, l\'axe culturel, la problématique, l\'objectif culturel, les compétences CECRL ciblées et une couleur personnalisée.',
+    target: '.pcard-new',
+    prep: function(cb){
+      llTourInjectDemo(function(){
+        llTourNavTo('seq', function(){
+          setTimeout(function(){
+            // Click first .pcard (level card) to enter level stage
+            var pcard = document.querySelector('.pcard:not(.pcard-new),.pcard');
+            if(pcard){ pcard.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true})); }
+            var att=0;
+            function waitNew(){
+              var el=document.querySelector('.pcard-new');
+              if(el){el.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(function(){if(cb)cb();},200);}
+              else if(++att<15){setTimeout(waitNew,250);}
+              else{if(cb)cb();}
+            }
+            setTimeout(waitNew, 400);
+          }, 300);
+        });
+      });
+    }
+  },
+  {
+    num:'5/19', title:'L\'éditeur de séquence',
+    text:'Voici la séquence démo "Fairy Tales Revisited" (2NDE B1+). Dans la colonne gauche tu remplis les informations de la séquence. L\'aperçu se met à jour automatiquement.',
+    target: '.sc-hdr',
+    prep: function(cb){ llTourInjectDemo(function(){ llTourOpenDemoSeq(cb); }); }
+  },
+  {
+    num:'6/19', title:'Les séances de la séquence',
+    text:'L’onglet Séances affiche toutes les séances de la séquence sélectionnée. Le bouton ⊕ crée une nouvelle séance. Clique sur une carte pour l’ouvrir dans l’éditeur.',
+    target: '.pcard-new',
+    prep: function(cb){ llTourGoSeaTab(false, cb); }
+  },
+  {
+    num:'7/19', title:'Grilles d\'évaluation',
+    text:'Chaque séquence peut avoir ses propres grilles d\'évaluation\u00a0: grilles CECRL avec descripteurs "I can…", ou grilles critères/points. Marque-les ⭐ pour les retrouver dans les favoris.',
+    target: null,
+    targetText: 'Grilles',
+    prep: function(cb){ llTourOpenDemoSeq(cb); }
+  },
+  {
+    num:'8/19', title:'L\'éditeur de séance',
+    text:'Voici la séance "Maleficent". À gauche\u00a0: titre, durée, objectif principal, supports cliquables (liens Drive, YouTube…), objectifs lexicaux, grammaticaux et phonologiques.',
+    target: null,
+    prep: function(cb){ llTourOpenDemoSea(cb); }
+  },
+  {
+    num:'9/19', title:'Les activités chronométrées',
+    text:'Décompose ta séance en activités avec leur durée. Le total se calcule automatiquement. Les activités apparaissent dans l\'aperçu A4 avec une barre de progression.',
+    target: null,
+    targetText: 'Compréhension orale',
+    prep: null
+  },
+  {
+    num:'10/19', title:'L\'aperçu A4 en temps réel',
+    text:'L\'aperçu A4 se met à jour à chaque modification. Il intègre les objectifs CECRL, les activités, la trace écrite et les supports. Tu peux l\'imprimer directement via le navigateur.',
+    target: null,
+    targetText: 'Aperçu',
+    prep: null
+  },
+  {
+    num:'11/19', title:'Exporter une séance',
+    text:'Le menu Exporter donne accès au PDF (impression), au RTF pour Word et LibreOffice, et à ⚡ Copier pour QuizLoom pour sélectionner 1 ou plusieurs séances et générer un QCM.',
+    target: null,
+    targetText: 'Exporter',
+    prep: null
+  },
+  {
+    num:'12/19', title:'Progressions',
+    text:'La vue Progression regroupe tes séquences dans un plan annuel par niveau de classe. Idéal pour équilibrer et visualiser ton programme sur l\'année scolaire.',
+    target: '.prog-layout, .tracker',
+    prep: function(cb){ llTourNavTo('prog', cb); }
+  },
+  {
+    num:'13/19', title:'Calendrier annuel',
+    text:'Le calendrier visualise tes séquences semaine par semaine. Les vacances scolaires et jours fériés sont intégrés. Clique un créneau pour y placer une séquence ou ajouter un événement.',
+    target: '.cal-grid',
+    prep: function(cb){ llTourNavTo('cal', cb); }
+  },
+,
+  {
+    num:'14/19', title:'Évaluations',
+    text:'La vue Évaluations centralise toutes tes grilles, toutes séquences confondues. Tu peux les distribuer sous forme de fichier HTML prêt à imprimer ou à partager avec tes élèves.',
+    target: null,
+    prep: function(cb){ llTourNavTo('eval', cb); }
+  },
+  {
+    num:'15/19', title:'Bibliothèque',
+    text:'La Bibliothèque centralise tout ce qui est indépendant d\'une séquence\u00a0: séances flash réutilisables, sorties scolaires, grilles favorites, comparatifs de manuels et statistiques CECRL.',
+    target: null,
+    prep: function(cb){ llTourNavTo('lib', cb); }
+  },
+  {
+    num:'16/19', title:'Séances flash',
+    text:'Les séances flash sont des idées de séances réutilisables, sans séquence associée. Crée-les ici et importe-les dans n\'importe quelle séquence quand tu en as besoin avec le bouton 📥.',
+    target: null,
+    targetText: 'flash',
+    prep: function(cb){ llTourNavTo('lib', cb); }
+  },
+  {
+    num:'17/19', title:'Programmes EN',
+    text:'L\'onglet Programmes EN donne accès au référentiel de grammaire, de phonétique et aux programmes officiels d\'anglais\u00a0: consultables et téléchargeables sans quitter l\'application.',
+    target: '#__ll_ref_navtab',
+    prep: function(cb){ llTourNavTo('seq', cb); }
+  },
+  {
+    num:'18/19', title:'EDT & Sauvegarde',
+    text:'📅 EDT\u00a0: saisis ton emploi du temps hebdomadaire avec des créneaux colorés. 💾 Sauvegarde\u00a0: exporte tes données en JSON (léger) ou en HTML complet. Sauvegarde régulièrement\u00a0!',
+    target: '#__ll_edt_btn',
+    prep: function(cb){ llTourNavTo('seq', cb); }
+  },
+  {
+    num:'19/19', title:'Tour terminé\u00a0! \u2728',
+    text:'Tu connais maintenant toutes les fonctionnalités de Lesson Loom ! Le guide ✨ en haut à droite reste accessible à tout moment. Bonne planification !',
+    target: null,
+    isLast: true
+  }
+];
+
+// ── CSS injection ─────────────────────────────────────────────
+function llTourInjectCSS() {
+  if (document.getElementById('__ll_tour_css')) return;
+  var s = document.createElement('style');
+  s.id = '__ll_tour_css';
+  s.textContent = [
+    '#__ll_tour_overlay{position:fixed;inset:0;z-index:99990;pointer-events:all}',
+    '#__ll_tour_spotlight{position:fixed;border-radius:12px;box-shadow:0 0 0 9999px rgba(10,8,30,0.75);border:2px solid rgba(108,99,255,0.8);transition:all .35s cubic-bezier(.4,0,.2,1);pointer-events:none;z-index:99991}',
+    '#__ll_tour_bubble{position:fixed;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px 20px 16px;max-width:300px;min-width:240px;box-shadow:0 14px 40px rgba(0,0,0,.4);z-index:99993;transition:all .25s cubic-bezier(.4,0,.2,1)}',
+    '.__ll_tour_num{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--accent2);margin-bottom:3px}',
+    '.__ll_tour_ttl{font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px}',
+    '.__ll_tour_txt{font-size:12.5px;line-height:1.6;color:var(--text-muted);margin-bottom:14px}',
+    '.__ll_tour_acts{display:flex;gap:6px;align-items:center;flex-wrap:wrap}',
+    '.__ll_tour_dots{display:flex;gap:4px;margin-bottom:12px}',
+    '.__ll_tour_dot{width:5px;height:5px;border-radius:50%;background:var(--border);transition:background .2s}',
+    '.__ll_tour_dot.on{background:var(--accent2)}'
+  ].join('');
+  document.head.appendChild(s);
+}
+
+// ── Build DOM ─────────────────────────────────────────────────
+function llTourBuildDOM() {
+  if (document.getElementById('__ll_tour_overlay')) return;
+  llTourInjectCSS();
+
+  var ov = document.createElement('div');
+  ov.id = '__ll_tour_overlay';
+  ov.addEventListener('click', function(e){ if(e.target===ov) llTourEnd(); });
+
+  var spot = document.createElement('div');
+  spot.id = '__ll_tour_spotlight';
+  spot.style.display = 'none';
+
+  var bubble = document.createElement('div');
+  bubble.id = '__ll_tour_bubble';
+
+  document.body.appendChild(ov);
+  document.body.appendChild(spot);
+  document.body.appendChild(bubble);
+}
+
+// ── Render step ───────────────────────────────────────────────
+function llTourRender() {
+  var step = LL_TOUR_STEPS[LL_TOUR_STEP];
+  if (!step) return;
+
+  var bubble = document.getElementById('__ll_tour_bubble');
+  var spot = document.getElementById('__ll_tour_spotlight');
+  if (!bubble || !spot) return;
+
+  // Loading state
+  bubble.innerHTML = '<div class="__ll_tour_num">'+step.num+'</div><div class="__ll_tour_ttl">'+step.title+'</div><div class="__ll_tour_txt" style="opacity:.5">Chargement\u2026</div>';
+  llTourCenterBubble(bubble);
+  spot.style.display = 'none';
+
+  // Run prep (navigation etc.)
+  function showStep() {
+    var total = LL_TOUR_STEPS.length;
+
+    // Build dots
+    var dotsHtml = '<div class="__ll_tour_dots">';
+    for (var i=0; i<total; i++) {
+      dotsHtml += '<div class="__ll_tour_dot'+(i===LL_TOUR_STEP?' on':'')+'"></div>';
+    }
+    dotsHtml += '</div>';
+
+    // Build actions
+    var acts = '<div class="__ll_tour_acts">';
+    if (LL_TOUR_STEP > 0) acts += '<button onclick="llTourGo(-1)" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-muted);font-size:11px;cursor:pointer;font-family:inherit">← Préc.</button>';
+    if (step.isLast) {
+      acts += '<button onclick="llTourEnd()" style="flex:1;padding:7px 12px;border-radius:8px;border:none;background:linear-gradient(135deg,#3ecf8e,#6c63ff);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">\u2713 Commencer !</button>';
+    } else {
+      acts += '<button onclick="llTourGo(1)" style="flex:1;padding:7px 12px;border-radius:8px;border:none;background:linear-gradient(135deg,#3ecf8e,#6c63ff);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">'+(LL_TOUR_STEP===total-2?'Terminer \u2192':'Suivant \u2192')+'</button>';
+    }
+    acts += '<button onclick="llTourEnd()" style="padding:4px 8px;border-radius:7px;border:none;background:transparent;color:var(--text-muted);font-size:10px;cursor:pointer;font-family:inherit">Passer</button></div>';
+
+    bubble.innerHTML = dotsHtml +
+      '<div class="__ll_tour_num">'+step.num+'</div>' +
+      '<div class="__ll_tour_ttl">'+step.title+'</div>' +
+      '<div class="__ll_tour_txt">'+step.text+'</div>' +
+      acts;
+
+    // Find target element
+    var targetEl = null;
+    if (step.target) {
+      targetEl = document.querySelector(step.target);
+    }
+    if (!targetEl && step.targetText) {
+      var all = document.querySelectorAll('button, h2, h3, div[class*="title"], [class*="header"]');
+      for (var i=0; i<all.length; i++) {
+        var txt = all[i].textContent || '';
+        if (txt.toLowerCase().indexOf(step.targetText.toLowerCase()) !== -1 && txt.length < 100) {
+          targetEl = all[i]; break;
+        }
+      }
+    }
+    if (!targetEl && step.targetSearch) {
+      var all2 = document.querySelectorAll('*');
+      for (var j=0; j<all2.length; j++) {
+        var t2 = all2[j].childNodes;
+        var txt2 = '';
+        for(var k=0;k<t2.length;k++) if(t2[k].nodeType===3) txt2+=t2[k].textContent;
+        if (txt2.indexOf(step.targetSearch) !== -1 && txt2.length < 200) {
+          targetEl = all2[j]; break;
+        }
+      }
+    }
+
+    if (targetEl) {
+      targetEl.scrollIntoView({behavior:'smooth', block:'center'});
+      setTimeout(function(){ llTourSpotlight(targetEl, bubble, spot); }, 300);
+    } else {
+      spot.style.display = 'none';
+      llTourCenterBubble(bubble);
+    }
+  }
+
+  if (step.prep) {
+    step.prep(showStep);
+  } else {
+    setTimeout(showStep, 50);
+  }
+}
+
+function llTourSpotlight(el, bubble, spot) {
+  var pad = 8;
+  var r = el.getBoundingClientRect();
+  spot.style.display = 'block';
+  spot.style.left = (r.left-pad)+'px';
+  spot.style.top = (r.top-pad)+'px';
+  spot.style.width = (r.width+pad*2)+'px';
+  spot.style.height = (r.height+pad*2)+'px';
+
+  // Position bubble
+  var bw = 300, bh = 220;
+  var spaceBelow = window.innerHeight - r.bottom - 16;
+  var spaceAbove = r.top - 16;
+
+  bubble.style.removeProperty('transform');
+  bubble.style.width = bw+'px';
+
+  if (spaceBelow > bh) {
+    bubble.style.top = (r.bottom + pad + 10)+'px';
+  } else if (spaceAbove > bh) {
+    bubble.style.top = (r.top - bh - pad - 10)+'px';
+  } else {
+    bubble.style.top = '50%';
+    bubble.style.transform = 'translateY(-50%)';
+  }
+
+  var left = Math.max(16, Math.min(r.left, window.innerWidth - bw - 16));
+  bubble.style.left = left+'px';
+  bubble.style.removeProperty('right');
+}
+
+function llTourCenterBubble(bubble) {
+  bubble.style.top = '50%';
+  bubble.style.left = '50%';
+  bubble.style.transform = 'translate(-50%, -50%)';
+  bubble.style.removeProperty('right');
+  bubble.style.width = '300px';
+}
+
+// ── Public API ────────────────────────────────────────────────
+window.llTourStart = function() {
+  if (LL_TOUR_ACTIVE) return;
+  LL_TOUR_ACTIVE = true;
+  LL_TOUR_STEP = 0;
+  llTourBuildDOM();
+  llTourRender();
+};
+
+window.llTourEnd = function() {
+  LL_TOUR_ACTIVE = false;
+  ['__ll_tour_overlay','__ll_tour_spotlight','__ll_tour_bubble'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.remove();
+  });
+}
+
+window.llTourGo = function(dir) {
+  LL_TOUR_STEP = Math.max(0, Math.min(LL_TOUR_STEPS.length-1, LL_TOUR_STEP + dir));
+  llTourRender();
+};
+
+// ── Demo button hook ─────────────────────────────────────────
+function llHookDemoBtn() {
+  if (document.getElementById('__ll_demo_btn')) return;
+  var guideBtn = document.getElementById('__ll_guide_btn');
+  if (!guideBtn) return;
+
+  // Slim down guide button label if it has text (keep icon only if wide)
+  var hdr = document.querySelector('.hdr-actions');
+  if (!hdr) return;
+
+  var btn = document.createElement('button');
+  btn.id = '__ll_demo_btn';
+  btn.innerHTML = '\u2728 D\u00e9mo';
+  btn.title = 'Lancer le tour guidé interactif de Lesson Loom';
+  btn.style.cssText = [
+    'padding:5px 12px;border-radius:9px;border:none;cursor:pointer;',
+    'background:linear-gradient(135deg,#8b5cf6,#ec4899);',
+    'color:#fff;font-size:12px;font-weight:700;font-family:inherit;',
+    'box-shadow:0 2px 8px rgba(139,92,246,.4);transition:all .2s;',
+    'display:inline-flex;align-items:center;gap:5px;white-space:nowrap'
+  ].join('');
+  btn.onmouseenter = function(){ this.style.opacity='.85'; this.style.transform='translateY(-1px)'; };
+  btn.onmouseleave = function(){ this.style.opacity='1'; this.style.transform=''; };
+  btn.onclick = function(){ window.llTourStart(); };
+
+  guideBtn.parentNode.insertBefore(btn, guideBtn);
+
+  // Compact prof name input to make room
+  var profInput = document.querySelector('[data-testid="prof-name-input"]');
+  if (profInput) { profInput.style.width = '80px'; }
+  // Also inject compact CSS
+  if (!document.getElementById('__ll_tour_compact_css')) {
+    var cs = document.createElement('style');
+    cs.id = '__ll_tour_compact_css';
+    cs.textContent = '[data-testid="prof-name-input"]{width:80px!important;font-size:11px!important}.dash-sub{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;font-size:12px!important;margin-bottom:16px!important}.dash-sub svg{vertical-align:middle!important}';
+    document.head.appendChild(cs);
+  }
+}
+
+// ── Hook into llHookAll ───────────────────────────────────────
+var _llPreTourHookAll = llHookAll;
+llHookAll = function() {
+  _llPreTourHookAll();
+  llHookDemoBtn();
+};
+
 
 obs.observe(document.body,{childList:true,subtree:true});
 window.addEventListener('load',function(){
