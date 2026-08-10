@@ -52,6 +52,10 @@ Chaque séquence contient :
 
 **Import de liste** — bouton `📋 Liste` à côté des champs Lexique, Grammaire et Phonologie : collez des items séparés par virgule ou saut de ligne, tout est ajouté d'un coup.
 
+**Duplication de séquence** — bouton 📋 sur chaque carte. Une fenêtre permet de choisir le titre de la copie, son **niveau de destination**, et d'inclure ou non les séances et les grilles. La copie est totalement indépendante de l'originale : chaque séance et chaque grille reçoit un nouvel identifiant, et les liens entre tâches et grilles sont réécrits vers la copie.
+
+**🔗 Grilles liées aux tâches** — bloc repliable listant, en lecture seule, quelle grille est rattachée à quelle séance-tâche. Signale les liens devenus invalides.
+
 ---
 
 ### 🎓 Séances
@@ -65,16 +69,21 @@ L'éditeur de séance comprend :
 - Trace écrite (éditeur riche)
 - Devoirs
 - Champ Classe (affiché sur l'aperçu A4)
+- **🎨 Mise en forme** — bloc replié en bas de page regroupant l'image d'illustration et la police
 
 **Aperçu A4 en temps réel** — mis à jour à chaque modification, imprimable directement depuis le navigateur.
+
+**Retour à la séquence mère** — dans l'en-tête, le titre de la séquence est cliquable et ouvre directement sa fiche.
 
 **💡 Objectifs de la séquence** — panneau de pastilles cliquables au-dessus du champ Lexique : les objectifs de la séquence parente s'ajoutent à la séance en un clic. Un second clic les retire.
 
 **✅ Cocher les objectifs traités** — panneau repliable sous les activités : cochez ce que vous avez effectivement traité. Un badge ×N indique combien de séances de la séquence réemploient chaque objectif. Ces coches alimentent le bilan de la progression.
 
-**Marquage des tâches** — badges `🏁 Tâche finale` et `🔷 Tâche intermédiaire`, mutuellement exclusifs. Ils colorent la carte de la séance, apparaissent dans l'aperçu A4, dans les cartes de progression et dans les exports.
+**Marquage des tâches** — badges `🏁 Tâche finale` et `🔷 Tâche intermédiaire`, mutuellement exclusifs. Ils colorent la carte de la séance, apparaissent dans l'aperçu A4, dans les cartes de progression et dans tous les exports.
 
-**Grille liée à la tâche finale** — une séance marquée Tâche finale peut être associée à une grille d'évaluation de la séquence, affichée en entier dans l'aperçu A4.
+**🏁 Dispositif de la tâche** — sur les séances marquées, un bloc repliable propose cinq champs : consigne élève, modalités, matériel, critères de réussite, différenciation. Il apparaît dans l'aperçu A4, l'export PDF et l'export RTF.
+
+**Grille liée à une tâche** — une séance marquée Tâche finale **ou intermédiaire** peut être associée à une grille d'évaluation de la séquence, affichée en entier dans l'aperçu A4.
 
 **Modèles d'activités** — sauvegardez vos activités récurrentes en favoris ⭐ pour les réutiliser rapidement.
 
@@ -82,7 +91,7 @@ L'éditeur de séance comprend :
 
 Depuis le menu **Exporter** d'une séance :
 - 🖨️ **PDF** — via l'impression navigateur
-- 📄 **RTF** — compatible Word ET LibreOffice
+- 📄 **RTF** — compatible Word ET LibreOffice, incluant le dispositif de la tâche et la grille liée
 - ⚡ **Copier pour QuizLoom** — ouvre un sélecteur pour choisir 1, plusieurs ou toutes les séances de la séquence
 
 #### Export d'une séquence complète
@@ -118,9 +127,11 @@ Trois types de grilles par séquence :
 
 **Grilles critères/points** — critères libres avec points par critère et par niveau. Le total se recalcule automatiquement ; une saisie manuelle le verrouille.
 
-**Grilles de positionnement** — sans points, avec marqueurs `✓ acquis` / `◐ en cours` / `○ non acquis`.
+**Grilles de positionnement** — marqueurs `✓ acquis` / `◐ en cours` / `○ non acquis`, activables sur n'importe quel type de grille. Les points et les marqueurs peuvent coexister : les champs de points n'apparaissent que si des points sont effectivement renseignés (en colonnes pour une grille CECRL, en lignes pour une grille critères).
 
 **⚖️ Panneau de cohérence** — repliable, il signale sans jamais bloquer : barème désynchronisé (avec correction en un clic), niveaux CECRL inhabituels pour le niveau de classe, intitulés en double, grilles incomplètes.
+
+**Gestion rapide** — sur chaque carte de grille, une étoile ⭐ pour les favoris et une croix ✕ pour supprimer, avec confirmation. La suppression nettoie automatiquement les liens des séances concernées.
 
 **Distribution aux élèves** — fichier HTML autonome avec listes de classes enregistrées, trois modes d'impression (Compact, Résultats seuls, Récapitulatif) et téléchargement individuel par élève.
 
@@ -146,6 +157,16 @@ Un bouton **▸ Détail** déplie les listings complets : descripteurs par comp�
 - Le bilan des objectifs
 
 Sections cochables, impression en couleurs ou en noir et blanc au choix.
+
+---
+
+### 📄 Fiche de séquence (aperçu A4 et PDF)
+
+La section **Étapes du projet** se construit automatiquement à partir des séances :
+- Badge et couleur pour les séances marquées tâche intermédiaire ou finale
+- Pastilles des compétences travaillées, avec le niveau le plus haut visé
+- Titre et objectif de chaque séance
+- **Récapitulatif de séquence** en fin de bloc : nombre de séances, de tâches, totaux linguistiques et fréquence des compétences
 
 ---
 

@@ -35453,144 +35453,101 @@ const A4Preview = ({
   // ---- Étapes du projet ----
   const renderEtapes = () => {
     if (!(s.seances || []).length) return null;
-    return /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxDEV)("div", {
-      style: {
-        marginBottom: 12
-      },
-      "x-file-name": "A4Preview",
-      "x-line-number": "274",
-      "x-column": "6",
-      "x-component": "div",
-      "x-id": "A4Preview_274_6",
-      "x-dynamic": "false",
-      children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxDEV)(SectionTitle, {
-        bg: C.etapes.bg,
-        fg: C.etapes.fg,
-        label: "\xC9tapes du projet",
-        "x-file-name": "A4Preview",
-        "x-line-number": "275",
-        "x-column": "8",
-        "x-component": "SectionTitle",
-        "x-id": "A4Preview_275_8",
-        "x-dynamic": "true"
-      }, void 0, false, {
-        fileName: _jsxFileName,
-        lineNumber: 275,
-        columnNumber: 9
-      }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxDEV)("div", {
-        style: {
-          display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: 8
-        },
-        "x-file-name": "A4Preview",
-        "x-line-number": "276",
-        "x-column": "8",
-        "x-component": "div",
-        "x-id": "A4Preview_276_8",
-        "x-dynamic": "true",
-        "x-source-type": "computed",
-        "x-source-editable": "false",
-        children: (s.seances || []).map((se, idx) => /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxDEV)("div", {
-          style: {
-            border: '1px solid #cbd5e1',
-            borderRadius: 4,
-            padding: '6px 8px',
-            fontSize: 10,
-            background: '#fff'
-          },
-          "x-file-name": "A4Preview",
-          "x-line-number": "278",
-          "x-column": "12",
-          "x-component": "div",
-          "x-id": "A4Preview_278_12",
-          "x-dynamic": "true",
-          "x-source-type": "computed",
-          "x-source-editable": "false",
-          children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxDEV)("div", {
-            style: {
-              fontWeight: 800,
-              color: C.etapes.fg,
-              marginBottom: 2
-            },
-            "x-file-name": "A4Preview",
-            "x-line-number": "279",
-            "x-column": "14",
-            "x-component": "div",
-            "x-id": "A4Preview_279_14",
-            "x-dynamic": "true",
-            "x-source-type": "computed",
-            "x-source-editable": "false",
-            children: ["S", /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxDEV)("span", {
-              "data-ve-dynamic": "true",
-              "x-excluded": "true",
-              style: {
-                display: "contents"
-              },
-              "x-file-name": "A4Preview",
-              "x-line-number": "279",
-              "x-column": "14",
-              "x-component": "div",
-              "x-id": "A4Preview_279_14_expr1",
-              "x-dynamic": "true",
-              "x-source-type": "computed",
-              "x-source-editable": "false",
-              children: idx + 1
-            }, void 0, false), " \u2014 ", /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxDEV)("span", {
-              "data-ve-dynamic": "true",
-              "x-excluded": "true",
-              style: {
-                display: "contents"
-              },
-              "x-file-name": "A4Preview",
-              "x-line-number": "279",
-              "x-column": "14",
-              "x-component": "div",
-              "x-id": "A4Preview_279_14_expr3",
-              "x-dynamic": "true",
-              "x-source-type": "computed",
-              "x-source-editable": "false",
-              children: se.titre || 'Sans titre'
-            }, void 0, false)]
-          }, void 0, true, {
-            fileName: _jsxFileName,
-            lineNumber: 279,
-            columnNumber: 15
-          }, undefined), se.objectif && /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxDEV)("div", {
-            style: {
-              color: '#475569'
-            },
-            "x-file-name": "A4Preview",
-            "x-line-number": "280",
-            "x-column": "30",
-            "x-component": "div",
-            "x-id": "A4Preview_280_30",
-            "x-dynamic": "true",
-            "x-source-type": "static-imported",
-            "x-source-path": "objectif",
-            "x-source-editable": "false",
-            "x-array-item-param": "se",
-            children: se.objectif
-          }, void 0, false, {
-            fileName: _jsxFileName,
-            lineNumber: 280,
-            columnNumber: 31
-          }, undefined)]
-        }, se.id, true, {
-          fileName: _jsxFileName,
-          lineNumber: 278,
-          columnNumber: 13
-        }, undefined))
-      }, void 0, false, {
-        fileName: _jsxFileName,
-        lineNumber: 276,
-        columnNumber: 9
-      }, undefined)]
-    }, void 0, true, {
-      fileName: _jsxFileName,
-      lineNumber: 274,
-      columnNumber: 7
-    }, undefined);
+    const J = react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxDEV;
+    const el = (tag, style, children, key) => J(tag, { style, children }, key, true);
+    const ORD = ['Pré-A1','A1','A1+','A2','A2+','B1','B1+','B2','B2+','C1','C2'];
+    const CC = { CO:'#059669', CE:'#0e7490', PO:'#be185d', PE:'#4f46e5', IO:'#c2410c', IE:'#a16207', MED:'#7e22ce' };
+
+    // Compétences de la séance : un code par compétence, niveau le plus haut.
+    const compsOf = (se) => {
+      const map = {};
+      (se.compActs || []).forEach(a => {
+        if (!a || !a.code) return;
+        const cur = map[a.code] || '';
+        if (ORD.indexOf(a.level || '') > ORD.indexOf(cur)) map[a.code] = a.level || '';
+      });
+      return Object.keys(map).map(k => ({ code: k, lvl: map[k] }));
+    };
+
+    // ── Récapitulatif de la séquence ──
+    const seances = s.seances || [];
+    let nInter = 0, nFin = 0;
+    const freq = {};
+    let nG = 0, nL = 0, nP = 0, nPr = 0;
+    seances.forEach(se => {
+      if (se.isTacheFinale) nFin++;
+      else if (se.isTacheInter) nInter++;
+      compsOf(se).forEach(c => { freq[c.code] = (freq[c.code] || 0) + 1; });
+      nG += (se.objGram || []).length;
+      nL += (se.objLex || []).length;
+      nP += (se.objPhon || []).length;
+      nPr += (se.objPrag || []).length;
+    });
+    const recapBits = [seances.length + ' séance' + (seances.length > 1 ? 's' : '')];
+    if (nInter) recapBits.push(nInter + ' tâche' + (nInter > 1 ? 's' : '') + ' intermédiaire' + (nInter > 1 ? 's' : ''));
+    if (nFin) recapBits.push(nFin + ' tâche finale');
+    const lingBits = [];
+    if (nG) lingBits.push('Gram. ' + nG);
+    if (nL) lingBits.push('Lex. ' + nL);
+    if (nP) lingBits.push('Phon. ' + nP);
+    if (nPr) lingBits.push('Pragm. ' + nPr);
+    const freqKeys = Object.keys(freq);
+
+    return el('div', { marginBottom: 12 }, [
+      J(SectionTitle, { bg: C.etapes.bg, fg: C.etapes.fg, label: '\u00C9tapes du projet' }, 'st', false),
+
+      el('div', { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 },
+        seances.map((se, idx) => {
+          const fin = !!se.isTacheFinale, inter = !!se.isTacheInter && !se.isTacheFinale;
+          const acc = fin ? '#b45309' : (inter ? '#1d4ed8' : null);
+          const cps = compsOf(se);
+          const kids = [];
+
+          // Badge de tâche
+          if (fin || inter) {
+            kids.push(el('div', {
+              fontSize: 8, fontWeight: 800, letterSpacing: .6, textTransform: 'uppercase',
+              color: acc, marginBottom: 2
+            }, (fin ? '\u25C6 T\u00E2che finale' : '\u25C7 T\u00E2che interm\u00E9diaire'), 'bg'));
+          }
+
+          // Titre, precede du symbole flash si la seance vient de la bibliotheque
+          kids.push(el('div', { fontWeight: 800, color: C.etapes.fg, marginBottom: 2 },
+            (se.fromFlash ? '\u26A1 ' : '') + 'S' + (idx + 1) + ' \u2014 ' + (se.titre || 'Sans titre'), 'ti'));
+
+          // Objectif
+          if (se.objectif) kids.push(el('div', { color: '#475569' }, se.objectif, 'ob'));
+
+          // Compétences travaillées
+          if (cps.length) {
+            kids.push(el('div', { marginTop: 3, display: 'flex', flexWrap: 'wrap', gap: 4 },
+              cps.map(c => el('span', {
+                fontSize: 8.5, fontWeight: 800, padding: '1px 5px', borderRadius: 7,
+                background: (CC[c.code] || '#64748b') + '1a', color: CC[c.code] || '#64748b'
+              }, c.code + (c.lvl ? ' ' + c.lvl : ''), c.code)), 'cp'));
+          }
+
+          return el('div', {
+            border: '1px solid ' + (acc || '#cbd5e1'),
+            borderLeft: acc ? ('3px solid ' + acc) : '1px solid #cbd5e1',
+            borderRadius: 4, padding: '6px 8px', fontSize: 10,
+            background: fin ? '#fffbeb' : (inter ? '#eff6ff' : '#fff')
+          }, kids, se.id);
+        }), 'grid'),
+
+      // ── Récapitulatif final ──
+      el('div', {
+        marginTop: 6, paddingTop: 5, borderTop: '1px solid #e2e8f0',
+        fontSize: 9, color: '#64748b', lineHeight: 1.5
+      }, [
+        el('div', {}, recapBits.join(' \u00B7 ') + (lingBits.length ? '  \u2014  ' + lingBits.join(' \u00B7 ') : ''), 'r1'),
+        freqKeys.length ? el('div', { marginTop: 1 }, [
+          'Comp\u00E9tences : ',
+          freqKeys.map((k, i) => el('span', { color: CC[k] || '#64748b', fontWeight: 700 },
+            (i ? ' \u00B7 ' : '') + k + ' \u00D7' + freq[k], k))
+        ], 'r2') : null
+      ], 'recap')
+    ]);
   };
 
   // ---- Supports + ----
@@ -52441,6 +52398,7 @@ const EvaluationsSection = ({
         alignItems: 'center',
         gap: 8
       },
+      "data-gid": g.id,
       "x-file-name": "SequenceEditor",
       "x-line-number": "730",
       "x-column": "8",
@@ -53644,16 +53602,52 @@ const AppProvider = ({
     });
     });
   }, []);
-  const duplicateSequence = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(id => {
+  // Duplication PROFONDE : chaque seance et chaque grille recoit un nouvel
+  // identifiant, sans quoi la copie et l'original partagent leurs coches
+  // d'objectifs (indexees sur sea.id) et leurs references de grilles.
+  // opts = { titre, niveau, withSeances, withGrilles }
+  const duplicateSequence = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)((id, opts) => {
     setData(d => {
       const src = d.sequences.find(s => s.id === id);
       if (!src) return d;
+      const o = opts || {};
+      const stamp = Date.now();
+      const rnd = () => Math.random().toString(36).slice(2, 7);
+
+      // Grilles : nouveaux ids + table de correspondance ancien -> nouveau
+      const gMap = {};
+      const grilles = (o.withGrilles === false ? [] : (src.grilles || [])).map((g, i) => {
+        const nid = 'gr_' + stamp + '_' + i + '_' + rnd();
+        if (g && g.id) gMap[g.id] = nid;
+        return JSON.parse(JSON.stringify({ ...g, id: nid }));
+      });
+
+      // Seances : nouveaux ids, supports renumerotes, lien grille reecrit
+      const seances = (o.withSeances === false ? [] : (src.seances || [])).map((se, i) => {
+        const clone = JSON.parse(JSON.stringify(se || {}));
+        clone.id = 'sea_' + stamp + '_' + i + '_' + rnd();
+        clone.createdAt = stamp;
+        if (Array.isArray(clone.supportsList)) {
+          clone.supportsList = clone.supportsList.map((sp, k) => ({
+            ...sp, id: 's_' + stamp + '_' + i + '_' + k
+          }));
+        }
+        // La grille liee suit la copie ; sinon le lien est retire.
+        if (clone.grilleId) clone.grilleId = gMap[clone.grilleId] || '';
+        return clone;
+      });
+
       const copy = {
-        ...src,
-        id: 'seq_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
-        titre: (src.titre || 'Sans titre') + ' (copie)',
-        updatedAt: Date.now()
+        ...JSON.parse(JSON.stringify(src)),
+        id: 'seq_' + stamp + '_' + rnd(),
+        titre: o.titre || ((src.titre || 'Sans titre') + ' (copie)'),
+        niveau: o.niveau || src.niveau,
+        seances,
+        grilles,
+        createdAt: stamp,
+        updatedAt: stamp
       };
+
       return {
         ...d,
         sequences: [...d.sequences, copy]
@@ -59506,10 +59500,67 @@ const buildHtml = seq => {
 
   // Étapes du projet
   if ((seq.seances || []).length) {
+    const _ORD = ['Pré-A1','A1','A1+','A2','A2+','B1','B1+','B2','B2+','C1','C2'];
+    const _CC = { CO:'#059669', CE:'#0e7490', PO:'#be185d', PE:'#4f46e5', IO:'#c2410c', IE:'#a16207', MED:'#7e22ce' };
+    const _comps = se => {
+      const m = {};
+      (se.compActs || []).forEach(a => {
+        if (!a || !a.code) return;
+        const cur = m[a.code] || '';
+        if (_ORD.indexOf(a.level || '') > _ORD.indexOf(cur)) m[a.code] = a.level || '';
+      });
+      return Object.keys(m).map(k => ({ code: k, lvl: m[k] }));
+    };
+
     out.push(`<div style="background:#f1f5f9;color:#1e293b;padding:4pt 10pt;font-size:10pt;font-weight:800;text-transform:uppercase;letter-spacing:1pt;border-radius:4pt;margin-bottom:4pt">Étapes du projet</div>`);
+
+    let _nI = 0, _nF = 0, _nG = 0, _nL = 0, _nP = 0, _nPr = 0;
+    const _freq = {};
+
     seq.seances.forEach((se, idx) => {
-      out.push(`<div style="border:1pt solid #cbd5e1;border-radius:4pt;padding:6pt 8pt;margin-bottom:4pt;font-size:10pt"><b>S${idx + 1} — ${sanitize(se.titre || 'Sans titre')}</b>${se.objectif ? `<br><span style="color:#475569">${sanitize(se.objectif)}</span>` : ''}</div>`);
+      const fin = !!se.isTacheFinale;
+      const inter = !!se.isTacheInter && !fin;
+      const acc = fin ? '#b45309' : (inter ? '#1d4ed8' : null);
+      if (fin) _nF++; else if (inter) _nI++;
+      _nG += (se.objGram || []).length;
+      _nL += (se.objLex || []).length;
+      _nP += (se.objPhon || []).length;
+      _nPr += (se.objPrag || []).length;
+
+      const cps = _comps(se);
+      cps.forEach(c => { _freq[c.code] = (_freq[c.code] || 0) + 1; });
+
+      const badge = (fin || inter)
+        ? `<div style="font-size:7.5pt;font-weight:800;letter-spacing:.5pt;text-transform:uppercase;color:${acc};margin-bottom:2pt">${fin ? '\u25C6 Tâche finale' : '\u25C7 Tâche intermédiaire'}</div>`
+        : '';
+      const pills = cps.length
+        ? `<div style="margin-top:3pt">` + cps.map(c =>
+            `<span style="font-size:7.5pt;font-weight:800;padding:1pt 4pt;border-radius:6pt;margin-right:3pt;background:${(_CC[c.code] || '#64748b')}22;color:${_CC[c.code] || '#64748b'}">${sanitize(c.code + (c.lvl ? ' ' + c.lvl : ''))}</span>`
+          ).join('') + `</div>`
+        : '';
+
+      out.push(`<div style="border:1pt solid ${acc || '#cbd5e1'};${acc ? `border-left:3pt solid ${acc};` : ''}border-radius:4pt;padding:6pt 8pt;margin-bottom:4pt;font-size:10pt;background:${fin ? '#fffbeb' : (inter ? '#eff6ff' : '#fff')};page-break-inside:avoid">${badge}<b>${se.fromFlash ? '\u26A1 ' : ''}S${idx + 1} — ${sanitize(se.titre || 'Sans titre')}</b>${se.objectif ? `<br><span style="color:#475569">${sanitize(se.objectif)}</span>` : ''}${pills}</div>`);
     });
+
+    // Récapitulatif de la séquence
+    const _bits = [seq.seances.length + ' séance' + (seq.seances.length > 1 ? 's' : '')];
+    if (_nI) _bits.push(_nI + ' tâche' + (_nI > 1 ? 's' : '') + ' intermédiaire' + (_nI > 1 ? 's' : ''));
+    if (_nF) _bits.push(_nF + ' tâche finale');
+    const _ling = [];
+    if (_nG) _ling.push('Gram. ' + _nG);
+    if (_nL) _ling.push('Lex. ' + _nL);
+    if (_nP) _ling.push('Phon. ' + _nP);
+    if (_nPr) _ling.push('Pragm. ' + _nPr);
+    const _fk = Object.keys(_freq);
+    let _rec = `<div style="margin-top:2pt;padding-top:4pt;border-top:1pt solid #e2e8f0;font-size:8.5pt;color:#64748b;line-height:1.5;page-break-inside:avoid">`;
+    _rec += _bits.join(' \u00B7 ') + (_ling.length ? '  \u2014  ' + _ling.join(' \u00B7 ') : '');
+    if (_fk.length) {
+      _rec += `<br>Compétences : ` + _fk.map(k =>
+        `<span style="color:${_CC[k] || '#64748b'};font-weight:700">${k} \u00D7${_freq[k]}</span>`
+      ).join(' \u00B7 ');
+    }
+    _rec += `</div>`;
+    out.push(_rec);
   }
 
   // Supports +
@@ -59950,7 +60001,7 @@ const exportSeanceOdt = (sea, seq) => {
   rtf += '\\f1\\fs20\\cf2\n';
 
   // En-tête
-  if(sq.titre||sq.niveau) rtf += '{\\pard\\sb0\\sa10\\f1\\fs17\\cf2 '+r((sq.titre||'')+(sq.niveau?' \\u183? '+sq.niveau.replace(/_/g,' '):''))+'\\par}\n';
+  if(sq.titre||sq.niveau) rtf += '{\\pard\\sb0\\sa10\\f1\\fs17\\cf2 '+r(sq.titre||'')+(sq.niveau?' \\u183? '+r(sq.niveau.replace(/_/g,' ')):'')+'\\par}\n';
   rtf += h1p(s.titre||'S\u00e9ance sans titre');
   if(s.objectif) rtf += sub(strip(s.objectif));
   if(s.duree) rtf += info('Dur\u00e9e :',String(s.duree)+' min');
@@ -60001,6 +60052,62 @@ const exportSeanceOdt = (sea, seq) => {
       rtf+=trow(aCols,[String(i+1),a.label||'',txt,dur],false,false);
     });
     rtf+='{\\pard\\sb4\\sa4\\par}\n';
+  }
+
+  // ── Dispositif de la tâche ────────────────────────────────────
+  if(s.isTacheFinale || s.isTacheInter){
+    const dsp = s.dispositif || {};
+    const DF = [
+      ['consigne','Consigne \u00e9l\u00e8ve'],
+      ['modalites','Modalit\u00e9s'],
+      ['materiel','Mat\u00e9riel'],
+      ['criteres','Crit\u00e8res de r\u00e9ussite'],
+      ['differenciation','Diff\u00e9renciation']
+    ].filter(f => String(dsp[f[0]]||'').trim());
+    if(DF.length){
+      rtf += secH('Dispositif de la t\u00e2che'+(s.isTacheFinale?' finale':' interm\u00e9diaire'));
+      const dCols=[3000,TW-3000];
+      DF.forEach(f=>{ rtf+=trow(dCols,[f[1], strip(dsp[f[0]])],false,false); });
+      rtf+='{\\pard\\sb4\\sa4\\par}\n';
+    }
+  }
+
+  // ── Grille d'évaluation liée ──────────────────────────────────
+  if(s.grilleId){
+    const g = (sq.grilles||[]).find(x => x && x.id === s.grilleId);
+    if(g){
+      rtf += secH('Grille d\u2019\u00e9valuation \u2014 '+(g.name||''));
+      const gRows = g.rows||[]; const gCols = g.cols||[];
+      if(gRows.length && gCols.length){
+        // trow attend des LARGEURS de colonnes (comme sCols/aCols),
+        // qu'il cumule lui-meme pour calculer les positions.
+        const first = 2200;
+        const each = Math.max(800, Math.floor((TW-first)/gCols.length));
+        const gW = [first];
+        for(let ci=0; ci<gCols.length; ci++) gW.push(each);
+        const head = [g.type==='cecrl'?'Niveau':'Crit\u00e8re'].concat(
+          gCols.map((c,ci)=>{
+            const cp=(g.colsPoints||[])[ci];
+            return String(c||'')+(cp!=null&&cp!==''?' ('+cp+' pts)':'');
+          })
+        );
+        rtf += trow(gW, head, true, false);
+        gRows.forEach((rw,ri)=>{
+          const rp=(g.rowsPoints||[])[ri];
+          const line=[String(rw||'')+(rp!=null&&rp!==''?' /'+rp:'')];
+          gCols.forEach((_,ci)=>{
+            const cell=(g.cells||{})[ri+'_'+ci];
+            let t='';
+            if(cell!=null) t = (typeof cell==='object') ? String(cell.text||'') : String(cell);
+            const cp = (cell && typeof cell==='object') ? cell.points : null;
+            if(cp!=null && String(cp).trim()!=='') t += (t?'  ':'')+'['+cp+']';
+            line.push(t);
+          });
+          rtf += trow(gW, line, false, false);
+        });
+        rtf+='{\\pard\\sb4\\sa4\\par}\n';
+      }
+    }
   }
 
   // ── Trace écrite ──────────────────────────────────────────────
@@ -67459,417 +67566,6 @@ const SeancesView = () => {
               fileName: _jsxFileName,
               lineNumber: 407,
               columnNumber: 13
-            }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)(SectionBox, {
-              compact: true,
-              color: "var(--text-muted)",
-              icon: /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)(lucide_react__WEBPACK_IMPORTED_MODULE_10__["default"], {
-                size: 11,
-                style: {
-                  verticalAlign: -1
-                },
-                "x-file-name": "SeancesView",
-                "x-line-number": "413",
-                "x-column": "64",
-                "x-component": "ImageIcon",
-                "x-id": "SeancesView_413_64",
-                "x-dynamic": "false"
-              }, void 0, false, {
-                fileName: _jsxFileName,
-                lineNumber: 413,
-                columnNumber: 65
-              }, undefined),
-              title: "Image d'illustration (facultatif)",
-              defaultOpen: !!activeSeance.imageUrl,
-              "x-file-name": "SeancesView",
-              "x-line-number": "413",
-              "x-column": "12",
-              "x-component": "SectionBox",
-              "x-id": "SeancesView_413_12",
-              "x-dynamic": "true",
-              "x-source-type": "computed",
-              "x-source-editable": "false",
-              children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("div", {
-                className: "fg",
-                style: {
-                  marginBottom: 8
-                },
-                "x-file-name": "SeancesView",
-                "x-line-number": "414",
-                "x-column": "14",
-                "x-component": "div",
-                "x-id": "SeancesView_414_14",
-                "x-dynamic": "false",
-                children: /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("input", {
-                  "data-testid": "sea-img-url",
-                  className: "fi",
-                  style: {
-                    fontSize: 12
-                  },
-                  value: activeSeance.imageUrl || '',
-                  onChange: e => updateSeance({
-                    imageUrl: e.target.value
-                  }),
-                  placeholder: "https://exemple.com/image.jpg",
-                  "x-file-name": "SeancesView",
-                  "x-line-number": "415",
-                  "x-column": "16",
-                  "x-component": "input",
-                  "x-id": "SeancesView_415_16",
-                  "x-dynamic": "false"
-                }, void 0, false, {
-                  fileName: _jsxFileName,
-                  lineNumber: 415,
-                  columnNumber: 17
-                }, undefined)
-              }, void 0, false, {
-                fileName: _jsxFileName,
-                lineNumber: 414,
-                columnNumber: 15
-              }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("div", {
-                style: {
-                  display: 'flex',
-                  gap: 8,
-                  alignItems: 'center',
-                  marginBottom: 8,
-                  fontSize: 11
-                },
-                "x-file-name": "SeancesView",
-                "x-line-number": "417",
-                "x-column": "14",
-                "x-component": "div",
-                "x-id": "SeancesView_417_14",
-                "x-dynamic": "false",
-                children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("span", {
-                  style: {
-                    color: 'var(--text-muted)',
-                    fontWeight: 600
-                  },
-                  "x-file-name": "SeancesView",
-                  "x-line-number": "418",
-                  "x-column": "16",
-                  "x-component": "span",
-                  "x-id": "SeancesView_418_16",
-                  "x-dynamic": "false",
-                  children: "Forme :"
-                }, void 0, false, {
-                  fileName: _jsxFileName,
-                  lineNumber: 418,
-                  columnNumber: 17
-                }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("label", {
-                  style: {
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 4,
-                    cursor: 'pointer'
-                  },
-                  "x-file-name": "SeancesView",
-                  "x-line-number": "419",
-                  "x-column": "16",
-                  "x-component": "label",
-                  "x-id": "SeancesView_419_16",
-                  "x-dynamic": "false",
-                  children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("input", {
-                    type: "radio",
-                    name: "img-shape",
-                    checked: (activeSeance.imageShape || 'banner') === 'banner',
-                    onChange: () => updateSeance({
-                      imageShape: 'banner'
-                    }),
-                    "x-file-name": "SeancesView",
-                    "x-line-number": "420",
-                    "x-column": "18",
-                    "x-component": "input",
-                    "x-id": "SeancesView_420_18",
-                    "x-dynamic": "false"
-                  }, void 0, false, {
-                    fileName: _jsxFileName,
-                    lineNumber: 420,
-                    columnNumber: 19
-                  }, undefined), " Banni\xE8re"]
-                }, void 0, true, {
-                  fileName: _jsxFileName,
-                  lineNumber: 419,
-                  columnNumber: 17
-                }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("label", {
-                  style: {
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 4,
-                    cursor: 'pointer'
-                  },
-                  "x-file-name": "SeancesView",
-                  "x-line-number": "422",
-                  "x-column": "16",
-                  "x-component": "label",
-                  "x-id": "SeancesView_422_16",
-                  "x-dynamic": "false",
-                  children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("input", {
-                    type: "radio",
-                    name: "img-shape",
-                    checked: activeSeance.imageShape === 'round',
-                    onChange: () => updateSeance({
-                      imageShape: 'round'
-                    }),
-                    "x-file-name": "SeancesView",
-                    "x-line-number": "423",
-                    "x-column": "18",
-                    "x-component": "input",
-                    "x-id": "SeancesView_423_18",
-                    "x-dynamic": "false"
-                  }, void 0, false, {
-                    fileName: _jsxFileName,
-                    lineNumber: 423,
-                    columnNumber: 19
-                  }, undefined), " Ronde"]
-                }, void 0, true, {
-                  fileName: _jsxFileName,
-                  lineNumber: 422,
-                  columnNumber: 17
-                }, undefined)]
-              }, void 0, true, {
-                fileName: _jsxFileName,
-                lineNumber: 417,
-                columnNumber: 15
-              }, undefined), activeSeance.imageUrl && /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("div", {
-                style: {
-                  marginTop: 6
-                },
-                "x-file-name": "SeancesView",
-                "x-line-number": "427",
-                "x-column": "16",
-                "x-component": "div",
-                "x-id": "SeancesView_427_16",
-                "x-dynamic": "false",
-                children: /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("img", {
-                  src: activeSeance.imageUrl,
-                  alt: "",
-                  style: activeSeance.imageShape === 'round' ? {
-                    width: 60,
-                    height: 60,
-                    borderRadius: '50%',
-                    objectFit: 'cover'
-                  } : {
-                    width: 120,
-                    maxHeight: 80,
-                    objectFit: 'cover',
-                    borderRadius: 6
-                  },
-                  onError: e => {
-                    e.target.style.display = 'none';
-                  },
-                  "x-file-name": "SeancesView",
-                  "x-line-number": "428",
-                  "x-column": "18",
-                  "x-component": "img",
-                  "x-id": "SeancesView_428_18",
-                  "x-dynamic": "false"
-                }, void 0, false, {
-                  fileName: _jsxFileName,
-                  lineNumber: 428,
-                  columnNumber: 19
-                }, undefined)
-              }, void 0, false, {
-                fileName: _jsxFileName,
-                lineNumber: 427,
-                columnNumber: 17
-              }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("div", {
-                style: {
-                  display: 'none'
-                },
-                "x-file-name": "SeancesView",
-                "x-line-number": "431",
-                "x-column": "14",
-                "x-component": "div",
-                "x-id": "SeancesView_431_14",
-                "x-dynamic": "false",
-                children: "\uD83D\uDCA1 Clic droit sur une image \u2192 \xAB Copier l'adresse de l'image \xBB."
-              }, void 0, false, {
-                fileName: _jsxFileName,
-                lineNumber: 431,
-                columnNumber: 15
-              }, undefined)]
-            }, void 0, true, {
-              fileName: _jsxFileName,
-              lineNumber: 413,
-              columnNumber: 13
-            }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)(SectionBox, {
-              compact: true,
-              color: "var(--text-muted)",
-              icon: /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)(lucide_react__WEBPACK_IMPORTED_MODULE_17__["default"], {
-                size: 11,
-                style: {
-                  verticalAlign: -1
-                },
-                "x-file-name": "SeancesView",
-                "x-line-number": "437",
-                "x-column": "64",
-                "x-component": "Type",
-                "x-id": "SeancesView_437_64",
-                "x-dynamic": "false"
-              }, void 0, false, {
-                fileName: _jsxFileName,
-                lineNumber: 437,
-                columnNumber: 65
-              }, undefined),
-              title: "Police d'\xE9criture (facultatif)",
-              defaultOpen: !!activeSeance.font,
-              "x-file-name": "SeancesView",
-              "x-line-number": "437",
-              "x-column": "12",
-              "x-component": "SectionBox",
-              "x-id": "SeancesView_437_12",
-              "x-dynamic": "false",
-              children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("select", {
-                className: "fs",
-                "data-testid": "sea-font",
-                style: {
-                  fontSize: 12
-                },
-                value: font,
-                onChange: e => updateSeance({
-                  font: e.target.value
-                }),
-                "x-file-name": "SeancesView",
-                "x-line-number": "438",
-                "x-column": "14",
-                "x-component": "select",
-                "x-id": "SeancesView_438_14",
-                "x-dynamic": "true",
-                "x-source-type": "computed",
-                "x-source-editable": "false",
-                children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("option", {
-                  value: "",
-                  "x-file-name": "SeancesView",
-                  "x-line-number": "439",
-                  "x-column": "16",
-                  "x-component": "option",
-                  "x-id": "SeancesView_439_16",
-                  "x-dynamic": "false",
-                  children: "\u2014 Par d\xE9faut \u2014"
-                }, void 0, false, {
-                  fileName: _jsxFileName,
-                  lineNumber: 439,
-                  columnNumber: 17
-                }, undefined), (_data_sequenceurData__WEBPACK_IMPORTED_MODULE_20__.FONTS || []).map(f => /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("option", {
-                  value: f.value,
-                  style: {
-                    fontFamily: f.value
-                  },
-                  "x-file-name": "SeancesView",
-                  "x-line-number": "440",
-                  "x-column": "40",
-                  "x-component": "option",
-                  "x-id": "SeancesView_440_40",
-                  "x-dynamic": "true",
-                  "x-source-type": "static-imported",
-                  "x-source-path": "label",
-                  "x-source-editable": "false",
-                  "x-array-item-param": "f",
-                  children: f.label
-                }, f.value, false, {
-                  fileName: _jsxFileName,
-                  lineNumber: 440,
-                  columnNumber: 41
-                }, undefined))]
-              }, void 0, true, {
-                fileName: _jsxFileName,
-                lineNumber: 438,
-                columnNumber: 15
-              }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("div", {
-                style: {
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  marginTop: 10,
-                  fontSize: 11,
-                  color: 'var(--text-muted)'
-                },
-                "x-file-name": "SeancesView",
-                "x-line-number": "442",
-                "x-column": "14",
-                "x-component": "div",
-                "x-id": "SeancesView_442_14",
-                "x-dynamic": "false",
-                children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("label", {
-                  style: {
-                    fontWeight: 600
-                  },
-                  "x-file-name": "SeancesView",
-                  "x-line-number": "443",
-                  "x-column": "16",
-                  "x-component": "label",
-                  "x-id": "SeancesView_443_16",
-                  "x-dynamic": "false",
-                  children: "Taille :"
-                }, void 0, false, {
-                  fileName: _jsxFileName,
-                  lineNumber: 443,
-                  columnNumber: 17
-                }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("input", {
-                  type: "range",
-                  min: "0.85",
-                  max: "1.5",
-                  step: "0.05",
-                  value: fontScale,
-                  onChange: e => updateSeance({
-                    fontScale: parseFloat(e.target.value)
-                  }),
-                  style: {
-                    flex: 1
-                  },
-                  "x-file-name": "SeancesView",
-                  "x-line-number": "444",
-                  "x-column": "16",
-                  "x-component": "input",
-                  "x-id": "SeancesView_444_16",
-                  "x-dynamic": "false"
-                }, void 0, false, {
-                  fileName: _jsxFileName,
-                  lineNumber: 444,
-                  columnNumber: 17
-                }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("span", {
-                  style: {
-                    minWidth: 40,
-                    textAlign: 'right'
-                  },
-                  "x-file-name": "SeancesView",
-                  "x-line-number": "445",
-                  "x-column": "16",
-                  "x-component": "span",
-                  "x-id": "SeancesView_445_16",
-                  "x-dynamic": "true",
-                  "x-source-type": "computed",
-                  "x-source-editable": "false",
-                  children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("span", {
-                    "data-ve-dynamic": "true",
-                    "x-excluded": "true",
-                    style: {
-                      display: "contents"
-                    },
-                    "x-file-name": "SeancesView",
-                    "x-line-number": "445",
-                    "x-column": "16",
-                    "x-component": "span",
-                    "x-id": "SeancesView_445_16_expr0",
-                    "x-dynamic": "true",
-                    "x-source-type": "computed",
-                    "x-source-editable": "false",
-                    children: Math.round(fontScale * 100)
-                  }, void 0, false), "%"]
-                }, void 0, true, {
-                  fileName: _jsxFileName,
-                  lineNumber: 445,
-                  columnNumber: 17
-                }, undefined)]
-              }, void 0, true, {
-                fileName: _jsxFileName,
-                lineNumber: 442,
-                columnNumber: 15
-              }, undefined)]
-            }, void 0, true, {
-              fileName: _jsxFileName,
-              lineNumber: 437,
-              columnNumber: 13
             }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("div", {
               className: "fg",
               "x-file-name": "SeancesView",
@@ -69997,6 +69693,473 @@ const SeancesView = () => {
             fileName: _jsxFileName,
             lineNumber: 642,
             columnNumber: 11
+          }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("details", {
+            style: {
+              marginTop: 6,
+              marginBottom: 4,
+              border: '1px solid var(--border)',
+              borderRadius: 8,
+              padding: '8px 12px',
+              background: 'var(--card)'
+            },
+            "x-file-name": "SeancesView",
+            "x-line-number": "660",
+            "x-column": "10",
+            "x-component": "details",
+            "x-id": "SeancesView_660_10",
+            "x-dynamic": "false",
+            children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("summary", {
+              style: {
+                cursor: 'pointer',
+                color: 'var(--text-muted)',
+                fontWeight: 700,
+                fontSize: 10,
+                letterSpacing: 0.5,
+                textTransform: 'uppercase',
+                userSelect: 'none'
+              },
+              "x-file-name": "SeancesView",
+              "x-line-number": "661",
+              "x-column": "12",
+              "x-component": "summary",
+              "x-id": "SeancesView_661_12",
+              "x-dynamic": "false",
+              children: "\uD83C\uDFA8 Mise en forme"
+            }, void 0, false, {
+              fileName: _jsxFileName,
+              lineNumber: 661,
+              columnNumber: 13
+            }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("div", {
+              style: {
+                paddingTop: 8
+              },
+              "x-file-name": "SeancesView",
+              "x-line-number": "662",
+              "x-column": "12",
+              "x-component": "div",
+              "x-id": "SeancesView_662_12",
+              "x-dynamic": "false",
+              children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)(SectionBox, {
+              compact: true,
+              color: "var(--text-muted)",
+              icon: /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)(lucide_react__WEBPACK_IMPORTED_MODULE_10__["default"], {
+                size: 11,
+                style: {
+                  verticalAlign: -1
+                },
+                "x-file-name": "SeancesView",
+                "x-line-number": "413",
+                "x-column": "64",
+                "x-component": "ImageIcon",
+                "x-id": "SeancesView_413_64",
+                "x-dynamic": "false"
+              }, void 0, false, {
+                fileName: _jsxFileName,
+                lineNumber: 413,
+                columnNumber: 65
+              }, undefined),
+              title: "Image d'illustration (facultatif)",
+              defaultOpen: !!activeSeance.imageUrl,
+              "x-file-name": "SeancesView",
+              "x-line-number": "413",
+              "x-column": "12",
+              "x-component": "SectionBox",
+              "x-id": "SeancesView_413_12",
+              "x-dynamic": "true",
+              "x-source-type": "computed",
+              "x-source-editable": "false",
+              children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("div", {
+                className: "fg",
+                style: {
+                  marginBottom: 8
+                },
+                "x-file-name": "SeancesView",
+                "x-line-number": "414",
+                "x-column": "14",
+                "x-component": "div",
+                "x-id": "SeancesView_414_14",
+                "x-dynamic": "false",
+                children: /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("input", {
+                  "data-testid": "sea-img-url",
+                  className: "fi",
+                  style: {
+                    fontSize: 12
+                  },
+                  value: activeSeance.imageUrl || '',
+                  onChange: e => updateSeance({
+                    imageUrl: e.target.value
+                  }),
+                  placeholder: "https://exemple.com/image.jpg",
+                  "x-file-name": "SeancesView",
+                  "x-line-number": "415",
+                  "x-column": "16",
+                  "x-component": "input",
+                  "x-id": "SeancesView_415_16",
+                  "x-dynamic": "false"
+                }, void 0, false, {
+                  fileName: _jsxFileName,
+                  lineNumber: 415,
+                  columnNumber: 17
+                }, undefined)
+              }, void 0, false, {
+                fileName: _jsxFileName,
+                lineNumber: 414,
+                columnNumber: 15
+              }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("div", {
+                style: {
+                  display: 'flex',
+                  gap: 8,
+                  alignItems: 'center',
+                  marginBottom: 8,
+                  fontSize: 11
+                },
+                "x-file-name": "SeancesView",
+                "x-line-number": "417",
+                "x-column": "14",
+                "x-component": "div",
+                "x-id": "SeancesView_417_14",
+                "x-dynamic": "false",
+                children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("span", {
+                  style: {
+                    color: 'var(--text-muted)',
+                    fontWeight: 600
+                  },
+                  "x-file-name": "SeancesView",
+                  "x-line-number": "418",
+                  "x-column": "16",
+                  "x-component": "span",
+                  "x-id": "SeancesView_418_16",
+                  "x-dynamic": "false",
+                  children: "Forme :"
+                }, void 0, false, {
+                  fileName: _jsxFileName,
+                  lineNumber: 418,
+                  columnNumber: 17
+                }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("label", {
+                  style: {
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    cursor: 'pointer'
+                  },
+                  "x-file-name": "SeancesView",
+                  "x-line-number": "419",
+                  "x-column": "16",
+                  "x-component": "label",
+                  "x-id": "SeancesView_419_16",
+                  "x-dynamic": "false",
+                  children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("input", {
+                    type: "radio",
+                    name: "img-shape",
+                    checked: (activeSeance.imageShape || 'banner') === 'banner',
+                    onChange: () => updateSeance({
+                      imageShape: 'banner'
+                    }),
+                    "x-file-name": "SeancesView",
+                    "x-line-number": "420",
+                    "x-column": "18",
+                    "x-component": "input",
+                    "x-id": "SeancesView_420_18",
+                    "x-dynamic": "false"
+                  }, void 0, false, {
+                    fileName: _jsxFileName,
+                    lineNumber: 420,
+                    columnNumber: 19
+                  }, undefined), " Banni\xE8re"]
+                }, void 0, true, {
+                  fileName: _jsxFileName,
+                  lineNumber: 419,
+                  columnNumber: 17
+                }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("label", {
+                  style: {
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    cursor: 'pointer'
+                  },
+                  "x-file-name": "SeancesView",
+                  "x-line-number": "422",
+                  "x-column": "16",
+                  "x-component": "label",
+                  "x-id": "SeancesView_422_16",
+                  "x-dynamic": "false",
+                  children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("input", {
+                    type: "radio",
+                    name: "img-shape",
+                    checked: activeSeance.imageShape === 'round',
+                    onChange: () => updateSeance({
+                      imageShape: 'round'
+                    }),
+                    "x-file-name": "SeancesView",
+                    "x-line-number": "423",
+                    "x-column": "18",
+                    "x-component": "input",
+                    "x-id": "SeancesView_423_18",
+                    "x-dynamic": "false"
+                  }, void 0, false, {
+                    fileName: _jsxFileName,
+                    lineNumber: 423,
+                    columnNumber: 19
+                  }, undefined), " Ronde"]
+                }, void 0, true, {
+                  fileName: _jsxFileName,
+                  lineNumber: 422,
+                  columnNumber: 17
+                }, undefined)]
+              }, void 0, true, {
+                fileName: _jsxFileName,
+                lineNumber: 417,
+                columnNumber: 15
+              }, undefined), activeSeance.imageUrl && /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("div", {
+                style: {
+                  marginTop: 6
+                },
+                "x-file-name": "SeancesView",
+                "x-line-number": "427",
+                "x-column": "16",
+                "x-component": "div",
+                "x-id": "SeancesView_427_16",
+                "x-dynamic": "false",
+                children: /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("img", {
+                  src: activeSeance.imageUrl,
+                  alt: "",
+                  style: activeSeance.imageShape === 'round' ? {
+                    width: 60,
+                    height: 60,
+                    borderRadius: '50%',
+                    objectFit: 'cover'
+                  } : {
+                    width: 120,
+                    maxHeight: 80,
+                    objectFit: 'cover',
+                    borderRadius: 6
+                  },
+                  onError: e => {
+                    e.target.style.display = 'none';
+                  },
+                  "x-file-name": "SeancesView",
+                  "x-line-number": "428",
+                  "x-column": "18",
+                  "x-component": "img",
+                  "x-id": "SeancesView_428_18",
+                  "x-dynamic": "false"
+                }, void 0, false, {
+                  fileName: _jsxFileName,
+                  lineNumber: 428,
+                  columnNumber: 19
+                }, undefined)
+              }, void 0, false, {
+                fileName: _jsxFileName,
+                lineNumber: 427,
+                columnNumber: 17
+              }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("div", {
+                style: {
+                  display: 'none'
+                },
+                "x-file-name": "SeancesView",
+                "x-line-number": "431",
+                "x-column": "14",
+                "x-component": "div",
+                "x-id": "SeancesView_431_14",
+                "x-dynamic": "false",
+                children: "\uD83D\uDCA1 Clic droit sur une image \u2192 \xAB Copier l'adresse de l'image \xBB."
+              }, void 0, false, {
+                fileName: _jsxFileName,
+                lineNumber: 431,
+                columnNumber: 15
+              }, undefined)]
+            }, void 0, true, {
+              fileName: _jsxFileName,
+              lineNumber: 413,
+              columnNumber: 13
+            }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)(SectionBox, {
+              compact: true,
+              color: "var(--text-muted)",
+              icon: /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)(lucide_react__WEBPACK_IMPORTED_MODULE_17__["default"], {
+                size: 11,
+                style: {
+                  verticalAlign: -1
+                },
+                "x-file-name": "SeancesView",
+                "x-line-number": "437",
+                "x-column": "64",
+                "x-component": "Type",
+                "x-id": "SeancesView_437_64",
+                "x-dynamic": "false"
+              }, void 0, false, {
+                fileName: _jsxFileName,
+                lineNumber: 437,
+                columnNumber: 65
+              }, undefined),
+              title: "Police d'\xE9criture (facultatif)",
+              defaultOpen: !!activeSeance.font,
+              "x-file-name": "SeancesView",
+              "x-line-number": "437",
+              "x-column": "12",
+              "x-component": "SectionBox",
+              "x-id": "SeancesView_437_12",
+              "x-dynamic": "false",
+              children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("select", {
+                className: "fs",
+                "data-testid": "sea-font",
+                style: {
+                  fontSize: 12
+                },
+                value: font,
+                onChange: e => updateSeance({
+                  font: e.target.value
+                }),
+                "x-file-name": "SeancesView",
+                "x-line-number": "438",
+                "x-column": "14",
+                "x-component": "select",
+                "x-id": "SeancesView_438_14",
+                "x-dynamic": "true",
+                "x-source-type": "computed",
+                "x-source-editable": "false",
+                children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("option", {
+                  value: "",
+                  "x-file-name": "SeancesView",
+                  "x-line-number": "439",
+                  "x-column": "16",
+                  "x-component": "option",
+                  "x-id": "SeancesView_439_16",
+                  "x-dynamic": "false",
+                  children: "\u2014 Par d\xE9faut \u2014"
+                }, void 0, false, {
+                  fileName: _jsxFileName,
+                  lineNumber: 439,
+                  columnNumber: 17
+                }, undefined), (_data_sequenceurData__WEBPACK_IMPORTED_MODULE_20__.FONTS || []).map(f => /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("option", {
+                  value: f.value,
+                  style: {
+                    fontFamily: f.value
+                  },
+                  "x-file-name": "SeancesView",
+                  "x-line-number": "440",
+                  "x-column": "40",
+                  "x-component": "option",
+                  "x-id": "SeancesView_440_40",
+                  "x-dynamic": "true",
+                  "x-source-type": "static-imported",
+                  "x-source-path": "label",
+                  "x-source-editable": "false",
+                  "x-array-item-param": "f",
+                  children: f.label
+                }, f.value, false, {
+                  fileName: _jsxFileName,
+                  lineNumber: 440,
+                  columnNumber: 41
+                }, undefined))]
+              }, void 0, true, {
+                fileName: _jsxFileName,
+                lineNumber: 438,
+                columnNumber: 15
+              }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("div", {
+                style: {
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginTop: 10,
+                  fontSize: 11,
+                  color: 'var(--text-muted)'
+                },
+                "x-file-name": "SeancesView",
+                "x-line-number": "442",
+                "x-column": "14",
+                "x-component": "div",
+                "x-id": "SeancesView_442_14",
+                "x-dynamic": "false",
+                children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("label", {
+                  style: {
+                    fontWeight: 600
+                  },
+                  "x-file-name": "SeancesView",
+                  "x-line-number": "443",
+                  "x-column": "16",
+                  "x-component": "label",
+                  "x-id": "SeancesView_443_16",
+                  "x-dynamic": "false",
+                  children: "Taille :"
+                }, void 0, false, {
+                  fileName: _jsxFileName,
+                  lineNumber: 443,
+                  columnNumber: 17
+                }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("input", {
+                  type: "range",
+                  min: "0.85",
+                  max: "1.5",
+                  step: "0.05",
+                  value: fontScale,
+                  onChange: e => updateSeance({
+                    fontScale: parseFloat(e.target.value)
+                  }),
+                  style: {
+                    flex: 1
+                  },
+                  "x-file-name": "SeancesView",
+                  "x-line-number": "444",
+                  "x-column": "16",
+                  "x-component": "input",
+                  "x-id": "SeancesView_444_16",
+                  "x-dynamic": "false"
+                }, void 0, false, {
+                  fileName: _jsxFileName,
+                  lineNumber: 444,
+                  columnNumber: 17
+                }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("span", {
+                  style: {
+                    minWidth: 40,
+                    textAlign: 'right'
+                  },
+                  "x-file-name": "SeancesView",
+                  "x-line-number": "445",
+                  "x-column": "16",
+                  "x-component": "span",
+                  "x-id": "SeancesView_445_16",
+                  "x-dynamic": "true",
+                  "x-source-type": "computed",
+                  "x-source-editable": "false",
+                  children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_23__.jsxDEV)("span", {
+                    "data-ve-dynamic": "true",
+                    "x-excluded": "true",
+                    style: {
+                      display: "contents"
+                    },
+                    "x-file-name": "SeancesView",
+                    "x-line-number": "445",
+                    "x-column": "16",
+                    "x-component": "span",
+                    "x-id": "SeancesView_445_16_expr0",
+                    "x-dynamic": "true",
+                    "x-source-type": "computed",
+                    "x-source-editable": "false",
+                    children: Math.round(fontScale * 100)
+                  }, void 0, false), "%"]
+                }, void 0, true, {
+                  fileName: _jsxFileName,
+                  lineNumber: 445,
+                  columnNumber: 17
+                }, undefined)]
+              }, void 0, true, {
+                fileName: _jsxFileName,
+                lineNumber: 442,
+                columnNumber: 15
+              }, undefined)]
+            }, void 0, true, {
+              fileName: _jsxFileName,
+              lineNumber: 437,
+              columnNumber: 13
+            }, undefined)]
+            }, void 0, true, {
+              fileName: _jsxFileName,
+              lineNumber: 662,
+              columnNumber: 13
+            }, undefined)]
+          }, void 0, true, {
+            fileName: _jsxFileName,
+            lineNumber: 660,
+            columnNumber: 11
           }, undefined)]
         }, void 0, true, {
           fileName: _jsxFileName,
@@ -71031,6 +71194,13 @@ const SequenceurView = () => {
   };
   const editingSeq = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(() => data.sequences.find(s => s.id === editingId), [data.sequences, editingId]);
   const openEditor = id => {
+    // Le niveau de travail doit suivre la sequence ouverte : sans cela, un
+    // « Retour » depuis l'editeur affiche la liste d'un niveau non selectionne,
+    // donc vide, ce qui donne l'impression d'avoir tout perdu.
+    try {
+      const _s = data.sequences.find(x => x.id === id);
+      if (_s && _s.niveau) setSelectedLevel(_s.niveau);
+    } catch (e) {}
     setEditingId(id);
     setStage('editor');
   };
@@ -71809,7 +71979,11 @@ const SequenceurView = () => {
               children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxDEV)("button", {
                 className: "pcard-act",
                 title: "Dupliquer",
-                onClick: () => duplicateSequence(s.id),
+                onClick: () => {
+                  try { window.__ll_duplicateSequence = duplicateSequence; } catch (e) {}
+                  if (typeof window.__ll_dupDialog === 'function') window.__ll_dupDialog(s.id);
+                  else duplicateSequence(s.id);
+                },
                 "x-file-name": "SequenceurView",
                 "x-line-number": "165",
                 "x-column": "18",
@@ -75636,23 +75810,107 @@ function llGrilleToast(msg){
   document.body.appendChild(t);setTimeout(function(){t.remove();},2200);
 }
 function llHookGrilleStarButtons(){
-  var activeSeq=window.__ll_activeSeq;if(!activeSeq||(activeSeq.grilles||[]).length===0)return;
-  var grilles=activeSeq.grilles||[];var cards=document.querySelectorAll('[x-id="SequenceEditor_730_8"]');
-  cards.forEach(function(card,i){
-    if(card.querySelector('.__ll_star_grille'))return;var g=grilles[i];if(!g)return;
-    var isFav=llIsGrilleFav(g.id);var star=document.createElement('button');star.className='__ll_star_grille';
-    star.style.cssText='background:none;border:none;cursor:pointer;font-size:18px;padding:2px 5px;flex-shrink:0;line-height:1;transition:transform .15s';
-    star.title=isFav?'Retirer des favoris':'Ajouter aux favoris';star.textContent=isFav?'⭐':'☆';star.dataset.gid=g.id;
-    star.onmouseenter=function(){this.style.transform='scale(1.2)';};star.onmouseleave=function(){this.style.transform='';};
-    star.onclick=function(e){
-      e.stopPropagation();var added=llToggleGrilleFav(this.dataset.gid);this.textContent=added?'⭐':'☆';
-      this.title=added?'Retirer des favoris':'Ajouter aux favoris';
-      llGrilleToast(added?'⭐ Ajoutée aux favoris':'☆ Retirée des favoris');llRefreshBiblio();
+  // La sequence de l'editeur est __ll_curSeq. __ll_activeSeq appartient a
+  // l'editeur de SEANCE et peut pointer vers une sequence precedente : s'en
+  // servir ici rattachait l'etoile a la grille d'une autre sequence.
+  var seq = window.__ll_curSeq || null;
+  if(!seq || !(seq.grilles||[]).length) return;
+  var byId = {};
+  (seq.grilles||[]).forEach(function(g){ if(g && g.id) byId[g.id] = g; });
+
+  var cards = document.querySelectorAll('[x-id="SequenceEditor_730_8"]');
+  cards.forEach(function(card){
+    // Rattachement par identifiant porte par la carte, jamais par position.
+    var gid = card.getAttribute('data-gid');
+    var g = gid ? byId[gid] : null;
+    if(!g) return;
+    if(card.querySelector('.__ll_star_grille')) return;
+
+    var actRow = card.lastElementChild;
+    var host = (actRow && actRow.nodeType===1) ? actRow.parentNode : card;
+
+    // ── Etoile favoris ──
+    var isFav = llIsGrilleFav(g.id);
+    var star = document.createElement('button');
+    star.className = '__ll_star_grille';
+    star.type = 'button';
+    star.style.cssText = 'background:none;border:none;cursor:pointer;font-size:18px;padding:2px 5px;flex-shrink:0;line-height:1;transition:transform .15s';
+    star.title = isFav ? 'Retirer des favoris' : 'Ajouter aux favoris';
+    star.textContent = isFav ? '\u2B50' : '\u2606';
+    star.dataset.gid = g.id;
+    star.onmouseenter = function(){ this.style.transform='scale(1.2)'; };
+    star.onmouseleave = function(){ this.style.transform=''; };
+    star.onclick = function(e){
+      e.stopPropagation(); e.preventDefault();
+      var added = llToggleGrilleFav(this.dataset.gid);
+      this.textContent = added ? '\u2B50' : '\u2606';
+      this.title = added ? 'Retirer des favoris' : 'Ajouter aux favoris';
+      llGrilleToast(added ? '\u2B50 Ajout\u00E9e aux favoris' : '\u2606 Retir\u00E9e des favoris');
+      llRefreshBiblio();
     };
-    var actRow=card.lastElementChild;
-    if(actRow&&actRow.nodeType===1&&actRow.children.length>0)actRow.insertBefore(star,actRow.firstChild);else card.appendChild(star);
+
+    // ── Suppression rapide ──
+    var del = document.createElement('button');
+    del.className = '__ll_del_grille';
+    del.type = 'button';
+    del.style.cssText = 'background:none;border:none;cursor:pointer;font-size:15px;padding:2px 6px;flex-shrink:0;line-height:1;color:#94a3b8;transition:color .15s,transform .15s';
+    del.title = 'Supprimer cette grille';
+    del.textContent = '\u2715';
+    del.dataset.gid = g.id;
+    del.onmouseenter = function(){ this.style.color='#dc2626'; this.style.transform='scale(1.15)'; };
+    del.onmouseleave = function(){ this.style.color='#94a3b8'; this.style.transform=''; };
+    del.onclick = function(e){
+      e.stopPropagation(); e.preventDefault();
+      var id = this.dataset.gid;
+      var cur = window.__ll_curSeq;
+      if(!cur) return;
+      var target = (cur.grilles||[]).filter(function(x){ return x.id === id; })[0];
+      if(!target) return;
+      if(!confirm('Supprimer la grille \u00AB\u00A0' + (target.name || 'sans nom') + '\u00A0\u00BB ?\n\nCette action est d\u00E9finitive.')) return;
+
+      if(typeof window.__ll_getData !== 'function' || typeof window.__ll_upsertSequence !== 'function') return;
+      var freshD = window.__ll_getData();
+      var freshSeq = (freshD.sequences||[]).filter(function(s){ return s.id === cur.id; })[0];
+      if(!freshSeq) return;
+
+      // Les seances qui pointaient vers cette grille perdent leur lien.
+      var seances = (freshSeq.seances||[]).map(function(s){
+        return s.grilleId === id ? Object.assign({}, s, { grilleId: null }) : s;
+      });
+      var grilles = (freshSeq.grilles||[]).filter(function(x){ return x.id !== id; });
+      window.__ll_upsertSequence(Object.assign({}, freshSeq, { grilles: grilles, seances: seances }));
+      try { if(llIsGrilleFav(id)) llToggleGrilleFav(id); } catch(err) {}
+      llGrilleToast('\uD83D\uDDD1\uFE0F Grille supprim\u00E9e');
+      llRefreshBiblio();
+    };
+
+    if(actRow && actRow.nodeType===1 && actRow.children.length>0){
+      actRow.insertBefore(star, actRow.firstChild);
+      card.appendChild(del);
+    } else {
+      card.appendChild(star);
+      card.appendChild(del);
+    }
   });
 }
+
+// Observateur dedie : sans lui, l'etoile n'apparait qu'au cycle suivant du
+// hook general (350 ms), d'ou la latence visible au rendu des cartes.
+(function(){
+  if(window.__ll_star_obs_ready) return;
+  window.__ll_star_obs_ready = true;
+  var pending = false;
+  function fast(){
+    if(pending) return;
+    pending = true;
+    requestAnimationFrame(function(){
+      pending = false;
+      try { llHookGrilleStarButtons(); } catch(e) {}
+    });
+  }
+  try { new MutationObserver(fast).observe(document.body, { childList:true, subtree:true }); } catch(e) {}
+})();
+
 function llHookFavGrillePickerBtn(){
   var area=document.querySelector('[x-id="SequenceEditor_723_6"]');
   if(!area||area.querySelector('.__ll_fav_picker_btn'))return;
@@ -76471,11 +76729,32 @@ function llOpenGrillePreview(grilleId){
       return '<th style="background:#f1f5f9;padding:7px 9px;font-size:11px;font-weight:700;border:1px solid #cbd5e1;text-align:center">'+(grille.colsPoints&&grille.colsPoints[i]?c+' ('+grille.colsPoints[i]+'pts)':c)+'</th>';
     }).join('')+'</tr>';
 
-  var tableBody=rows.map(function(r){
-    return '<tr><td style="background:#ede9fe;color:#4f46e5;font-weight:800;font-size:12px;padding:7px 9px;border:1px solid #cbd5e1;text-align:center">'+r+'</td>'+
-      cols.map(function(c){
-        var cell=cells[r+'__'+c]||cells[r+'-'+c]||'';
-        return '<td style="padding:7px 9px;border:1px solid #cbd5e1;font-size:11px;vertical-align:top;line-height:1.5">'+cell+'</td>';
+  // Les cellules sont indexees par INDEX numeriques (rIdx_cIdx) et valent
+  // { text, points, marker }. Les anciennes grilles pouvaient stocker une
+  // simple chaine : les deux formes sont acceptees.
+  function cellAt(ri, ci){
+    var v = cells[ri + '_' + ci];
+    if (v == null) return { text:'', points:null, marker:'' };
+    if (typeof v === 'object') return { text: v.text || '', points: v.points, marker: v.marker || '' };
+    return { text: String(v), points:null, marker:'' };
+  }
+  function esc(s){
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  var tableBody=rows.map(function(r, ri){
+    var rp = (grille.rowsPoints || [])[ri];
+    return '<tr><td style="background:#ede9fe;color:#4f46e5;font-weight:800;font-size:12px;padding:7px 9px;border:1px solid #cbd5e1;text-align:center">'
+      + esc(r) + (rp != null && rp !== '' ? '<br><span style="font-size:10px;font-weight:600;color:#7c6df2">/' + esc(rp) + '</span>' : '')
+      + '</td>'+
+      cols.map(function(c, ci){
+        var cl = cellAt(ri, ci);
+        var inner = esc(cl.text).replace(/\n/g, '<br>');
+        if (cl.points != null && String(cl.points).trim() !== '') {
+          inner += '<br><span style="font-size:10px;color:#64748b;font-weight:700">' + esc(cl.points) + '</span>';
+        }
+        return '<td style="padding:7px 9px;border:1px solid #cbd5e1;font-size:11px;vertical-align:top;line-height:1.5">'+inner+'</td>';
       }).join('')+'</tr>';
   }).join('');
 
@@ -77372,6 +77651,569 @@ function llInjectSeanceListTickSummary(){
 
 // ── 3. Bilan réemploi Progressions — version corrigée ─────────────
 // (ancienne était dans .tracker, la bonne cible est .timeline)
+// ═══ BADGE ⚡ SEANCE ISSUE DE LA BIBLIOTHEQUE FLASH ══════════════════
+// Purement visuel : lecture du champ fromFlash, aucune ecriture.
+(function() {
+
+  function css() {
+    if (document.getElementById('__ll_flashbadge_css')) return;
+    var st = document.createElement('style');
+    st.id = '__ll_flashbadge_css';
+    st.textContent =
+        '.__ll_flash_card_badge{display:inline-flex;align-items:center;gap:3px;'
+      + 'font-size:9px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;'
+      + 'color:#c2410c;background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.3);'
+      + 'padding:1px 6px;border-radius:8px;margin-top:3px}';
+    document.head.appendChild(st);
+  }
+
+  // ── Carte de seance dans la liste ────────────────────────────────
+  function hookFlashCards() {
+    if (document.querySelector('.editor-panel')) return;
+    if (document.querySelector('.preview-panel')) return;
+
+    var dash = document.querySelector('[x-id="SeancesView_308_8"]');
+    if (!dash || dash.offsetParent === null) return;
+    if (typeof window.__ll_getData !== 'function') return;
+
+    // Sequence courante : on part de la liste affichee, jamais d'un titre.
+    var seq = window.__ll_activeSeq;
+    if (!seq) return;
+    var dAll = window.__ll_getData();
+    var fresh = (dAll.sequences || []).filter(function(s){ return s.id === seq.id; })[0];
+    if (!fresh) return;
+
+    var grid = dash.querySelector('.grid');
+    if (!grid) return;
+    var cards = Array.prototype.slice.call(grid.querySelectorAll('.pcard:not(.pcard-new)'));
+    if (!cards.length) return;
+
+    css();
+
+    cards.forEach(function(card, idx) {
+      var sea = (fresh.seances || [])[idx];
+      if (!sea) return;
+      var isFlash = !!sea.fromFlash;
+      var existing = card.querySelector('.__ll_flash_card_badge');
+
+      if (isFlash && !existing) {
+        var titleDiv = card.querySelector('.pcard-title');
+        if (!titleDiv) return;
+        var badge = document.createElement('div');
+        badge.className = '__ll_flash_card_badge';
+        badge.title = 'S\u00E9ance issue de la biblioth\u00E8que flash';
+        badge.textContent = '\u26A1 Flash';
+        // Apres les badges de tache s'il y en a, sinon apres le titre.
+        var after = card.querySelector('.__ll_tf_card_badge, .__ll_ti_card_badge') || titleDiv;
+        after.parentNode.insertBefore(badge, after.nextSibling);
+      } else if (!isFlash && existing) {
+        existing.remove();
+      }
+    });
+  }
+
+  var _prevFB = window.llHookAll || function(){};
+  window.llHookAll = function(){ _prevFB(); hookFlashCards(); };
+  if (typeof llHookAll !== 'undefined') {
+    var _pFB = llHookAll;
+    llHookAll = function(){ _pFB(); hookFlashCards(); };
+  }
+
+})();
+
+// ═══ M — RECAP DES GRILLES LIEES + RETOUR A LA SEQUENCE ═════════════
+(function() {
+
+  function css() {
+    if (document.getElementById('__ll_m_css')) return;
+    var st = document.createElement('style');
+    st.id = '__ll_m_css';
+    st.textContent =
+        '#__ll_grlink{margin:8px 0 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);padding:8px 12px;border-left:3px solid #6c63ff}'
+      + '#__ll_grlink > summary{cursor:pointer;color:var(--text-muted);font-weight:700;font-size:10px;letter-spacing:.5px;text-transform:uppercase;user-select:none}'
+      + '#__ll_grlink .__b{padding-top:8px}'
+      + '#__ll_grlink .__r{display:flex;align-items:center;gap:7px;font-size:11px;padding:3px 0;line-height:1.4}'
+      + '#__ll_grlink .__t{font-size:9px;font-weight:800;padding:1px 6px;border-radius:8px;flex-shrink:0}'
+      + '#__ll_grlink .__n{color:var(--text-muted)}'
+      + '[x-id="SeancesView_403_90"]{cursor:pointer;transition:color .15s}'
+      + '[x-id="SeancesView_403_90"]:hover{color:#6c63ff;text-decoration:underline}'
+      + '[x-id="SeancesView_403_90"]::after{content:" \u2197";font-size:.85em;opacity:.55}';
+    document.head.appendChild(st);
+  }
+
+  // ── 1. Recapitulatif des grilles liees (editeur de sequence) ─────
+  function hookRecap() {
+    var seq = window.__ll_curSeq;
+    var old = document.getElementById('__ll_grlink');
+    // Uniquement dans l'editeur de sequence, jamais dans celui de seance.
+    if (document.querySelector('[data-testid="sea-titre"]')) { if (old) old.remove(); return; }
+    if (!seq) { if (old) old.remove(); return; }
+
+    var grilles = seq.grilles || [];
+    var seances = seq.seances || [];
+    var links = [];
+    seances.forEach(function(se, i) {
+      if (!se.grilleId) return;
+      if (!se.isTacheFinale && !se.isTacheInter) return;
+      var g = grilles.filter(function(x){ return x.id === se.grilleId; })[0];
+      links.push({ n:i+1, titre: se.titre || '', fin: !!se.isTacheFinale, g: g || null });
+    });
+    if (!links.length) { if (old) old.remove(); return; }
+
+    var anchor = document.querySelector('[x-id="SequenceEditor_723_6"]');
+    if (!anchor || anchor.offsetParent === null) { if (old) old.remove(); return; }
+
+    var sig = seq.id + '|' + links.map(function(l){
+      return l.n + ':' + (l.fin?'F':'I') + ':' + (l.g ? l.g.id : 'X') + ':' + l.titre;
+    }).join('|');
+    if (old && old.dataset.llSig === sig && old.parentNode) return;
+    if (old) old.remove();
+
+    css();
+
+    var box = document.createElement('details');
+    box.id = '__ll_grlink';
+    box.dataset.llSig = sig;
+    try { box.open = localStorage.getItem('__ll_grlink_open') === '1'; } catch(e) {}
+    box.addEventListener('toggle', function(){
+      try { localStorage.setItem('__ll_grlink_open', box.open ? '1' : '0'); } catch(e) {}
+    });
+
+    var sum = document.createElement('summary');
+    sum.textContent = '\uD83D\uDD17 Grilles li\u00E9es aux t\u00E2ches (' + links.length + ')';
+    box.appendChild(sum);
+
+    var body = document.createElement('div');
+    body.className = '__b';
+
+    links.forEach(function(l) {
+      var row = document.createElement('div');
+      row.className = '__r';
+
+      var tag = document.createElement('span');
+      tag.className = '__t';
+      tag.style.cssText = l.fin
+        ? 'background:rgba(245,158,11,.14);color:#b45309'
+        : 'background:rgba(59,130,246,.14);color:#1d4ed8';
+      tag.textContent = (l.fin ? '\uD83C\uDFC1' : '\uD83D\uDD37') + ' S' + l.n;
+      row.appendChild(tag);
+
+      var nm = document.createElement('span');
+      nm.className = '__n';
+      nm.textContent = l.titre ? (l.titre + ' \u2192 ') : '\u2192 ';
+      row.appendChild(nm);
+
+      var gn = document.createElement('span');
+      if (l.g) {
+        gn.style.fontWeight = '700';
+        gn.textContent = l.g.name || 'Grille sans nom';
+      } else {
+        gn.style.cssText = 'color:#dc2626;font-weight:700';
+        gn.textContent = '\u26A0 grille introuvable';
+      }
+      row.appendChild(gn);
+
+      body.appendChild(row);
+    });
+
+    box.appendChild(body);
+    anchor.parentNode.insertBefore(box, anchor.nextSibling);
+  }
+
+  // ── 2. Retour vers la sequence mere ─────────────────────────────
+  // Aucun bouton ajoute : on rend cliquable le titre deja affiche dans la
+  // ligne « Sequence : ... » de l'en-tete, ce qui evite tout doublon.
+  function hookUpSeq() {
+    var old = document.getElementById('__ll_upseq');
+    if (old) old.remove();   // nettoyage de l'ancien bouton injecte
+
+    if (!document.querySelector('[data-testid="sea-titre"]')) return;
+    var lnk = document.querySelector('[x-id="SeancesView_403_90"]');
+    if (!lnk || lnk.dataset.llLink === '1') return;
+
+    css();
+    lnk.dataset.llLink = '1';
+    lnk.title = 'Ouvrir la fiche de cette s\u00E9quence';
+  }
+
+  function gotoParentSequence() {
+    var sea = window.__ll_activeSeance;
+    if (!sea || !sea.id || typeof window.__ll_getData !== 'function') return;
+
+    var dAll = window.__ll_getData() || {};
+    var seqs = dAll.sequences || [];
+    var target = null;
+    for (var si = 0; si < seqs.length && !target; si++) {
+      var sl = seqs[si].seances || [];
+      for (var sj = 0; sj < sl.length; sj++) {
+        if (sl[sj].id === sea.id) { target = seqs[si].id; break; }
+      }
+    }
+    if (!target) return;
+
+    // __ll_openSeqEditor reste defini apres le demontage de la vue : l'appeler
+    // trop tot revient a piloter un composant qui n'existe plus, sans effet.
+    // On attend donc que la vue Sequences soit REELLEMENT montee dans le DOM.
+    function mounted() {
+      return !!document.querySelector('[x-id="SequenceurView_74_12"]')
+          || !!document.querySelector('[x-id="SequenceEditor_723_6"]');
+    }
+
+    if (typeof window.__ll_navigateTo === 'function') window.__ll_navigateTo('seq');
+    else if (typeof window.__ll_openSequenceById === 'function') window.__ll_openSequenceById(target);
+
+    var tries = 0;
+    (function poll() {
+      if (mounted() && typeof window.__ll_openSeqEditor === 'function') {
+        window.__ll_openSeqEditor(target);
+        return;
+      }
+      if (++tries > 60) return;   // 3 s au maximum
+      setTimeout(poll, 50);
+    })();
+  }
+
+  // Delegation : le lien survit a tous les rendus de React.
+  document.addEventListener('click', function(ev) {
+    var t = ev.target && ev.target.closest && ev.target.closest('[x-id="SeancesView_403_90"]');
+    if (!t) return;
+    if (!document.querySelector('[data-testid="sea-titre"]')) return;
+    ev.preventDefault(); ev.stopPropagation();
+    gotoParentSequence();
+  }, true);
+
+  var _prevM = window.llHookAll || function(){};
+  window.llHookAll = function(){ _prevM(); hookRecap(); hookUpSeq(); };
+  if (typeof llHookAll !== 'undefined') {
+    var _pM = llHookAll;
+    llHookAll = function(){ _pM(); hookRecap(); hookUpSeq(); };
+  }
+
+})();
+
+// ═══ DISPOSITIF DE LA TACHE (interm. / finale) ══════════════════════
+// Cinq champs libres stockes dans sea.dispositif. Purement additif : les
+// seances existantes n'ont simplement rien dedans.
+(function() {
+
+  var FIELDS = [
+    { k:'consigne',  lbl:'Consigne \u00E9l\u00E8ve',       ph:'L\u2019\u00E9nonc\u00E9 tel qu\u2019il sera donn\u00E9 aux \u00E9l\u00E8ves\u2026', rows:3 },
+    { k:'modalites', lbl:'Modalit\u00E9s',            ph:'Individuel / binôme / groupe \u00B7 dur\u00E9e \u00B7 support de rendu\u2026', rows:2 },
+    { k:'materiel',  lbl:'Mat\u00E9riel',             ph:'Ce qu\u2019il faut pr\u00E9parer\u2026', rows:2 },
+    { k:'criteres',  lbl:'Crit\u00E8res de r\u00E9ussite', ph:'Ce que l\u2019\u00E9l\u00E8ve doit atteindre\u2026', rows:3 },
+    { k:'differenciation', lbl:'Diff\u00E9renciation', ph:'Aide pour les \u00E9l\u00E8ves fragiles \u00B7 ouverture pour les rapides\u2026', rows:3 }
+  ];
+
+  function css() {
+    if (document.getElementById('__ll_disp_css')) return;
+    var st = document.createElement('style');
+    st.id = '__ll_disp_css';
+    st.textContent =
+        '#__ll_disp{margin:8px 0 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);padding:8px 12px}'
+      + '#__ll_disp > summary{cursor:pointer;color:var(--text-muted);font-weight:700;font-size:10px;letter-spacing:.5px;text-transform:uppercase;user-select:none}'
+      + '#__ll_disp .__ll_disp_body{padding-top:8px}'
+      + '#__ll_disp label{display:block;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--text-muted);margin:8px 0 3px}'
+      + '#__ll_disp textarea{width:100%;padding:6px 8px;border-radius:6px;border:1px solid var(--border);background:var(--panel);color:var(--text);font-family:inherit;font-size:12px;line-height:1.45;resize:vertical}'
+      + '#__ll_disp textarea:focus{outline:none;border-color:#6c63ff}'
+      + '.__ll_disp_prev{margin:10px 0;padding:8px 10px;border-radius:6px;max-width:100%;box-sizing:border-box;overflow-wrap:anywhere;word-break:break-word}'
+      + '.__ll_disp_prev h3{margin:0 0 6px;font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase}'
+      + '.__ll_disp_prev .__d{margin-bottom:5px;font-size:11px;line-height:1.5;white-space:normal;overflow-wrap:anywhere;word-break:break-word;max-width:100%}'
+      + '.__ll_disp_prev .__d b{display:block;font-size:9px;letter-spacing:.5px;text-transform:uppercase;opacity:.75}';
+    document.head.appendChild(st);
+  }
+
+  function saveField(seaId, seqId, key, val) {
+    if (typeof window.__ll_getData !== 'function' || typeof window.__ll_upsertSequence !== 'function') return;
+    var dAll = window.__ll_getData();
+    var seq = (dAll.sequences || []).filter(function(s){ return s.id === seqId; })[0];
+    if (!seq) return;
+    var changed = false;
+    var seances = (seq.seances || []).map(function(s) {
+      if (s.id !== seaId) return s;
+      var disp = Object.assign({}, s.dispositif || {});
+      if ((disp[key] || '') === val) return s;
+      disp[key] = val;
+      changed = true;
+      return Object.assign({}, s, { dispositif: disp });
+    });
+    if (!changed) return;
+    window.__ll_upsertSequence(Object.assign({}, seq, { seances: seances }));
+  }
+
+  // ── Editeur ──────────────────────────────────────────────────────
+  function hookDispositifEditor() {
+    var sea = window.__ll_activeSeance;
+    var seq = window.__ll_activeSeq;
+    var old = document.getElementById('__ll_disp');
+    if (!document.querySelector('[data-testid="sea-titre"]')) { if (old) old.remove(); return; }
+    var isTask = sea && (sea.isTacheFinale || sea.isTacheInter);
+    if (!sea || !seq || !isTask) { if (old) old.remove(); return; }
+
+    var titleLbl = document.querySelector('[x-id="SeancesView_408_14"]');
+    var titleFg = titleLbl && titleLbl.closest('.fg');
+    if (!titleFg || !titleFg.parentNode) return;
+
+    var isFin = !!sea.isTacheFinale;
+    var disp = sea.dispositif || {};
+    // L'empreinte ignore le CONTENU des champs : sans cela, le bloc serait
+    // reconstruit a chaque frappe et le curseur perdu.
+    var sig = sea.id + '|' + (isFin ? 'F' : 'I');
+    if (old && old.dataset.llSig === sig && old.parentNode) return;
+    if (old) old.remove();
+
+    css();
+
+    var box = document.createElement('details');
+    box.id = '__ll_disp';
+    box.dataset.llSig = sig;
+    box.style.borderLeft = '3px solid ' + (isFin ? '#f59e0b' : '#3b82f6');
+    try { box.open = localStorage.getItem('__ll_disp_open') === '1'; } catch(e) {}
+
+    var sum = document.createElement('summary');
+    sum.textContent = (isFin ? '\uD83C\uDFC1' : '\uD83D\uDD37') + ' Dispositif de la t\u00E2che';
+    box.appendChild(sum);
+    box.addEventListener('toggle', function(){
+      try { localStorage.setItem('__ll_disp_open', box.open ? '1' : '0'); } catch(e) {}
+    });
+
+    var body = document.createElement('div');
+    body.className = '__ll_disp_body';
+
+    FIELDS.forEach(function(f) {
+      var lab = document.createElement('label');
+      lab.textContent = f.lbl;
+      var ta = document.createElement('textarea');
+      ta.rows = f.rows;
+      ta.placeholder = f.ph;
+      ta.value = disp[f.k] || '';
+      // Enregistrement a la sortie du champ : React se redessine alors sans
+      // interrompre la saisie.
+      ta.addEventListener('blur', function() {
+        saveField(sea.id, seq.id, f.k, this.value);
+      });
+      body.appendChild(lab);
+      body.appendChild(ta);
+    });
+
+    box.appendChild(body);
+    titleFg.parentNode.insertBefore(box, titleFg.nextSibling);
+  }
+
+  // ── Apercu A4 ────────────────────────────────────────────────────
+  function hookDispositifPreview() {
+    var sea = window.__ll_activeSeance;
+    var old = document.getElementById('__ll_disp_prev');
+    var isTask = sea && (sea.isTacheFinale || sea.isTacheInter);
+    if (!sea || !isTask) { if (old) old.remove(); return; }
+
+    var disp = sea.dispositif || {};
+    var filled = FIELDS.filter(function(f){ return (disp[f.k] || '').trim(); });
+    if (!filled.length) { if (old) old.remove(); return; }
+
+    var sheet = document.querySelector('.preview-panel h1');
+    if (!sheet) return;
+    var container = sheet.parentNode;
+
+    var isFin = !!sea.isTacheFinale;
+    var hash = sea.id + '|' + (isFin ? 'F' : 'I') + '|' + filled.map(function(f){ return f.k + ':' + disp[f.k]; }).join('|');
+    if (old && old.dataset.llHash === hash && old.parentNode === container) return;
+    if (old) old.remove();
+
+    css();
+
+    var acc = isFin ? '#b45309' : '#1d4ed8';
+    var bg  = isFin ? 'rgba(245,158,11,.07)' : 'rgba(59,130,246,.07)';
+
+    var wrap = document.createElement('div');
+    wrap.id = '__ll_disp_prev';
+    wrap.className = '__ll_disp_prev';
+    wrap.dataset.llHash = hash;
+    wrap.style.cssText = 'background:' + bg + ';border-left:3px solid ' + acc;
+
+    var h = document.createElement('h3');
+    h.style.color = acc;
+    h.textContent = (isFin ? '\uD83C\uDFC1' : '\uD83D\uDD37') + ' Dispositif de la t\u00E2che';
+    wrap.appendChild(h);
+
+    filled.forEach(function(f) {
+      var row = document.createElement('div');
+      row.className = '__d';
+      var b = document.createElement('b');
+      b.style.color = acc;
+      b.textContent = f.lbl;
+      row.appendChild(b);
+      (disp[f.k] || '').split('\n').forEach(function(line, i) {
+        if (i) row.appendChild(document.createElement('br'));
+        row.appendChild(document.createTextNode(line));
+      });
+      wrap.appendChild(row);
+    });
+
+    container.appendChild(wrap);
+  }
+
+  var _prevD = window.llHookAll || function(){};
+  window.llHookAll = function(){ _prevD(); hookDispositifEditor(); hookDispositifPreview(); };
+  if (typeof llHookAll !== 'undefined') {
+    var _pD = llHookAll;
+    llHookAll = function(){ _pD(); hookDispositifEditor(); hookDispositifPreview(); };
+  }
+
+})();
+
+// ═══ DUPLICATION DE SEQUENCE — fenetre de destination ═══════════════
+// La duplication elle-meme est faite par le bundle (clonage profond avec
+// nouveaux identifiants). Cette fenetre ne fait que recueillir les choix.
+(function() {
+
+  var NIVEAUX = [
+    { v:'6\u00E8me',            l:'6\u00E8me' },
+    { v:'5\u00E8me',            l:'5\u00E8me' },
+    { v:'4\u00E8me',            l:'4\u00E8me' },
+    { v:'3\u00E8me',            l:'3\u00E8me' },
+    { v:'Seconde',              l:'Seconde' },
+    { v:'Premi\u00E8re',        l:'Premi\u00E8re' },
+    { v:'Terminale',            l:'Terminale' },
+    { v:'Seconde_Techno',       l:'Seconde technologique' },
+    { v:'Premi\u00E8re_Techno', l:'Premi\u00E8re technologique' },
+    { v:'Terminale_Techno',     l:'Terminale technologique' },
+    { v:'Premi\u00E8re_AMC',    l:'Premi\u00E8re AMC' },
+    { v:'Terminale_AMC',        l:'Terminale AMC' },
+    { v:'Premi\u00E8re_LLCER',  l:'Premi\u00E8re LLCER' },
+    { v:'Terminale_LLCER',      l:'Terminale LLCER' },
+    { v:'DNL',                  l:'DNL' },
+    { v:'Autre',                l:'Autre' }
+  ];
+
+  window.__ll_dupDialog = function(seqId){
+    var getData = window.__ll_getData;
+    if (typeof getData !== 'function') return;
+    var src = (getData().sequences || []).filter(function(s){ return s.id === seqId; })[0];
+    if (!src) return;
+
+    var old = document.getElementById('__ll_dup_dlg');
+    if (old) old.remove();
+
+    var nSea = (src.seances || []).length;
+    var nGri = (src.grilles || []).length;
+
+    var ov = document.createElement('div');
+    ov.id = '__ll_dup_dlg';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;padding:20px';
+
+    var box = document.createElement('div');
+    box.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:0 20px 50px rgba(15,23,42,.28);padding:22px 24px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto';
+
+    var h = document.createElement('h2');
+    h.style.cssText = 'font-family:Playfair Display,Georgia,serif;font-size:19px;font-weight:800;margin:0 0 3px;color:var(--text)';
+    h.textContent = '\uD83D\uDCCB Dupliquer la s\u00E9quence';
+    box.appendChild(h);
+
+    var sub = document.createElement('div');
+    sub.style.cssText = 'font-size:12px;color:var(--text-muted);margin-bottom:16px';
+    sub.textContent = src.titre || 'Sans titre';
+    box.appendChild(sub);
+
+    function label(t){
+      var l = document.createElement('div');
+      l.style.cssText = 'font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);margin:12px 0 5px';
+      l.textContent = t;
+      return l;
+    }
+
+    // Titre de la copie
+    box.appendChild(label('Titre de la copie'));
+    var inp = document.createElement('input');
+    inp.type = 'text';
+    inp.value = (src.titre || 'Sans titre') + ' (copie)';
+    inp.style.cssText = 'width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-family:inherit;font-size:13px';
+    box.appendChild(inp);
+
+    // Niveau de destination
+    box.appendChild(label('Niveau de destination'));
+    var sel = document.createElement('select');
+    sel.style.cssText = 'width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-family:inherit;font-size:13px;cursor:pointer';
+    NIVEAUX.forEach(function(n){
+      var o = document.createElement('option');
+      o.value = n.v; o.textContent = n.l;
+      sel.appendChild(o);
+    });
+    if (src.niveau && !NIVEAUX.some(function(n){ return n.v === src.niveau; })) {
+      var extra = document.createElement('option');
+      extra.value = src.niveau; extra.textContent = src.niveau;
+      sel.insertBefore(extra, sel.firstChild);
+    }
+    sel.value = src.niveau || 'Seconde';
+    box.appendChild(sel);
+
+    var hint = document.createElement('div');
+    hint.style.cssText = 'font-size:10.5px;color:var(--text-muted);font-style:italic;margin-top:5px';
+    hint.textContent = 'La copie sera rang\u00E9e dans ce niveau.';
+    box.appendChild(hint);
+
+    // Contenu a copier
+    box.appendChild(label('Contenu \u00E0 copier'));
+
+    function check(txt, on, dis){
+      var lab = document.createElement('label');
+      lab.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);padding:5px 0;cursor:' + (dis ? 'default' : 'pointer') + (dis ? ';opacity:.5' : '');
+      var cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.checked = on; cb.disabled = !!dis;
+      cb.style.cssText = 'width:15px;height:15px;accent-color:#6c63ff;cursor:' + (dis ? 'default' : 'pointer');
+      lab.appendChild(cb);
+      lab.appendChild(document.createTextNode(txt));
+      box.appendChild(lab);
+      return cb;
+    }
+
+    var cbSea = check(nSea ? ('Les s\u00E9ances (' + nSea + ')') : 'Aucune s\u00E9ance \u00E0 copier', nSea > 0, nSea === 0);
+    var cbGri = check(nGri ? ('Les grilles d\u2019\u00E9valuation (' + nGri + ')') : 'Aucune grille \u00E0 copier', nGri > 0, nGri === 0);
+
+    var note = document.createElement('div');
+    note.style.cssText = 'font-size:10.5px;color:var(--text-muted);line-height:1.5;margin-top:8px;padding:8px 10px;background:rgba(108,99,255,.06);border-radius:8px';
+    note.textContent = 'Les objectifs, l\u2019axe et la probl\u00E9matique de la s\u00E9quence sont toujours copi\u00E9s. '
+      + 'La copie est totalement ind\u00E9pendante : les coches d\u2019objectifs ne sont pas partag\u00E9es avec l\u2019originale.';
+    box.appendChild(note);
+
+    // Actions
+    var act = document.createElement('div');
+    act.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;margin-top:18px';
+
+    var cancel = document.createElement('button');
+    cancel.type = 'button'; cancel.textContent = 'Annuler';
+    cancel.style.cssText = 'padding:9px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-muted);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer';
+    cancel.onclick = function(){ ov.remove(); };
+
+    var go = document.createElement('button');
+    go.type = 'button'; go.textContent = '\uD83D\uDCCB Dupliquer';
+    go.style.cssText = 'padding:9px 18px;border-radius:8px;border:none;background:linear-gradient(135deg,#6c63ff,#5a52e0);color:#fff;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer';
+    go.onclick = function(){
+      var t = (inp.value || '').trim();
+      if (!t) { inp.focus(); return; }
+      if (typeof window.__ll_duplicateSequence !== 'function') { ov.remove(); return; }
+      window.__ll_duplicateSequence(seqId, {
+        titre: t,
+        niveau: sel.value,
+        withSeances: cbSea.checked,
+        withGrilles: cbGri.checked
+      });
+      ov.remove();
+    };
+
+    act.appendChild(cancel); act.appendChild(go);
+    box.appendChild(act);
+
+    ov.appendChild(box);
+    ov.onclick = function(ev){ if (ev.target === ov) ov.remove(); };
+    document.addEventListener('keydown', function esc(ev){
+      if (ev.key === 'Escape') { ov.remove(); document.removeEventListener('keydown', esc); }
+    });
+    document.body.appendChild(ov);
+    setTimeout(function(){ inp.focus(); inp.select(); }, 60);
+  };
+
+})();
+
 // ═══ F — IMPRESSION DE LA PROGRESSION ANNUELLE ══════════════════════
 // Reutilise la couche d'impression du Lot B3 : meme feuille de style A4,
 // memes conventions typographiques. Aucun impact sur les exports existants.
@@ -81402,14 +82244,16 @@ llHookAll = function() {
     var sea = window.__ll_activeSeance;
     var seq = window.__ll_activeSeq;
     var old = document.getElementById('__ll_tf_editor_badge');
+    // Garde stricte : ce badge n'existe QUE dans l'editeur de seance.
+    if (!document.querySelector('[data-testid="sea-titre"]')) { if (old) old.remove(); return; }
     if (!sea || !seq) { if (old) old.remove(); return; }
     var editorPanel = document.querySelector('.editor-panel');
     if (!editorPanel) return;
-    var titleLabel = null;
-    editorPanel.querySelectorAll('label.fl').forEach(function(lbl) {
-      var first = lbl.childNodes[0];
-      if (first && first.nodeType === 3 && first.textContent.indexOf('Titre de la s') !== -1) titleLabel = lbl;
-    });
+    // Ancrage sur l'identifiant React UNIQUE du label « Titre de la seance ».
+    // L'ancien reperage par texte 'Titre de la s' capturait aussi
+    // « Titre de la sequence » : le badge apparaissait dans l'editeur de
+    // sequence, avec une seance perimee, et restait cliquable.
+    var titleLabel = document.querySelector('[x-id="SeancesView_408_14"]');
     if (!titleLabel) return;
     if (!old) {
       var badge = document.createElement('button');
@@ -81422,7 +82266,12 @@ llHookAll = function() {
         var freshSeq = (freshD.sequences || []).find(function(s) { return s.id === seq.id; });
         if (!freshSeq) return;
         var updatedSeances = (freshSeq.seances || []).map(function(s) {
-          return s.id === sea.id ? Object.assign({}, s, { isTacheFinale: !s.isTacheFinale }) : s;
+          if (s.id !== sea.id) return s;
+          var next = !s.isTacheFinale;
+          // Exclusion mutuelle : marquer Tache finale retire Tache
+          // intermediaire, comme la bascule inverse le fait deja. Sans cela
+          // une seance peut porter les deux drapeaux et s'affiche en finale.
+          return Object.assign({}, s, { isTacheFinale: next, isTacheInter: next ? false : s.isTacheInter });
         });
         window.__ll_upsertSequence(Object.assign({}, freshSeq, { seances: updatedSeances }));
       });
@@ -81832,14 +82681,15 @@ llHookAll = function() {
     var sea = window.__ll_activeSeance;
     var seq = window.__ll_activeSeq;
     var old = document.getElementById('__ll_ti_editor_badge');
+    if (!document.querySelector('[data-testid="sea-titre"]')) { if (old) old.remove(); return; }
     if (!sea || !seq) { if (old) old.remove(); return; }
     var editorPanel = document.querySelector('.editor-panel');
     if (!editorPanel) return;
-    var titleLabel = null;
-    editorPanel.querySelectorAll('label.fl').forEach(function(lbl) {
-      var first = lbl.childNodes[0];
-      if (first && first.nodeType === 3 && first.textContent.indexOf('Titre de la s') !== -1) titleLabel = lbl;
-    });
+    // Ancrage sur l'identifiant React UNIQUE du label « Titre de la seance ».
+    // L'ancien reperage par texte 'Titre de la s' capturait aussi
+    // « Titre de la sequence » : le badge apparaissait dans l'editeur de
+    // sequence, avec une seance perimee, et restait cliquable.
+    var titleLabel = document.querySelector('[x-id="SeancesView_408_14"]');
     if (!titleLabel) return;
     if (!old) {
       var badge = document.createElement('button');
@@ -81924,7 +82774,10 @@ llHookAll = function() {
     var sea = window.__ll_activeSeance;
     var seq = window.__ll_activeSeq;
     var old = document.getElementById('__ll_grille_link');
-    if (!sea || !seq || !sea.isTacheFinale) { if (old) old.remove(); return; }
+    if (!document.querySelector('[data-testid="sea-titre"]')) { if (old) old.remove(); return; }
+    // Une tache intermediaire merite une grille au meme titre qu'une finale.
+    var isTask = sea && (sea.isTacheFinale || sea.isTacheInter);
+    if (!sea || !seq || !isTask) { if (old) old.remove(); return; }
 
     var grilles = seq.grilles || [];
     if (!grilles.length) { if (old) old.remove(); return; }
@@ -81932,24 +82785,28 @@ llHookAll = function() {
     var editorPanel = document.querySelector('.editor-panel');
     if (!editorPanel) return;
 
-    var titleFg = null;
-    editorPanel.querySelectorAll('label.fl').forEach(function(lbl) {
-      var first = lbl.childNodes[0];
-      if (first && first.nodeType === 3 && first.textContent.indexOf('Titre de la s') !== -1) titleFg = lbl.closest('.fg');
-    });
+    var titleLbl = document.querySelector('[x-id="SeancesView_408_14"]');
+    var titleFg = titleLbl && titleLbl.closest('.fg');
     if (!titleFg) return;
 
-    var hash = grilles.map(function(g) { return g.id + ':' + g.name; }).join('|') + '||' + (sea.grilleId || '');
+    var isFin = !!sea.isTacheFinale;
+    var hash = grilles.map(function(g) { return g.id + ':' + g.name; }).join('|')
+      + '||' + (sea.grilleId || '') + '||' + (isFin ? 'F' : 'I');
     if (old && old.dataset.llHash === hash) return;
     if (old) old.remove();
 
     var box = document.createElement('div');
     box.id = '__ll_grille_link';
     box.dataset.llHash = hash;
+    // Couleur d'accent selon le type de tache : ambre pour la finale,
+    // bleu pour l'intermediaire, comme partout ailleurs dans l'application.
+    box.style.borderLeft = '3px solid ' + (isFin ? '#f59e0b' : '#3b82f6');
 
     var t = document.createElement('div');
     t.className = 'll-gr-t';
-    t.textContent = '\uD83D\uDCCA Grille d\u2019\u00E9valuation de la t\u00E2che finale';
+    t.textContent = isFin
+      ? '\uD83C\uDFC1 Grille d\u2019\u00E9valuation de la t\u00E2che finale'
+      : '\uD83D\uDD37 Grille d\u2019\u00E9valuation de la t\u00E2che interm\u00E9diaire';
     box.appendChild(t);
 
     var sel = document.createElement('select');
@@ -82032,8 +82889,43 @@ llHookAll = function() {
       tr.appendChild(td0);
       (g.cols || []).forEach(function(col, ci) {
         var td = document.createElement('td');
-        var key = ri + '_' + ci;
-        td.textContent = (g.cells || {})[key] || '';
+        var raw = (g.cells || {})[ri + '_' + ci];
+        var ctext = '', cpts = null, cmk = '';
+        if (raw != null) {
+          if (typeof raw === 'object') { ctext = raw.text || ''; cpts = raw.points; cmk = raw.marker || ''; }
+          else ctext = String(raw);
+        }
+
+        td.appendChild(document.createTextNode(ctext));
+
+        if (cpts != null && String(cpts).trim() !== '') {
+          var sp = document.createElement('span');
+          sp.textContent = ' ' + cpts;
+          sp.style.cssText = 'font-size:9px;color:#64748b;font-weight:700';
+          td.appendChild(sp);
+        }
+
+        // Grille de positionnement : on reproduit le visuel de l'editeur,
+        // c'est-a-dire les TROIS symboles, celui qui est retenu etant mis en
+        // evidence. L'apercu montre la grille telle qu'elle sera imprimee.
+        if (g.showMarkers) {
+          var MKS = [['acq','\u2713','#059669'], ['enc','\u25D0','#d97706'], ['non','\u25CB','#94a3b8']];
+          var row = document.createElement('div');
+          row.style.cssText = 'display:flex;gap:3px;margin-top:3px';
+          MKS.forEach(function(m) {
+            var on = (cmk === m[0]);
+            var b = document.createElement('span');
+            b.textContent = m[1];
+            b.title = m[0] === 'acq' ? 'Acquis' : (m[0] === 'enc' ? 'En cours d\u2019acquisition' : 'Non acquis');
+            b.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;'
+              + 'width:13px;height:13px;border-radius:3px;font-size:9px;font-weight:800;'
+              + 'border:1px solid ' + m[2] + ';'
+              + (on ? ('background:' + m[2] + ';color:#fff') : ('background:transparent;color:' + m[2] + ';opacity:.55'));
+            row.appendChild(b);
+          });
+          td.appendChild(row);
+        }
+
         tr.appendChild(td);
       });
       tbody.appendChild(tr);
@@ -82994,6 +83886,31 @@ llHookAll = function() {
         o.push('<table style="margin-bottom:4pt;page-break-inside:avoid"><tbody><tr>' +
           '<td style="background:#fee2e2;color:#991b1b;font-weight:800;font-size:9.5pt;width:22%">Devoirs</td>' +
           '<td style="font-size:9.5pt;white-space:pre-wrap">' + e(dv) + '</td></tr></tbody></table>');
+      }
+    }
+
+    // Dispositif de la tâche (consigne, modalités, matériel, critères,
+    // différenciation) — n'apparaît que sur les séances marquées.
+    if (s.isTacheFinale || s.isTacheInter) {
+      var _dsp = s.dispositif || {};
+      var _DF = [
+        ['consigne', 'Consigne élève'],
+        ['modalites', 'Modalités'],
+        ['materiel', 'Matériel'],
+        ['criteres', 'Critères de réussite'],
+        ['differenciation', 'Différenciation']
+      ].filter(function(f) { return (_dsp[f[0]] || '').trim(); });
+      if (_DF.length) {
+        var _fin = !!s.isTacheFinale;
+        o.push(secHead('Dispositif de la tâche', _fin ? '#fef3c7' : '#dbeafe', _fin ? '#b45309' : '#1d4ed8'));
+        o.push('<table style="margin-bottom:4pt;page-break-inside:avoid;table-layout:fixed;width:100%"><tbody>');
+        _DF.forEach(function(f) {
+          o.push('<tr><td style="background:' + (_fin ? '#fffbeb' : '#eff6ff') +
+            ';color:' + (_fin ? '#b45309' : '#1d4ed8') +
+            ';font-weight:800;font-size:9pt;width:22%;word-wrap:break-word;overflow-wrap:anywhere">' + e(f[1]) + '</td>' +
+            '<td style="font-size:9.5pt;white-space:pre-wrap;word-wrap:break-word;overflow-wrap:anywhere;word-break:break-word">' + e(_dsp[f[0]]) + '</td></tr>');
+        });
+        o.push('</tbody></table>');
       }
     }
 
