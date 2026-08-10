@@ -32,7 +32,7 @@ Six onglets principaux dans la barre de navigation :
 | 📈 Progression | Plan annuel par niveau de classe |
 | 📅 Calendrier | Calendrier scolaire annuel |
 | 📊 Évaluations | Toutes les grilles, toutes séquences confondues |
-| 📚 Bibliothèque | Séances flash, sorties, grilles favorites, statistiques |
+| 📚 Bibliothèque | Grilles, séances flash, sorties, manuels, archives, corbeille |
 
 ---
 
@@ -188,12 +188,45 @@ Centralisez toutes vos grilles, toutes séquences confondues. Distribuez-les dir
 
 ### 📚 Bibliothèque
 
-- **⚡ Séances flash** — idées de séances réutilisables, indépendantes de toute séquence. Importez-les dans une séquence avec 📥.
+Tous les encarts sont **repliés à l'ouverture**, avec un **compteur** dans chaque en-tête — violet dès qu'il y a du contenu, gris sinon. Un coup d'œil suffit pour savoir où chercher. Un encart ouvert se signale par un fin liseré de sa couleur sur le bord gauche.
+
+- **📚 Manuels** — comparatifs des séquences des manuels de Seconde, Première et Terminale. S'ouvrent en lecture plein écran et se téléchargent.
+- **📋 Grilles à imprimer** — grilles fabriquées pour être imprimées telles quelles, sans être rattachées à une séquence. On y range une grille depuis l'éditeur de grille, bouton orange **Ajouter à la bibliothèque**. Cet encart n'apparaît que s'il contient quelque chose. Attention : une grille rangée ici ne peut plus être réinjectée dans une séquence — pour cela, utilisez l'étoile ☆.
+- **🎯 Grilles d'évaluation** — deux blocs :
+  - *Créées sans séquence* — bouton ➕ pour en créer et les gérer
+  - *⭐ Favorites — issues de vos séquences* — les grilles marquées ☆ n'importe où, avec le bouton **+ Séquence** pour les copier dans une autre séquence
+- **⚡ Idées pour séance flash** — séances réutilisables, indépendantes de toute séquence. Importez-les dans une séquence avec 📥.
+- **⭐ Activités favorites** — activités enregistrées depuis l'éditeur de séance
 - **🚌 Sorties & voyages scolaires** — listez et gérez vos sorties
-- **⭐ Grilles favorites** — retrouvez les grilles marquées d'une étoile
-- **📊 Statistiques CECRL** — vue globale de vos objectifs langagiers
-- **Comparatif manuels** — notes et comparatifs de manuels
-- **Archives** — séquences archivées en fin d'année
+- **📄 Supports & images** et **🎯 Stratégies** — éléments enregistrés depuis l'éditeur de séance
+- **📦 Archives** — séquences archivées en fin d'année, restaurables une par une ou toutes ensemble
+- **🗑️ Corbeille** — les 15 dernières séquences ou séances supprimées, restaurables
+
+> Les **statistiques** ne sont pas ici : elles sont accessibles par le bouton 📊 du bandeau.
+
+---
+
+### 📊 Tableau de bord
+
+Bouton **📊** dans le bandeau — vue d'ensemble de votre contenu :
+
+- **Quatre grands chiffres** : séquences, séances, grilles, idées flash
+- **Répartition par niveau** — niveaux affichés avec leur nom complet et classés dans l'ordre pédagogique (6ème → Terminale)
+- **Activités langagières** les plus travaillées
+- **Complétude des séances** — part de séances dont les objectifs linguistiques sont renseignés
+- **Carte des descripteurs CECRL par niveau** — croisement des niveaux CECRL et des activités langagières, consultable pour l'ensemble ou niveau par niveau
+
+Ce qui est compté : uniquement vos vraies séquences. Les séquences **archivées** sont signalées à part sous les grands chiffres, et la séquence de démonstration du tour guidé n'est jamais comptée. Le compteur **Grilles** additionne les grilles de vos séquences, celles créées sans séquence et celles rangées dans « Grilles à imprimer ». Le compteur **Idées flash** correspond à l'encart du même nom dans la Bibliothèque.
+
+---
+
+### ✨ Confort d'utilisation
+
+- **Échap ferme n'importe quelle fenêtre** qui s'ouvre par-dessus (une seule à la fois, la plus récente)
+- Les **messages de confirmation** apparaissent en bas de l'écran : vert quand quelque chose a réussi ou a été restauré, violet pour une action effectuée. Ils s'empilent si plusieurs arrivent en même temps.
+- Les blocs repliables, les fenêtres et le passage d'un onglet à l'autre se font **en douceur**
+- Tout est **navigable au clavier** : Tab pour atteindre un en-tête de bloc, Entrée ou Espace pour l'ouvrir
+- Si les **animations réduites** sont activées dans le système, l'application les désactive automatiquement
 
 ---
 

@@ -138,16 +138,26 @@
 }
 
 /* LL Biblio Unified */
-.ll-bib-sec{margin-bottom:14px}
-.ll-bib-hdr{display:flex;align-items:center;gap:10px;cursor:pointer;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:10px 10px 0 0;user-select:none;transition:background .15s;font-family:inherit}
+.ll-bib-sec{margin-bottom:14px;animation:__llBibIn .28s ease both}
+.ll-bib-sec.ll-bib-noanim{animation:none}
+@keyframes __llBibIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.ll-bib-hdr{display:flex;align-items:center;gap:10px;cursor:pointer;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:10px 10px 0 0;user-select:none;transition:background .15s,border-radius .42s cubic-bezier(.25,.1,.25,1),box-shadow .34s ease;font-family:inherit}
 .ll-bib-hdr.closed{border-radius:10px}
 .ll-bib-hdr:hover{background:rgba(108,99,255,.05)}
-.ll-bib-caret{font-size:10px;color:var(--text-muted);transition:transform .2s;flex-shrink:0;display:inline-block}
+.ll-bib-hdr:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
+.ll-bib-caret{font-size:10px;color:var(--text-muted);transition:transform .42s cubic-bezier(.25,.1,.25,1);flex-shrink:0;display:inline-block}
 .ll-bib-caret.open{transform:rotate(90deg)}
 .ll-bib-ico{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;font-size:14px;flex-shrink:0}
 .ll-bib-title{font-size:15px;font-weight:800;flex:1}
 .ll-bib-badge{font-size:12px;font-weight:700;color:var(--text-muted);background:var(--bg);padding:2px 9px;border-radius:12px}
-.ll-bib-body{padding:14px;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;background:var(--panel)}
+.ll-bib-shell{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .42s cubic-bezier(.25,.1,.25,1),opacity .34s ease}
+.ll-bib-sec.ll-open .ll-bib-shell{grid-template-rows:1fr;opacity:1}
+.ll-bib-clip{overflow:hidden;min-height:0}
+.ll-bib-body{padding:14px;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;background:var(--panel);transition:box-shadow .34s ease}
+.ll-bib-badge.on{background:rgba(108,99,255,.12);color:var(--accent2)}
+.ll-bib-sec.ll-open .ll-bib-hdr{box-shadow:inset 3px 0 0 var(--ll-bib-accent,var(--accent2))}
+.ll-bib-sec.ll-open .ll-bib-body{box-shadow:inset 3px 0 0 var(--ll-bib-accent,var(--accent2))}
+@media (prefers-reduced-motion:reduce){.ll-bib-shell,.ll-bib-hdr,.ll-bib-caret,.ll-bib-body{transition:none !important}.ll-bib-sec{animation:none !important}}
 .ll-bib-sub-hdr{display:flex;align-items:center;gap:8px;margin:18px 0 10px;padding-top:14px;border-top:1px dashed var(--border);font-size:14px;font-weight:800}
 .ll-bib-sub-ico{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;font-size:12px;flex-shrink:0}
 .ll-bib-tbl{width:100%;border-collapse:collapse}
@@ -156,6 +166,26 @@
 .ll-bib-tbl tr:last-child td{border-bottom:none}
 .ll-bib-tbl tbody tr:hover td{background:rgba(108,99,255,.02)}
 .ll-bib-empty{font-size:13px;color:var(--text-muted);font-style:italic;padding:16px 4px;text-align:center;margin:0}
+/* LL View — fondu au changement d'onglet (opacite seule) */
+.app-view,.ll-view-in{animation:__llViewIn .25s ease both}
+@keyframes __llViewIn{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.app-view,.ll-view-in{animation:none}}
+@media print{.app-view,.ll-view-in{animation:none !important;opacity:1 !important}}
+/* LL Boutons — les petits boutons ne sautillent plus au survol */
+.btn.btn-sm:hover{transform:none;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+button.btn:active{transform:translateY(0);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+/* LL Overlay — apparition douce des fenetres superposees */
+.ll-ov{animation:__llOvIn .18s ease both}
+.ll-ov > div{animation:__llBoxIn .24s cubic-bezier(.25,.1,.25,1) both}
+@keyframes __llOvIn{from{opacity:0}to{opacity:1}}
+@keyframes __llBoxIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.ll-ov,.ll-ov > div{animation:none}}
+/* LL Toast — message de confirmation unifie */
+.ll-toast{animation:__llToastIn .32s cubic-bezier(.25,.1,.25,1) both}
+.ll-toast.ll-toast-out{animation:__llToastOut .28s ease both}
+@keyframes __llToastIn{from{opacity:0;transform:translateX(-50%) translateY(14px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes __llToastOut{from{opacity:1;transform:translateX(-50%) translateY(0)}to{opacity:0;transform:translateX(-50%) translateY(10px)}}
+@media (prefers-reduced-motion:reduce){.ll-toast,.ll-toast.ll-toast-out{animation:none;opacity:1;transform:translateX(-50%)}}
 </style>
         
         
@@ -43807,7 +43837,7 @@ function LLBibliothequeView() {
   var grilles = lib.grilles || [];
   var strategies = lib.strategies || [];
 
-  var openState = useState({ supports: true, grilles: true, strategies: false });
+  var openState = useState({ supports: false, grilles: false, strategies: false });
   var open = openState[0];
   var setOpen = openState[1];
   var toggle = function (key) { setOpen(function (o) { var n = Object.assign({}, o); n[key] = !o[key]; return n; }); };
@@ -43824,25 +43854,54 @@ function LLBibliothequeView() {
     );
   }
 
+  var LL_BIB_EASE = 'cubic-bezier(.25,.1,.25,1)';
+  var LL_BIB_ACCENTS = { grilles: '#4f46e5', supports: '#0e7490', strategies: '#c2410c' };
+
   function section(key, title, count, body) {
     var isOpen = open[key];
+    var accent = LL_BIB_ACCENTS[key] || 'var(--accent2)';
     var headerStyle = {
       display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
       padding: '12px 16px', background: 'var(--card)', border: '1px solid var(--border)',
       borderRadius: isOpen ? '10px 10px 0 0' : 10, userSelect: 'none',
-      transition: 'background .15s'
+      boxShadow: isOpen ? ('inset 3px 0 0 ' + accent) : 'none',
+      transition: 'background .15s, border-radius .42s ' + LL_BIB_EASE + ', box-shadow .34s ease'
     };
     var caretStyle = {
       display: 'inline-block', width: 16, fontSize: 11, color: 'var(--text-muted)',
-      transition: 'transform .2s', transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)'
+      transition: 'transform .42s ' + LL_BIB_EASE, transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)'
     };
-    var bodyWrap = isOpen ? h('div', { style: { padding: 14, border: '1px solid var(--border)', borderTop: 'none', borderRadius: '0 0 10px 10px', background: 'var(--panel)' } }, body) : null;
+    var countStyle = {
+      fontSize: 12, fontWeight: 700, padding: '2px 9px', borderRadius: 12,
+      color: count > 0 ? 'var(--accent2)' : 'var(--text-muted)',
+      background: count > 0 ? 'rgba(108,99,255,.12)' : 'var(--bg)'
+    };
+    // Le contenu reste toujours dans la page : c'est ce qui permet
+    // au depliage et au repliage d'etre progressifs dans les deux sens.
+    var bodyWrap = h('div', {
+      style: {
+        display: 'grid',
+        gridTemplateRows: isOpen ? '1fr' : '0fr',
+        opacity: isOpen ? 1 : 0,
+        transition: 'grid-template-rows .42s ' + LL_BIB_EASE + ', opacity .34s ease'
+      }
+    }, h('div', { style: { overflow: 'hidden', minHeight: 0 } },
+        h('div', {
+          style: {
+            padding: 14, border: '1px solid var(--border)', borderTop: 'none',
+            borderRadius: '0 0 10px 10px', background: 'var(--panel)',
+            boxShadow: isOpen ? ('inset 3px 0 0 ' + accent) : 'none',
+            transition: 'box-shadow .34s ease'
+          }
+        }, body)
+      ));
     return h('div', { key: key, id: 'll-bib-' + key, style: { marginBottom: 14 } },
       h('div', { style: headerStyle, onClick: function () { toggle(key); }, role: 'button', tabIndex: 0,
+        'aria-expanded': isOpen ? 'true' : 'false',
         onKeyDown: function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(key); } } },
         h('span', { style: caretStyle }, '\u25B6'),
         h('span', { style: { fontSize: 15, fontWeight: 800, flex: 1 } }, title),
-        h('span', { style: { fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', background: 'var(--bg)', padding: '2px 9px', borderRadius: 12 } }, String(count))
+        h('span', { style: countStyle }, String(count))
       ),
       bodyWrap
     );
@@ -43906,10 +43965,10 @@ function LLBibliothequeView() {
     })
   );
 
-  return h('div', { className: 'dash' },
+  return h('div', { className: 'dash ll-view-in' },
     h('div', { className: 'dash-title' }, 'Biblioth\u00E8que'),
     h('div', { className: 'dash-sub' }, 'Tous vos supports, images, grilles et strat\u00E9gies enregistr\u00E9s, list\u00E9s en un seul endroit.'),
-    section('grilles', '\uD83D\uDCCB Grilles d\u2019\u00E9valuations utilis\u00E9es dans les s\u00E9quences', grilles.length, grillesBody),
+    section('grilles', '\uD83D\uDCCB Grilles \u00E0 imprimer', grilles.length, grillesBody),
     section('supports', '\uD83D\uDCC4 Supports & images', supports.length, supportsBody),
     section('strategies', '\uD83C\uDFAF Strat\u00E9gies', strategies.length, stratBody)
   );
@@ -73846,7 +73905,8 @@ function openSaveModal(){
   var totalGrilles=seqs.reduce(function(s,sq){return s+(sq.grilles||[]).length},0);
   var overlay=document.createElement('div');
   overlay.id='__ll_save_modal';
-  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn .18s ease';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  overlay.className=(overlay.className?overlay.className+' ':'')+'ll-ov';
   var box=document.createElement('div');
   box.style.cssText='background:var(--panel);border-radius:18px;padding:28px 30px;min-width:480px;max-width:94vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.35);position:relative';
   // ── Build content via innerHTML (NO box.innerHTML+= to avoid destroying event listeners) ──
@@ -74986,6 +75046,15 @@ var LL_NIV_LABELS = {
   'Première_LLCER':'Première LLCER','Terminale_LLCER':'Terminale LLCER'
 };
 function llNivLabel(n){ return LL_NIV_LABELS[n]||n; }
+// Trie les niveaux dans l'ordre pedagogique (6eme -> Terminale) plutot
+// que par ordre alphabetique. Les niveaux inconnus passent a la fin.
+function llNivSort(a,b){
+  var ia=LL_NIV_ORDER.indexOf(a), ib=LL_NIV_ORDER.indexOf(b);
+  if(ia===-1&&ib===-1) return String(a).localeCompare(String(b),'fr');
+  if(ia===-1) return 1;
+  if(ib===-1) return -1;
+  return ia-ib;
+}
 
 // ── Modèles d'activités (⭐ favoris) ──────────────────────────────────────────
 var LL_ACT_TEMPLATES_KEY='lessonloom-act-templates';
@@ -75167,6 +75236,7 @@ window.llOpenSortieModal=function(eventId){
   var ov=document.createElement('div');
   ov.id='__ll_sortie_modal';
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.className=(ov.className?ov.className+' ':'')+'ll-ov';
 
   var box=document.createElement('div');
   box.style.cssText='background:var(--panel);border-radius:18px;padding:26px 28px;min-width:420px;max-width:94vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.4);position:relative';
@@ -75248,8 +75318,7 @@ window.llOpenSortieModal=function(eventId){
     // Toast
     var t=document.createElement('div');
     t.textContent='✓ Sortie enregistrée !';
-    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;z-index:99999';
-    document.body.appendChild(t);setTimeout(function(){t.remove();},2000);
+    window.llToast(t,'ok');
   };
 };
 
@@ -75327,7 +75396,8 @@ window.llOpenRefModal=function(){
 
   var ov=document.createElement('div');
   ov.id='__ll_ref_modal';
-  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.className=(ov.className?ov.className+' ':'')+'ll-ov';
 
   var availNivs=LL_NIV_ORDER.filter(function(n){return LL_DG_EN[n]||LL_DP_EN[n]||LL_DA_EN[n];});
   var curNiv=availNivs[0]||'6ème';
@@ -75497,7 +75567,8 @@ window.llOpenGrilleCreator = function(existingId){
 
   var ov = document.createElement('div');
   ov.id = '__ll_grille_creator';
-  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.className=(ov.className?ov.className+' ':'')+'ll-ov';
 
   var box = document.createElement('div');
   box.style.cssText = 'background:var(--panel);border-radius:18px;padding:0;width:min(680px,96vw);max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.4)';
@@ -75667,8 +75738,7 @@ window.llOpenGrilleCreator = function(existingId){
     llRefreshBiblio();
     var t=document.createElement('div');
     t.textContent=existing ? '\u2713 Grille modifi\u00e9e !' : '\u2713 Grille enregistr\u00e9e dans la Biblioth\u00e8que !';
-    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#6c63ff;color:#fff;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;z-index:99999';
-    document.body.appendChild(t); setTimeout(function(){ t.remove(); }, 2500);
+    window.llToast(t,'info');
   };
   footer.appendChild(cancelBtn); footer.appendChild(saveBtn);
   box.appendChild(footer);
@@ -75692,6 +75762,7 @@ window.llAddFavGrilleToSeq = function(grilleId){
 
   var ov=document.createElement('div');
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.className=(ov.className?ov.className+' ':'')+'ll-ov';
   var box=document.createElement('div');
   box.style.cssText='background:var(--panel);border-radius:16px;padding:22px 24px;min-width:380px;max-width:90vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.4)';
   var h3=document.createElement('h3');
@@ -75721,8 +75792,7 @@ window.llAddFavGrilleToSeq = function(grilleId){
       ov.remove();
       var t=document.createElement('div');
       t.textContent='\u2713 Grille ajout\u00e9e \u00e0 la s\u00e9quence !';
-      t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#6c63ff;color:#fff;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;z-index:99999';
-      document.body.appendChild(t); setTimeout(function(){ t.remove(); }, 2500);
+      window.llToast(t,'info');
     };
     box.appendChild(btn);
   });
@@ -75805,10 +75875,50 @@ function llHideEvalGrillesSeq(){
     }
   });
 }
-function llGrilleToast(msg){
-  var t=document.createElement('div');t.textContent=msg;t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#6c63ff;color:#fff;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;z-index:99999;pointer-events:none';
-  document.body.appendChild(t);setTimeout(function(){t.remove();},2200);
+// ═══ MESSAGE DE CONFIRMATION — fonction unique ══════════════════
+// Remplace les 17 messages qui etaient ecrits un par un, chacun avec
+// sa couleur et sa duree. Accepte soit un texte, soit un element deja
+// cree (son texte est alors conserve).
+//   type : 'ok' (vert), 'info' (violet), 'warn' (rouge)
+var LL_TOAST_COLORS={ok:'#10b981',info:'#6c63ff',warn:'#ef4444'};
+var LL_TOAST_MS=2600;
+window.llToast=function(el,type){
+  if(el===null||el===undefined)return null;
+  if(typeof el==='string'){var msg=el;el=document.createElement('div');el.textContent=msg;}
+  var color=LL_TOAST_COLORS[type]||LL_TOAST_COLORS.info;
+  // Empilement : un nouveau message se place au-dessus du precedent.
+  var already=document.querySelectorAll('.ll-toast').length;
+  el.className=(el.className?el.className+' ':'')+'ll-toast';
+  el.style.cssText='position:fixed;left:50%;bottom:'+(24+already*52)+'px;z-index:99999;'
+    +'background:'+color+';color:#fff;padding:11px 22px;border-radius:12px;'
+    +'font-family:inherit;font-weight:700;font-size:13px;line-height:1.35;'
+    +'box-shadow:0 6px 20px rgba(15,23,42,.22);pointer-events:none;'
+    +'max-width:min(90vw,520px);text-align:center';
+  document.body.appendChild(el);
+  setTimeout(function(){
+    el.classList.add('ll-toast-out');
+    setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); },300);
+  },LL_TOAST_MS);
+  return el;
+};
+
+// ═══ ECHAP FERME LA FENETRE DU DESSUS ══════════════════════
+// Seules 4 fenetres sur 21 reagissaient a Echap. Cette surveillance
+// unique s'occupe de toutes les autres. Elle ne ferme jamais qu'une
+// seule fenetre a la fois, la plus recente, et ne touche a rien d'autre.
+if(!window.__ll_esc_ready){
+  window.__ll_esc_ready = true;
+  document.addEventListener('keydown', function(e){
+    if(e.key !== 'Escape') return;
+    var ovs = document.querySelectorAll('.ll-ov');
+    if(!ovs.length) return;
+    var top = ovs[ovs.length-1];
+    if(top.dataset && top.dataset.llNoEsc === '1') return;
+    if(top.parentNode) top.parentNode.removeChild(top);
+  });
 }
+
+function llGrilleToast(msg){ window.llToast(msg,'info'); }
 function llHookGrilleStarButtons(){
   // La sequence de l'editeur est __ll_curSeq. __ll_activeSeq appartient a
   // l'editeur de SEANCE et peut pointer vers une sequence precedente : s'en
@@ -75924,6 +76034,7 @@ window.llPickFavGrilleForCurrentSeq=function(){
   var favGrilles=llGetAllFavGrilles();
   if(!favGrilles.length){alert('Aucune grille favorite.\nCliquez ☆ sur une grille dans l’éditeur ou la Bibliothèque.');return;}
   var ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.className=(ov.className?ov.className+' ':'')+'ll-ov';
   var box=document.createElement('div');box.style.cssText='background:var(--panel);border-radius:16px;padding:22px 24px;min-width:420px;max-width:90vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.4)';
   var h3=document.createElement('h3');h3.style.cssText='font-family:Playfair Display,serif;font-size:17px;font-weight:800;margin:0 0 6px';h3.textContent='⭐ Ajouter une grille favorite';box.appendChild(h3);
   var sub=document.createElement('p');sub.style.cssText='font-size:12px;color:var(--text-muted);margin:0 0 14px';
@@ -75983,6 +76094,7 @@ window.llAddGrilleToSeqPicker=function(grilleId){
   var realSeqs=(data.sequences||[]).filter(function(s){return !s.isFlash&&!s.isEvalLib&&s.id!==LL_EVAL_GRILLES_SEQ_ID&&s.id!=='__ll_flash_seances__';});
   if(!realSeqs.length){alert('Aucune séquence disponible.');return;}
   var ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.className=(ov.className?ov.className+' ':'')+'ll-ov';
   var box=document.createElement('div');box.style.cssText='background:var(--panel);border-radius:16px;padding:22px 24px;min-width:380px;max-width:90vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.4)';
   var h3=document.createElement('h3');h3.style.cssText='font-family:Playfair Display,serif;font-size:17px;font-weight:800;margin:0 0 14px';h3.textContent='Copier dans une séquence :';box.appendChild(h3);
   realSeqs.forEach(function(seq){
@@ -76014,7 +76126,15 @@ function llInjectGrillesBiblio(container,anchorId){
   mBtn.style.cssText='font-size:11px;padding:4px 12px';
   mBtn.textContent=evalGrilles.length?'\u2795 G\u00E9rer':'\u2795 Cr\u00E9er';
   mBtn.onclick=function(e){e.stopPropagation();window.llOpenEvalGrillesEditor();};
-  var s=llMakeBibCard('__ll_biblio_grilles','\uD83C\uDFAF','Grilles d\u2019\u00E9valuation sans s\u00E9quence attribu\u00E9e','rgba(108,99,255,.15)','#4f46e5',mBtn);
+  var s=llMakeBibCard('__ll_biblio_grilles','\uD83C\uDFAF','Grilles d\u2019\u00E9valuation','rgba(108,99,255,.15)','#4f46e5',mBtn,evalGrilles.length+favGrilles.length);
+  // Sous-titre du premier bloc (pas de trait s\u00E9parateur : il ouvre la carte)
+  var ownHdr=document.createElement('div');ownHdr.className='ll-bib-sub-hdr';
+  ownHdr.style.cssText='margin:0 0 10px;padding-top:0;border-top:none';
+  var ownIco=document.createElement('span');ownIco.className='ll-bib-sub-ico';
+  ownIco.style.cssText='background:rgba(108,99,255,.15);color:#4f46e5';ownIco.textContent='\u270F\uFE0F';
+  var ownTxt=document.createElement('span');ownTxt.textContent='Cr\u00E9\u00E9es sans s\u00E9quence';
+  ownHdr.appendChild(ownIco);ownHdr.appendChild(ownTxt);
+  s.body.appendChild(ownHdr);
   // Grille cards
   if(!evalGrilles.length){
     var emp=document.createElement('p');emp.className='ll-bib-empty';
@@ -76027,7 +76147,7 @@ function llInjectGrillesBiblio(container,anchorId){
   var favHdr=document.createElement('div');favHdr.className='ll-bib-sub-hdr';
   var favIco=document.createElement('span');favIco.className='ll-bib-sub-ico';
   favIco.style.cssText='background:rgba(234,179,8,.15);color:#92400e';favIco.textContent='\u2B50';
-  var favTitle=document.createElement('span');favTitle.textContent='Grilles favorites';
+  var favTitle=document.createElement('span');favTitle.textContent='Favorites \u2014 issues de vos s\u00E9quences';
   favHdr.appendChild(favIco);favHdr.appendChild(favTitle);favDiv.appendChild(favHdr);
   if(!favGrilles.length){
     var fe=document.createElement('p');fe.className='ll-bib-empty';
@@ -76051,7 +76171,8 @@ window.llOpenManuel=function(key,label){
   var b64=LL_MANUEL_B64[key];
   if(!b64){alert('Fichier introuvable.');return;}
   var ov=document.createElement('div');
-  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;flex-direction:column';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;flex-direction:column';
+  ov.className=(ov.className?ov.className+' ':'')+'ll-ov';
   var hdr=document.createElement('div');
   hdr.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:10px 18px;background:var(--panel);border-bottom:1px solid var(--border);flex-shrink:0;gap:14px';
   var title=document.createElement('span');
@@ -76088,31 +76209,92 @@ function llRefreshBiblio(){
    '__ll_biblio_archives','__ll_biblio_corbeille'].forEach(function(id){
     var el=document.getElementById(id);if(el)el.remove();
   });
-  llInjectBiblioSections();
+  LL_BIB_SILENT=true;
+  try{
+    llInjectBiblioSections();
+    var _c=llFindBiblioContainer();
+    if(_c){
+      if(typeof llInjectArchiveBiblio==='function')llInjectArchiveBiblio(_c);
+      if(typeof llInjectCorbeilleBiblio==='function')llInjectCorbeilleBiblio(_c);
+    }
+  }finally{ LL_BIB_SILENT=false; }
+  llSyncReactGrillesCard();
+}
+
+// Masque l'encart React \u00AB Grilles mises de c\u00F4t\u00E9 \u00BB tant qu'il est vide.
+// Aucune modification du DOM g\u00E9r\u00E9 par React : on ajoute/retire une simple
+// r\u00E8gle de style dans le <head>.
+function llSyncReactGrillesCard(){
+  var n=0;
+  try{
+    var d=window.__ll_getData?window.__ll_getData():null;
+    n=((d&&d.library&&d.library.grilles)||[]).length;
+  }catch(e){ n=0; }
+  var st=document.getElementById('__ll_hide_lib_grilles');
+  if(n===0){
+    if(!st){
+      st=document.createElement('style');
+      st.id='__ll_hide_lib_grilles';
+      st.textContent='#ll-bib-grilles{display:none !important}';
+      document.head.appendChild(st);
+    }
+  }else if(st){ st.remove(); }
 }
 
 // ── Unified biblio card builder ──────────────────────────
-function llMakeBibCard(id,emoji,title,accentBg,accentColor,actionEl){
+// Etat ouvert/ferme conserve le temps de la session : une carte
+// reconstruite (ajout d'un favori, d'une sortie...) reste comme elle etait.
+// Non enregistre sur le disque : au prochain lancement, tout est replie.
+var LL_BIB_OPEN={};
+var LL_BIB_SILENT=false;
+function llMakeBibCard(id,emoji,title,accentBg,accentColor,actionEl,count){
+  var wasOpen=(LL_BIB_OPEN[id]===true);
   var wrap=document.createElement('div');
-  wrap.id=id;wrap.className='ll-bib-sec';wrap.dataset.llOpen='1';
-  var hdr=document.createElement('div');hdr.className='ll-bib-hdr';
-  var caret=document.createElement('span');caret.className='ll-bib-caret open';caret.textContent='\u25B6';
+  wrap.id=id;
+  wrap.className='ll-bib-sec'+(wasOpen?' ll-open':'')+(LL_BIB_SILENT?' ll-bib-noanim':'');
+  wrap.dataset.llOpen=wasOpen?'1':'0';
+  wrap.style.setProperty('--ll-bib-accent',accentColor);
+  var hdr=document.createElement('div');hdr.className=wasOpen?'ll-bib-hdr':'ll-bib-hdr closed';
+  hdr.setAttribute('role','button');
+  hdr.setAttribute('tabindex','0');
+  hdr.setAttribute('aria-expanded',wasOpen?'true':'false');
+  var caret=document.createElement('span');caret.className=wasOpen?'ll-bib-caret open':'ll-bib-caret';caret.textContent='\u25B6';
   var ico=document.createElement('span');ico.className='ll-bib-ico';
   ico.style.cssText='background:'+accentBg+';color:'+accentColor;
   ico.textContent=emoji;
   var titleEl=document.createElement('span');titleEl.className='ll-bib-title';titleEl.textContent=title;
   hdr.appendChild(caret);hdr.appendChild(ico);hdr.appendChild(titleEl);
+  if(count!==null&&count!==undefined){
+    var cntEl=document.createElement('span');
+    cntEl.className=(Number(count)>0)?'ll-bib-badge on':'ll-bib-badge';
+    cntEl.textContent=String(count);
+    hdr.appendChild(cntEl);
+  }
   if(actionEl){hdr.appendChild(actionEl);}
+  // Coque animable : la hauteur passe de 0fr a 1fr, donc le d\u00E9pliage
+  // s'ajuste tout seul \u00E0 la hauteur r\u00E9elle du contenu.
+  var shell=document.createElement('div');shell.className='ll-bib-shell';
+  var clip=document.createElement('div');clip.className='ll-bib-clip';
   var body=document.createElement('div');body.className='ll-bib-body';
-  hdr.onclick=function(e){
-    if(e.target.closest('button,a'))return;
+  clip.appendChild(body);shell.appendChild(clip);
+  function llBibToggle(){
     var open=wrap.dataset.llOpen==='1';
     wrap.dataset.llOpen=open?'0':'1';
-    body.style.display=open?'none':'';
+    LL_BIB_OPEN[id]=!open;
+    if(open){wrap.classList.remove('ll-open');}else{wrap.classList.add('ll-open');}
     caret.className=open?'ll-bib-caret':'ll-bib-caret open';
     hdr.className=open?'ll-bib-hdr closed':'ll-bib-hdr';
+    hdr.setAttribute('aria-expanded',open?'false':'true');
+  }
+  hdr.onclick=function(e){
+    if(e.target.closest('button,a'))return;
+    llBibToggle();
   };
-  wrap.appendChild(hdr);wrap.appendChild(body);
+  hdr.onkeydown=function(e){
+    if(e.target!==hdr)return;
+    if(e.key==='Enter'||e.key===' '||e.key==='Spacebar'){e.preventDefault();llBibToggle();}
+  };
+  wrap.appendChild(hdr);wrap.appendChild(shell);
   return{wrap:wrap,body:body};
 }
 
@@ -76183,7 +76365,7 @@ function llInjectBiblioSections(){
   llInjectFlashBiblio(container,'ll-bib-supports');
 
   // ── 4. Activités favorites ────────────────────────────────────────
-  var sf=llMakeBibCard('__ll_biblio_fav','\u2B50','Activit\u00E9s favorites','rgba(234,179,8,.15)','#92400e',null);
+  var sf=llMakeBibCard('__ll_biblio_fav','\u2B50','Activit\u00E9s favorites','rgba(234,179,8,.15)','#92400e',null,actTpls.length);
   if(!actTpls.length){
     var emp=document.createElement('p');emp.className='ll-bib-empty';
     emp.textContent='Aucune activit\u00E9 favorite. Cliquez sur \u2B50 dans l\u2019\u00E9diteur de s\u00E9ance pour en enregistrer une.';
@@ -76217,7 +76399,7 @@ function llInjectBiblioSections(){
   addSortieEl.style.cssText='font-size:11px;padding:4px 12px;border:1px solid var(--border);border-radius:7px;background:var(--card);cursor:pointer;font-family:inherit;color:var(--text);font-weight:700';
   addSortieEl.textContent='+ Ajouter';
   addSortieEl.onclick=function(e){e.stopPropagation();window.llOpenSortieModal(null);};
-  var ss=llMakeBibCard('__ll_biblio_sorties','\uD83D\uDE8C','Sorties \u0026 Voyages scolaires','rgba(239,68,68,.15)','#b91c1c',addSortieEl);
+  var ss=llMakeBibCard('__ll_biblio_sorties','\uD83D\uDE8C','Sorties \u0026 Voyages scolaires','rgba(239,68,68,.15)','#b91c1c',addSortieEl,calEvs.length);
   if(!calEvs.length){
     var emp2=document.createElement('p');emp2.className='ll-bib-empty';
     emp2.textContent='Aucune sortie enregistr\u00E9e. Utilisez le bouton \uD83D\uDE8C dans le Calendrier ou ici.';
@@ -76469,6 +76651,7 @@ window.llCreateFlashSeance = function(){
   var ov = document.createElement('div');
   ov.id='__ll_flash_modal';
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.className=(ov.className?ov.className+' ':'')+'ll-ov';
   var box = document.createElement('div');
   box.style.cssText='background:var(--panel);border-radius:18px;padding:24px 26px;min-width:400px;max-width:94vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.4);position:relative';
   box.innerHTML=
@@ -76507,8 +76690,7 @@ window.llCreateFlashSeance = function(){
     llRefreshBiblio();
     var t=document.createElement('div');
     t.textContent='⚡ Séance flash enregistrée !';
-    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;z-index:99999';
-    document.body.appendChild(t); setTimeout(function(){t.remove();},2000);
+    window.llToast(t,'ok');
   };
   setTimeout(function(){ box.querySelector('#__ll_flash_title').focus(); },100);
 };
@@ -76521,6 +76703,7 @@ window.llImportFlashToSeq = function(){
 
   var ov = document.createElement('div');
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.className=(ov.className?ov.className+' ':'')+'ll-ov';
   var box = document.createElement('div');
   box.style.cssText='background:var(--panel);border-radius:16px;padding:22px 24px;min-width:380px;max-width:90vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.4)';
   var html='<h3 style="font-family:Playfair Display,serif;font-size:17px;font-weight:800;margin:0 0 12px">📥 Importer une séance flash dans la séquence</h3>';
@@ -76562,8 +76745,7 @@ window.llImportFlashToSeq = function(){
         ov.remove();
         var t=document.createElement('div');
         t.textContent='✓ Séance importée dans la séquence !';
-        t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#6c63ff;color:#fff;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;z-index:99999';
-        document.body.appendChild(t); setTimeout(function(){t.remove();},2500);
+        window.llToast(t,'info');
       } else {
         ov.remove();
         alert('Import impossible : rechargez la page et réessayez.');
@@ -76587,6 +76769,7 @@ window.llEditFlashSeance = function(id){
   var ov=document.createElement('div');
   ov.id='__ll_flash_modal';
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.className=(ov.className?ov.className+' ':'')+'ll-ov';
   var box=document.createElement('div');
   box.style.cssText='background:var(--panel);border-radius:18px;padding:24px 26px;min-width:400px;max-width:94vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.4);position:relative';
   box.innerHTML=
@@ -76631,8 +76814,7 @@ window.llEditFlashSeance = function(id){
     llRefreshBiblio();
     var t=document.createElement('div');
     t.textContent='\u2713 S\u00E9ance flash mise \u00E0 jour !';
-    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#6c63ff;color:#fff;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;z-index:99999';
-    document.body.appendChild(t);setTimeout(function(){t.remove();},2000);
+    window.llToast(t,'info');
   };
   setTimeout(function(){ box.querySelector('#__ll_flash_title').focus(); },100);
 };
@@ -76663,7 +76845,7 @@ function llInjectFlashBiblio(container,anchorId){
   addBtn.style.cssText='font-size:11px;padding:4px 12px';
   addBtn.textContent='+ Cr\u00E9er';
   addBtn.onclick=function(e){e.stopPropagation();window.llCreateFlashSeance();};
-  var s=llMakeBibCard('__ll_biblio_flash','\u26A1','Id\u00E9es pour s\u00E9ance flash','rgba(249,115,22,.15)','#c2410c',addBtn);
+  var s=llMakeBibCard('__ll_biblio_flash','\u26A1','Id\u00E9es pour s\u00E9ance flash','rgba(249,115,22,.15)','#c2410c',addBtn,list.length);
   if(!list.length){
     var emp=document.createElement('p');emp.className='ll-bib-empty';
     emp.textContent='Aucune id\u00E9e enregistr\u00E9e. Cliquez + Cr\u00E9er pour en ajouter une.';
@@ -77089,8 +77271,7 @@ function llShowFlashForm(content, existingSea) {
     // Toast
     var t=document.createElement('div');
     t.textContent = existingSea ? '✓ Séance modifiée !' : '⚡ Séance flash créée !';
-    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;z-index:99999';
-    document.body.appendChild(t); setTimeout(function(){t.remove();},2000);
+    window.llToast(t,'ok');
     setTimeout(function(){ llRenderFlashList(content); }, 150);
   };
   actRow.appendChild(saveBtn);
@@ -77106,7 +77287,8 @@ function llOpenFlashSeances() {
 
   var modal = document.createElement('div');
   modal.id = '__ll_flash_panel';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  modal.className=(modal.className?modal.className+' ':'')+'ll-ov';
 
   var box = document.createElement('div');
   box.style.cssText = 'background:var(--panel);border-radius:18px;padding:0;width:min(680px,96vw);max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.4)';
@@ -77156,7 +77338,8 @@ window.llCopyFlashToSeq = function(seaId) {
   if(!realSeqs.length) { alert('Aucune séquence disponible. Créez d\'abord une séquence.'); return; }
 
   var ov = document.createElement('div');
-  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.className=(ov.className?ov.className+' ':'')+'ll-ov';
   var box = document.createElement('div');
   box.style.cssText = 'background:var(--panel);border-radius:16px;padding:20px 24px;min-width:380px;max-width:90vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.4)';
   box.innerHTML = '<h3 style="font-family:Playfair Display,serif;font-size:17px;font-weight:800;margin:0 0 12px">📥 Ajouter cette séance flash à une séquence</h3>' +
@@ -77180,8 +77363,7 @@ window.llCopyFlashToSeq = function(seaId) {
       ov.remove();
       var t = document.createElement('div');
       t.textContent = '✓ Séance ajoutée à la séquence !';
-      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#6c63ff;color:#fff;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;z-index:99999';
-      document.body.appendChild(t); setTimeout(function(){ t.remove(); }, 2500);
+      window.llToast(t,'info');
     };
     box.appendChild(btn);
   });
@@ -79084,9 +79266,7 @@ function llDoImportSeq(seqData, niv){
   upsert(imported);
   var toast = document.createElement('div');
   toast.textContent = '✓ Séquence "'+imported.titre+'" importée en '+imported.niveau+' !';
-  toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:12px 24px;border-radius:12px;font-weight:700;font-size:13px;z-index:99999;box-shadow:0 4px 16px rgba(0,0,0,.25)';
-  document.body.appendChild(toast);
-  setTimeout(function(){toast.remove();},3500);
+  window.llToast(toast,'ok');
 }
 
 window.llShowImportDialog = function(seqData){
@@ -79096,7 +79276,8 @@ window.llShowImportDialog = function(seqData){
 
   var ov=document.createElement('div');
   ov.id='__ll_import_dlg';
-  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.className=(ov.className?ov.className+' ':'')+'ll-ov';
 
   var box=document.createElement('div');
   box.style.cssText='background:var(--panel);border-radius:18px;padding:26px 28px;min-width:440px;max-width:94vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.4)';
@@ -79563,7 +79744,8 @@ window.llShowEdtView = function(edt){
 
   var ov = document.createElement('div');
   ov.id = '__ll_edt_modal';
-  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:12px';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:12px';
+  ov.className=(ov.className?ov.className+' ':'')+'ll-ov';
 
   var useSat = (edt.slots||[]).some(function(s){ return s.day===5; });
   var days = useSat ? LL_EDT_DAYS : LL_EDT_DAYS.slice(0,5);
@@ -79647,7 +79829,8 @@ window.llOpenEdtEditor = function(existingEdt){
 
   var ov = document.createElement('div');
   ov.id = '__ll_edt_modal';
-  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:12px';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:12px';
+  ov.className=(ov.className?ov.className+' ':'')+'ll-ov';
 
   var box = document.createElement('div');
   box.style.cssText = 'background:var(--panel);border-radius:18px;padding:20px 24px;max-width:min(720px,96vw);width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.4)';
@@ -79852,8 +80035,7 @@ window.llOpenEdtEditor = function(existingEdt){
       llUpdateEdtBtn();
       var t = document.createElement('div');
       t.textContent = '✓ EDT enregistré !';
-      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;z-index:99999';
-      document.body.appendChild(t); setTimeout(function(){ t.remove(); }, 2500);
+      window.llToast(t,'ok');
       // Show view after save
       window.llShowEdtView(data);
     };
@@ -80307,7 +80489,8 @@ window.llPickSeqForCopy = function(sea) {
   if (old) old.remove();
   var ov = document.createElement('div');
   ov.id = '__ll_copy_sea_modal';
-  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.className=(ov.className?ov.className+' ':'')+'ll-ov';
   var box = document.createElement('div');
   box.style.cssText = 'background:var(--panel);border-radius:18px;padding:24px;min-width:360px;max-width:88vw;max-height:72vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.4);position:relative';
   // Header
@@ -80363,8 +80546,7 @@ window.llCopySeanceToSeq = function(sea, targetSeqId) {
   }
   var t = document.createElement('div');
   t.textContent = '\u2713 S\u00E9ance copi\u00E9e vers \u00AB ' + (tgt.titre || 'S\u00E9quence') + ' \u00BB';
-  t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#6c63ff;color:#fff;padding:10px 22px;border-radius:10px;font-weight:700;font-size:13px;z-index:99999;box-shadow:0 4px 16px rgba(108,99,255,.4)';
-  document.body.appendChild(t); setTimeout(function() { t.remove(); }, 3000);
+  window.llToast(t,'info');
 };
 
 function llHookSeanceCopyBtn() {
@@ -80400,7 +80582,8 @@ window.llOpenNotepad = function() {
   var text = localStorage.getItem(LL_NOTEPAD_KEY) || '';
   var ov = document.createElement('div');
   ov.id = '__ll_notepad_modal';
-  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9998;display:flex;align-items:flex-end;justify-content:flex-end;padding:80px 16px 16px 16px;pointer-events:none';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9998;display:flex;align-items:flex-end;justify-content:flex-end;padding:80px 16px 16px 16px;pointer-events:none';
+  ov.className=(ov.className?ov.className+' ':'')+'ll-ov';
   var box = document.createElement('div');
   box.style.cssText = 'width:340px;max-height:420px;display:flex;flex-direction:column;background:var(--panel);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.35);pointer-events:all;border:1px solid var(--border);overflow:hidden';
   // Header
@@ -80517,9 +80700,19 @@ var LL_AL_COLORS = {
 function llComputeStats() {
   var data = window.__ll_getData ? window.__ll_getData() : null;
   if (!data) return null;
-  var seqs = (data.sequences || []).filter(function(s) {
-    return !s.isFlash && !s.isEvalLib && s.id !== LL_EVAL_GRILLES_SEQ_ID && s.id !== '__ll_flash_seances__';
-  });
+  // Sequences techniques et sequence de demonstration du tour guide :
+  // jamais comptees dans les statistiques.
+  function llIsTechSeq(s){
+    return s.isFlash || s.isEvalLib
+        || s.id === LL_EVAL_GRILLES_SEQ_ID
+        || s.id === '__ll_flash_seances__'
+        || s.id === LL_TOUR_DEMO_SEQ_ID;
+  }
+  var allSeqs = (data.sequences || []).filter(function(s){ return !llIsTechSeq(s); });
+  // Les archives sont comptees a part, pour que les chiffres du haut et la
+  // carte CECRL du bas parlent du meme perimetre.
+  var seqs = allSeqs.filter(function(s){ return !s.isArchived; });
+  var archivedSeqs = allSeqs.filter(function(s){ return s.isArchived; }).length;
   var totalSeqs = seqs.length;
   var totalSeances = 0;
   var totalGrilles = 0;
@@ -80544,11 +80737,15 @@ function llComputeStats() {
           (sea.objPhon && sea.objPhon.length)) seancesAvecObj++;
     });
   });
+  // Grilles creees sans sequence : elles vivent dans une sequence technique
+  // qui est exclue ci-dessus, il faut donc les ajouter explicitement.
+  var evalSeq = (data.sequences || []).filter(function(s){ return s.id === LL_EVAL_GRILLES_SEQ_ID; })[0];
+  if(evalSeq) totalGrilles += (evalSeq.grilles || []).length;
   totalGrilles += (((data.library || {}).grilles) || []).length;
   var flashCount = (function(){ try{ return JSON.parse(localStorage.getItem('lessonloom-flash-seances')||'[]').length; }catch(e){ return 0; } })();
   return { totalSeqs: totalSeqs, totalSeances: totalSeances, totalGrilles: totalGrilles,
            byNiv: byNiv, alCounts: alCounts, seancesAvecObj: seancesAvecObj,
-           flashCount: flashCount };
+           flashCount: flashCount, archivedSeqs: archivedSeqs };
 }
 
 function llMakeKPI(value, label, color) {
@@ -80591,7 +80788,8 @@ window.llOpenStatsModal = function() {
 
   var ov = document.createElement('div');
   ov.id = '__ll_stats_modal';
-  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  ov.className=(ov.className?ov.className+' ':'')+'ll-ov';
   var box = document.createElement('div');
   box.style.cssText = 'background:var(--panel);border-radius:20px;padding:28px;width:100%;max-width:600px;max-height:88vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.4);position:relative';
 
@@ -80620,6 +80818,17 @@ window.llOpenStatsModal = function() {
   kpiRow.appendChild(llMakeKPI(st.flashCount, 'Id\u00E9es flash', '#f59e0b'));
   box.appendChild(kpiRow);
 
+  // Les archives ne sont pas comptees ci-dessus : on le dit clairement.
+  if (st.archivedSeqs > 0) {
+    var archNote = document.createElement('p');
+    archNote.style.cssText = 'font-size:11px;color:var(--text-muted);margin:-12px 0 18px;text-align:center';
+    archNote.textContent = '\uD83D\uDCE6 ' + st.archivedSeqs + ' s\u00E9quence'
+      + (st.archivedSeqs > 1 ? 's' : '') + ' archiv\u00E9e'
+      + (st.archivedSeqs > 1 ? 's' : '') + ', non compt\u00E9e'
+      + (st.archivedSeqs > 1 ? 's' : '') + ' ci-dessus';
+    box.appendChild(archNote);
+  }
+
   function sectionTitle(txt) {
     var d = document.createElement('div');
     d.style.cssText = 'font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);margin:18px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--border)';
@@ -80627,7 +80836,7 @@ window.llOpenStatsModal = function() {
   }
 
   // ── Répartition par niveau ──
-  var nivKeys = Object.keys(st.byNiv).sort();
+  var nivKeys = Object.keys(st.byNiv).sort(llNivSort);
   if (nivKeys.length) {
     box.appendChild(sectionTitle('R\u00E9partition par niveau'));
     var maxSeq = Math.max.apply(null, nivKeys.map(function(k){ return st.byNiv[k].seqs; }));
@@ -80647,7 +80856,7 @@ window.llOpenStatsModal = function() {
       row.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:6px';
       var lbl = document.createElement('div');
       lbl.style.cssText = 'width:130px;flex-shrink:0;font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
-      lbl.title = niv; lbl.textContent = niv;
+      lbl.title = llNivLabel(niv); lbl.textContent = llNivLabel(niv);
       var barWrap = document.createElement('div');
       barWrap.style.cssText = 'flex:1;background:var(--bg);border-radius:4px;height:16px;overflow:hidden;position:relative';
       var bar = document.createElement('div');
@@ -80791,8 +81000,7 @@ window.llRestoreFromCorbeille = function(idx) {
     arr.splice(idx,1); llCorbeilleSave(arr); llRefreshBiblio();
     var t=document.createElement('div');
     t.textContent='\u2713 S\u00E9quence \u00AB '+item.label+' \u00BB restaur\u00E9e';
-    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;z-index:99999';
-    document.body.appendChild(t); setTimeout(function(){t.remove();},3000);
+    window.llToast(t,'ok');
   } else if (item.type === 'seance') {
     var data=window.__ll_getData?window.__ll_getData():null; if(!data)return;
     var tgtSeq=(data.sequences||[]).find(function(s){return s.id===item.parentSeqId;});
@@ -80801,8 +81009,7 @@ window.llRestoreFromCorbeille = function(idx) {
     arr.splice(idx,1); llCorbeilleSave(arr); llRefreshBiblio();
     var t2=document.createElement('div');
     t2.textContent='\u2713 S\u00E9ance restaur\u00E9e dans \u00AB '+tgtSeq.titre+' \u00BB';
-    t2.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;z-index:99999';
-    document.body.appendChild(t2); setTimeout(function(){t2.remove();},3000);
+    window.llToast(t2,'ok');
   }
 };
 
@@ -80814,7 +81021,7 @@ window.llViderCorbeille = function() {
 function llInjectCorbeilleBiblio(container) {
   if (document.getElementById('__ll_biblio_corbeille')) return;
   var arr = llCorbeilleGet();
-  var s = llMakeBibCard('__ll_biblio_corbeille','\uD83D\uDDD1\uFE0F','Corbeille','rgba(239,68,68,.1)','#b91c1c',null);
+  var s = llMakeBibCard('__ll_biblio_corbeille','\uD83D\uDDD1\uFE0F','Corbeille','rgba(239,68,68,.1)','#b91c1c',null,arr.length);
   if (!arr.length) {
     var emp=document.createElement('p');emp.className='ll-bib-empty';
     emp.textContent='La corbeille est vide. Les s\u00E9quences et s\u00E9ances supprim\u00E9es y apparaissent automatiquement.';
@@ -80904,8 +81111,7 @@ window.llArchiveYear = function(year) {
   toArchive.forEach(function(s){window.__ll_upsertSequence(Object.assign({},s,{isArchived:true,archivedYear:year}));});
   llRefreshBiblio();
   var t=document.createElement('div');t.textContent='\uD83D\uDCE6 '+toArchive.length+' s\u00E9quences archiv\u00E9es ('+year+')';
-  t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#6c63ff;color:#fff;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;z-index:99999';
-  document.body.appendChild(t);setTimeout(function(){t.remove();},3000);
+  window.llToast(t,'info');
 };
 
 window.llRestoreArchivedSeq = function(seqId) {
@@ -80917,8 +81123,7 @@ window.llRestoreArchivedSeq = function(seqId) {
   llRefreshBiblio();
   // Toast confirmation
   var t=document.createElement('div');t.textContent='\u2197 Séquence restaurée : '+(seq.titre||'sans titre');
-  t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#22c55e;color:#fff;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;z-index:99999';
-  document.body.appendChild(t);setTimeout(function(){t.remove();},3000);
+  window.llToast(t,'ok');
 };
 
 function llInjectArchiveBiblio(container) {
@@ -80955,7 +81160,7 @@ function llInjectArchiveBiblio(container) {
     document.body.appendChild(pick);
     setTimeout(function(){document.addEventListener('click',function h(){pick.remove();document.removeEventListener('click',h);});},80);
   };
-  var s=llMakeBibCard('__ll_biblio_archives','\uD83D\uDCE6','Archives','rgba(100,116,139,.12)','#475569',archBtn);
+  var s=llMakeBibCard('__ll_biblio_archives','\uD83D\uDCE6','Archives','rgba(100,116,139,.12)','#475569',archBtn,archived.length);
   if(!archived.length){
     var emp=document.createElement('p');emp.className='ll-bib-empty';
     emp.textContent='Aucune s\u00E9quence archiv\u00E9e. Utilisez \u00AB Archiver une ann\u00E9e \u00BB pour basculer une ann\u00E9e scolaire hors de la liste principale.';
@@ -81007,7 +81212,12 @@ function llBuildCECRLHeatmap(box) {
   var data=window.__ll_getData?window.__ll_getData():null;if(!data)return;
 
   // Collect all non-hidden sequences grouped by niveau
-  var seqs=(data.sequences||[]).filter(function(s){return !s.isFlash&&!s.isEvalLib&&!s.isArchived;});
+  var seqs=(data.sequences||[]).filter(function(s){
+    return !s.isFlash && !s.isEvalLib && !s.isArchived
+        && s.id!==LL_EVAL_GRILLES_SEQ_ID
+        && s.id!=='__ll_flash_seances__'
+        && s.id!==LL_TOUR_DEMO_SEQ_ID;
+  });
   var niveaux=[];
   var byNiv={};
   seqs.forEach(function(seq){
@@ -81015,7 +81225,7 @@ function llBuildCECRLHeatmap(box) {
     if(!byNiv[niv]){byNiv[niv]=[];niveaux.push(niv);}
     byNiv[niv].push(seq);
   });
-  niveaux.sort();
+  niveaux.sort(llNivSort);
 
   function secT(txt){var d=document.createElement('div');d.style.cssText='font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);margin:18px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--border)';d.textContent=txt;return d;}
   box.appendChild(secT('Carte des descripteurs CECRL par niveau'));
@@ -81094,7 +81304,7 @@ function llBuildCECRLHeatmap(box) {
   allNiveaux.forEach(function(niv,i){
     var tab=document.createElement('button');
     tab.style.cssText='padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:'+(i===0?'#6c63ff':'var(--card)')+';color:'+(i===0?'#fff':'var(--text)')+';font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .12s';
-    tab.textContent=niv==='Tous'?'🌍 Tous':niv;
+    tab.textContent=niv==='Tous'?'🌍 Tous':llNivLabel(niv);
     tab.dataset.niv=niv;
     tab.onclick=function(){
       tabBar.querySelectorAll('button').forEach(function(b){
@@ -81134,8 +81344,51 @@ llHookAll=function(){
   if(container){
     llInjectArchiveBiblio(container);
     llInjectCorbeilleBiblio(container);
+    llSyncReactGrillesCard();
   }
 };
+
+// ═══════════════════════════════════════════════════════════════════
+// BIBLIOTHEQUE — pose immediate des encarts
+// Le hook general est temporise a 350 ms : les encarts React
+// s'affichaient d'abord, puis les sept encarts injectes arrivaient
+// d'un bloc et poussaient la page vers le bas. Cet observateur les
+// pose dans la meme image que le rendu React. Il n'injecte que ce
+// qui manque et ne supprime jamais rien.
+// ═══════════════════════════════════════════════════════════════════
+(function(){
+  if(window.__ll_bib_fast_ready) return;
+  window.__ll_bib_fast_ready = true;
+  var pending = false;
+
+  function llBiblioFast(){
+    // Sortie immediate si l'on n'est pas sur la Bibliotheque.
+    if(!document.getElementById('ll-bib-supports')
+       && !document.getElementById('ll-bib-grilles')
+       && !document.getElementById('ll-bib-strategies')) return;
+    // Sortie immediate si tout est deja en place.
+    if(document.getElementById('__ll_biblio_manuels')
+       && document.getElementById('__ll_biblio_archives')
+       && document.getElementById('__ll_biblio_corbeille')) return;
+    if(pending) return;
+    pending = true;
+    requestAnimationFrame(function(){
+      pending = false;
+      try{
+        llInjectBiblioSections();
+        var c = llFindBiblioContainer();
+        if(c){
+          llInjectArchiveBiblio(c);
+          llInjectCorbeilleBiblio(c);
+          llSyncReactGrillesCard();
+        }
+      }catch(e){}
+    });
+  }
+
+  try{ new MutationObserver(llBiblioFast).observe(document.body,{childList:true,subtree:true}); }catch(e){}
+  llBiblioFast();
+})();
 
 
 
@@ -81153,7 +81406,8 @@ window.llOpenCalEventEditor = function(evtId) {
 
   var old=document.getElementById('__ll_calev_modal');if(old)old.remove();
   var ov=document.createElement('div');ov.id='__ll_calev_modal';
-  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  ov.className=(ov.className?ov.className+' ':'')+'ll-ov';
 
   var box=document.createElement('div');
   box.style.cssText='background:var(--panel);border-radius:18px;padding:24px 26px;min-width:360px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.4);position:relative';
@@ -81221,8 +81475,7 @@ window.llOpenCalEventEditor = function(evtId) {
     ov.remove();
     // Toast
     var t=document.createElement('div');t.textContent='\u2713 \u00C9v\u00E9nement mis \u00E0 jour';
-    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#6c63ff;color:#fff;padding:10px 20px;border-radius:10px;font-weight:700;font-size:13px;z-index:99999';
-    document.body.appendChild(t);setTimeout(function(){t.remove();},2500);
+    window.llToast(t,'info');
   };
 
   btnRow.appendChild(cancelBtn);btnRow.appendChild(delBtn);btnRow.appendChild(saveBtn);
@@ -81382,7 +81635,8 @@ function llOpenQuizLoomPicker(sea, sq){
 
   var overlay=document.createElement('div');
   overlay.id='__ll_ql_modal';
-  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  overlay.className=(overlay.className?overlay.className+' ':'')+'ll-ov';
 
   var box=document.createElement('div');
   box.style.cssText='background:var(--panel);border-radius:18px;padding:26px 28px;min-width:440px;max-width:92vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.35);position:relative';
