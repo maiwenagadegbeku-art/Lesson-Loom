@@ -77324,15 +77324,32 @@ function llHookSeancesHomeGrid() {
 
 // ── 1c. BOUTON "Copier vers" quand on édite une séance flash ─────────
 function llHookFlashSeanceEditor() {
+  var old = document.getElementById('__ll_flash_copy_btn');
+
+  // Garde stricte : ce bouton n'existe QUE dans l'editeur de seance.
+  // Sans elle, .editor-panel existe aussi dans l'editeur de SEQUENCE et le
+  // bouton s'y injectait.
+  if(!document.querySelector('[data-testid="sea-titre"]')) { if(old) old.remove(); return; }
+
   var sea = window.__ll_activeSeance;
-  var seq = window.__ll_activeSeq;
-  if(!sea || !seq || seq.id !== LL_FLASH_SEQ_ID) {
-    // Remove copy button if exists (left flash sequence)
-    var old = document.getElementById('__ll_flash_copy_btn');
-    if(old) old.remove();
-    return;
+  if(!sea || !sea.id) { if(old) old.remove(); return; }
+
+  // La sequence parente est retrouvee dans les donnees fraiches : on ne fait
+  // jamais confiance a __ll_activeSeq, qui peut pointer vers la sequence
+  // precedemment ouverte (ici, la sequence flash).
+  var seq = null;
+  if(typeof window.__ll_getData === 'function') {
+    var dAll = window.__ll_getData() || {};
+    var seqs = dAll.sequences || [];
+    for(var si = 0; si < seqs.length && !seq; si++) {
+      var sl = seqs[si].seances || [];
+      for(var sj = 0; sj < sl.length; sj++) {
+        if(sl[sj].id === sea.id) { seq = seqs[si]; break; }
+      }
+    }
   }
-  if(document.getElementById('__ll_flash_copy_btn')) return;
+  if(!seq || seq.id !== LL_FLASH_SEQ_ID) { if(old) old.remove(); return; }
+  if(old) return;
 
   // Find the export/toolbar area in the seance editor
   var panel = document.querySelector('.editor-panel');
