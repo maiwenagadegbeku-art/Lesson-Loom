@@ -9,7 +9,7 @@ Application standalone (un seul fichier HTML) qui fonctionne directement dans le
 ## Prérequis
 
 - Un navigateur moderne (Chrome, Firefox, Edge)
-- Aucune installation — double-clic sur `lesson-loom-modified.html` pour ouvrir
+- Aucune installation — double-clic sur le fichier HTML pour ouvrir
 
 ---
 
@@ -48,7 +48,9 @@ Chaque séquence contient :
 - Liste de séances (réordonnables, duplicables, copiables vers une autre séquence)
 - Grilles d'évaluation associées
 
-**Niveaux disponibles** : 6ème à 3ème, Seconde LV A/B/C, Première LV A/B/C, Terminale LV A/B/C, AMC, LLCER, Seconde/Première/Terminale génériques.
+**Niveaux disponibles** : 6ème à 3ème, Seconde LV A/B/C, Première LV A/B/C, Terminale LV A/B/C, AMC, LLCER, voie technologique, Seconde/Première/Terminale génériques.
+
+**Import de liste** — bouton `📋 Liste` à côté des champs Lexique, Grammaire et Phonologie : collez des items séparés par virgule ou saut de ligne, tout est ajouté d'un coup.
 
 ---
 
@@ -66,7 +68,13 @@ L'éditeur de séance comprend :
 
 **Aperçu A4 en temps réel** — mis à jour à chaque modification, imprimable directement depuis le navigateur.
 
-**Ticks de réemploi** — marquez les objectifs hérités d'une séance précédente pour suivre leur réemploi au fil de la séquence.
+**💡 Objectifs de la séquence** — panneau de pastilles cliquables au-dessus du champ Lexique : les objectifs de la séquence parente s'ajoutent à la séance en un clic. Un second clic les retire.
+
+**✅ Cocher les objectifs traités** — panneau repliable sous les activités : cochez ce que vous avez effectivement traité. Un badge ×N indique combien de séances de la séquence réemploient chaque objectif. Ces coches alimentent le bilan de la progression.
+
+**Marquage des tâches** — badges `🏁 Tâche finale` et `🔷 Tâche intermédiaire`, mutuellement exclusifs. Ils colorent la carte de la séance, apparaissent dans l'aperçu A4, dans les cartes de progression et dans les exports.
+
+**Grille liée à la tâche finale** — une séance marquée Tâche finale peut être associée à une grille d'évaluation de la séquence, affichée en entier dans l'aperçu A4.
 
 **Modèles d'activités** — sauvegardez vos activités récurrentes en favoris ⭐ pour les réutiliser rapidement.
 
@@ -75,27 +83,69 @@ L'éditeur de séance comprend :
 Depuis le menu **Exporter** d'une séance :
 - 🖨️ **PDF** — via l'impression navigateur
 - 📄 **RTF** — compatible Word ET LibreOffice
-- ⚡ **Copier pour QuizLoom** — ouvre un sélecteur pour choisir 1, plusieurs ou toutes les séances de la séquence. Le texte est copié dans le presse-papier, prêt à être collé dans QuizLoom.
+- ⚡ **Copier pour QuizLoom** — ouvre un sélecteur pour choisir 1, plusieurs ou toutes les séances de la séquence
+
+#### Export d'une séquence complète
+
+Depuis la fiche séquence : **📄 Séquence complète (PDF)** — mise en page Compact ou Aéré, avec choix du sommaire, des images, des grilles liées, de la trace écrite et des devoirs.
+
+---
+
+### 🎯 Référentiel CECRL
+
+Les **activités langagières** couvrent l'intégralité du référentiel du Volume complémentaire 2018/2020 :
+
+| Compétence | Sous-compétences | Descripteurs |
+|---|---|---|
+| CO — Compréhension de l'oral | 6 | 36 |
+| CE — Compréhension de l'écrit | 5 | 33 |
+| PO — Production orale | 5 | 28 |
+| PE — Production écrite | 2 | 11 |
+| IO — Interaction orale | 9 | 54 |
+| IE — Interaction écrite | 4 | 28 |
+| MED — Médiation | 12 | 44 |
+| Composante pragmatique | 6 | 34 |
+
+Soit **294 descripteurs de Pré-A1 à C2**, triés par niveau croissant. La compréhension audiovisuelle est intégrée à la Compréhension de l'oral (sous-compétences *Émissions TV et films* et *Vidéos en ligne*).
 
 ---
 
 ### 📋 Grilles d'évaluation
 
-Deux types de grilles par séquence :
+Trois types de grilles par séquence :
 
-**Grilles CECRL** — descripteurs *"I can…"* par compétence et niveau. Pré-remplissage automatique des cellules vides selon le niveau de chaque ligne.
+**Grilles CECRL** — descripteurs officiels par compétence et niveau. Le modal de chargement propose tous les niveaux de Pré-A1 à C2, avec une **présélection adaptée au niveau de classe** de la séquence (A1/A2 en 6ème, A2+/B1 en 3ème, B2 en Terminale…), librement modifiable.
 
-**Grilles critères/points** — critères libres avec points par critère et par niveau.
+**Grilles critères/points** — critères libres avec points par critère et par niveau. Le total se recalcule automatiquement ; une saisie manuelle le verrouille.
 
-- Marquez vos grilles ⭐ pour les retrouver dans vos favoris
-- Ouvrez une grille en HTML dans un nouvel onglet (distribution aux élèves ou impression)
-- Créez des grilles indépendantes (sans séquence) depuis la Bibliothèque
+**Grilles de positionnement** — sans points, avec marqueurs `✓ acquis` / `◐ en cours` / `○ non acquis`.
+
+**⚖️ Panneau de cohérence** — repliable, il signale sans jamais bloquer : barème désynchronisé (avec correction en un clic), niveaux CECRL inhabituels pour le niveau de classe, intitulés en double, grilles incomplètes.
+
+**Distribution aux élèves** — fichier HTML autonome avec listes de classes enregistrées, trois modes d'impression (Compact, Résultats seuls, Récapitulatif) et téléchargement individuel par élève.
 
 ---
 
 ### 📈 Progression
 
-Regroupez vos séquences dans un plan annuel par niveau de classe. Visualisez l'équilibre de votre programme sur l'année scolaire.
+Regroupez vos séquences dans un plan annuel par niveau de classe.
+
+**Cartes de séquence enrichies** — chaque carte affiche l'axe culturel, les compétences CECRL avec leur niveau visé, des compteurs linguistiques (grammaire, lexique, phonologie, pragmatique), les tâches intermédiaires et finale avec leur numéro de séance, et le nombre de séances.
+
+Un bouton **▸ Détail** déplie les listings complets : descripteurs par compétence, points de grammaire, items lexicaux, points de phonologie, et intitulés des tâches.
+
+**🎯 Bilan de réemploi des objectifs** — panneau repliable en bas de la progression :
+- Sélecteur de périmètre : toute la progression ou une séquence en particulier
+- Case *Inclure les objectifs non traités* pour repérer ce qui reste à faire
+- Chaque objectif est dépliable et montre dans quelles séances il est réemployé
+
+**🖨️ Imprimer la progression** — document A4 (paysage par défaut) comprenant :
+- Le tableau de synthèse annuelle : séquences, axes, compétences avec niveaux, tâches, séances
+- La couverture annuelle : totaux par catégorie linguistique et fréquence des compétences
+- Le détail par séquence
+- Le bilan des objectifs
+
+Sections cochables, impression en couleurs ou en noir et blanc au choix.
 
 ---
 
@@ -104,7 +154,7 @@ Regroupez vos séquences dans un plan annuel par niveau de classe. Visualisez l'
 - Visualisation hebdomadaire de l'année scolaire
 - Vacances scolaires et jours fériés intégrés
 - Placement de séquences sur des semaines
-- Ajout de sorties et voyages scolaires (depuis le calendrier ou la Bibliothèque)
+- Ajout de sorties et voyages scolaires
 - Cliquez un événement pour le modifier ou le supprimer
 
 ---
@@ -122,6 +172,7 @@ Centralisez toutes vos grilles, toutes séquences confondues. Distribuez-les dir
 - **⭐ Grilles favorites** — retrouvez les grilles marquées d'une étoile
 - **📊 Statistiques CECRL** — vue globale de vos objectifs langagiers
 - **Comparatif manuels** — notes et comparatifs de manuels
+- **Archives** — séquences archivées en fin d'année
 
 ---
 
@@ -149,8 +200,10 @@ Bouton **💾** dans le bandeau — deux formats :
 
 | Format | Usage |
 |--------|-------|
-| **JSON** | Fichier léger contenant uniquement les données (séquences, séances, grilles, etc.) |
+| **JSON** | Fichier léger contenant uniquement les données |
 | **HTML complet** | L'application entière avec toutes les données — ouvrable sur n'importe quel ordinateur |
+
+**Partage d'une séquence** — bouton *Partager (HTML)* sur la fiche séquence ; réception par le bouton *📥 Importer une séquence HTML* de la page d'accueil, ou par lien avec `#import=`.
 
 > ⚠️ Les données sont stockées dans le navigateur (localStorage). Sauvegardez régulièrement, notamment avant de vider le cache ou changer de navigateur.
 
@@ -170,6 +223,7 @@ Depuis Lesson Loom : **Exporter → ⚡ Copier pour QuizLoom** → sélectionnez
 - Aucune donnée n'est envoyée à un serveur
 - Aucun compte requis
 - Fonctionne hors ligne (après premier chargement)
+- Les **listes de classes** sont stockées séparément et ne sont jamais incluses dans un export de séquence partagée
 
 ---
 
@@ -180,4 +234,4 @@ Outil pédagogique personnel — usage non commercial.
 🌟 **Lesson Loom** — Développé pour les enseignants d'anglais LV1 dans le secondaire français.
 Dérivé de [Le Séquenceur LV](https://github.com/charlirollo/sequenceur-lv) par Charlie Rollo (AGPLv3).
 
-© Juin 2026 [Maïwena Gadegbeku](mailto:maiwena.gadegbeku@ac-rennes.fr)
+© Août 2026 [Maïwena Gadegbeku](mailto:maiwena.gadegbeku@ac-rennes.fr)
