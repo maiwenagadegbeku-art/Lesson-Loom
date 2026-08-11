@@ -53557,7 +53557,7 @@ const AppProvider = ({
   // État de l'import partagé (depuis #import=… dans l'URL)
   const [sharedImport, setSharedImport] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    try{localStorage.setItem(STORAGE_KEY, JSON.stringify(data));try{if(window.__ll_saveOk)window.__ll_saveOk();}catch(_o){}}catch(_q){try{if(window.__ll_saveFailed)window.__ll_saveFailed(_q,data);}catch(_o2){}}
   }, [data]);
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
     localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
@@ -53896,6 +53896,7 @@ const AppProvider = ({
     window.__ll_deleteSequence = deleteSequence;
     window.__ll_upsertCalEvent = upsertCalEvent;
     window.__ll_deleteCalEvent = deleteCalEvent;
+    window.__ll_upsertProgression = upsertProgression;
   } catch (e) {}
   return /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxDEV)(AppContext.Provider, {
     value: value,
@@ -58146,7 +58147,7 @@ const queryClient = new _tanstack_react_query__WEBPACK_IMPORTED_MODULE_2__.Query
   }
 });
 const root = react_dom_client__WEBPACK_IMPORTED_MODULE_1__.createRoot(document.getElementById("root"));
-root.render(/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxDEV)((react__WEBPACK_IMPORTED_MODULE_0___default().StrictMode), {
+root.render(/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxDEV)((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), {
   children: /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_6__.jsxDEV)(_tanstack_react_query__WEBPACK_IMPORTED_MODULE_3__.QueryClientProvider, {
     client: queryClient,
     "x-file-name": "index",
@@ -61286,7 +61287,7 @@ const CalendrierView = () => {
     var y1=+m[1],y2=+m[2],allH=new Set(gH(y1).concat(gH(y2)));
     var cust=lV(),tI=toI(new Date());
     var evts=(curData.calendar&&curData.calendar.events)||[];
-    var seqs=curData.sequences||[];
+    var seqs=(curData.sequences||[]).filter(function(s){return s && !s.isFlash && !s.isEvalLib && s.id!=='__ll_tour_demo__' && s.id!=='__ll_flash_seances__' && s.id!=='__ll_eval_grilles__';});
     function iV(d){return cust.some(function(c){return d>=c.start&&d<=c.end})}
     function vL(d){var c=cust.find(function(c){return d>=c.start&&d<=c.end});return c?c.label:''}
     function eF(d){return evts.filter(function(e){var s=(e.startDate||'').slice(0,10),en=(e.endDate||e.startDate||'').slice(0,10);return d>=s&&d<=en})}
@@ -65486,7 +65487,7 @@ const RichTextEditor = ({
 }) => {
   _s();
   const ref = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
-  const lastValueRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(value || '');
+  const lastValueRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null); /* LOT 7 : temoin null au montage. Auparavant initialise a la valeur courante, l'effet concluait "rien n'a change" et n'injectait jamais le contenu : la boite restait vide, et la premiere frappe ecrasait le texte enregistre. */
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
     if (ref.current && (value || '') !== lastValueRef.current) {
       // Sanitize avant injection : protège contre les balises <script>, attrs on*, javascript: urls.
@@ -73829,7 +73830,7 @@ function hookHighlight(){
 var _llObsTimer=null;
 var obs=new MutationObserver(function(){
   clearTimeout(_llObsTimer);
-  _llObsTimer=setTimeout(function(){hookS();renderLib();hookImageInputs();hookCecrlCustomDesc();hookHighlight();hookSeanceExport();hookSauvegardeBtn();},200);
+  _llObsTimer=setTimeout(function(){hookS();hookImageInputs();hookCecrlCustomDesc();hookHighlight();hookSeanceExport();hookSauvegardeBtn();},200);
 });
 
 // ═══ CECRL CUSTOM DESCRIPTOR v4 (React-state based) ═══════
@@ -73933,16 +73934,21 @@ function openSaveModal(){
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted)">🗄️ Espace navigateur</div>
         <div style="font-size:12px;font-weight:700;color:var(--text)">${(function(){
-          try{var raw=localStorage.getItem('le-sequenceur-data-v2')||'{}';var kb=(new Blob([raw]).size/1024).toFixed(1);var maxMo=5;var pct=Math.min(100,parseFloat(kb)/(maxMo*1024)*100).toFixed(0);return kb+' Ko / ~'+maxMo+' Mo';}catch(e){return'—';}
+          try{var u=window.__ll_storageUsage();return u.totalKo+' Ko / ~5 Mo';}catch(e){return'—';}
         })()}</div>
       </div>
       <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:10px">
         <div style="height:100%;border-radius:4px;transition:width .3s;background:${(function(){
-          try{var raw=localStorage.getItem('le-sequenceur-data-v2')||'{}';var pct=new Blob([raw]).size/(5*1024*1024)*100;return pct>80?'#ef4444':pct>50?'#f59e0b':'#6c63ff';}catch(e){return'#6c63ff';}
+          try{var p=window.__ll_storageUsage().pct;return p>80?'#ef4444':p>50?'#f59e0b':'#6c63ff';}catch(e){return'#6c63ff';}
         })()};width:${(function(){
-          try{var raw=localStorage.getItem('le-sequenceur-data-v2')||'{}';return Math.min(100,new Blob([raw]).size/(5*1024*1024)*100).toFixed(1)+'%';}catch(e){return'0%';}
+          try{return Math.min(100,window.__ll_storageUsage().pct).toFixed(1)+'%';}catch(e){return'0%';}
         })()}"></div>
       </div>
+      <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px">${(function(){
+        try{var u=window.__ll_storageUsage();
+          return 'Séquences et séances '+u.mainKo+' Ko · Corbeille '+u.corbeilleKo+' Ko · Reste '+u.autresKo+' Ko';
+        }catch(e){return '';}
+      })()}</div>
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div style="font-size:10px;color:var(--text-muted)">Dernière sauvegarde fichier :&nbsp;</div>
         <div style="font-size:11px;font-weight:700;color:${(function(){
@@ -79256,12 +79262,32 @@ function llDoImportSeq(seqData, niv){
   imported.id = 'seq_'+Date.now()+'_'+Math.random().toString(36).slice(2,5);
   imported.niveau = niv || seqData.niveau || 'Seconde';
   imported.importedAt = Date.now();
-  // Clear grille IDs to avoid dups
-  (imported.grilles||[]).forEach(function(g){
-    g.id = 'gri_'+Date.now()+Math.random().toString(36).slice(2,4);
+  // ── LOT 3 — Identifiants neufs ET liens preserves ──────────────
+  // Ancienne version : identifiants tires sur 2 caracteres (1296 valeurs)
+  // -> environ 1 chance sur 3 d'avoir deux seances jumelles sur 30 seances.
+  // Et le lien seance-tache -> grille n'etait pas reecrit : toute grille
+  // liee arrivait detachee. Meme methode que la duplication de sequence :
+  // table de correspondance ancien -> nouveau, identifiants indexes.
+  var _stamp = Date.now();
+  var _rnd = function(){ return Math.random().toString(36).slice(2,7); };
+  var _gMap = {};
+  (imported.grilles||[]).forEach(function(g, i){
+    if (!g) return;
+    var nid = 'gri_' + _stamp + '_' + i + '_' + _rnd();
+    if (g.id) _gMap[g.id] = nid;
+    g.id = nid;
   });
-  (imported.seances||[]).forEach(function(s){
-    s.id = 'sea_'+Date.now()+Math.random().toString(36).slice(2,4);
+  (imported.seances||[]).forEach(function(s, i){
+    if (!s) return;
+    s.id = 'sea_' + _stamp + '_' + i + '_' + _rnd();
+    if (Array.isArray(s.supportsList)) {
+      s.supportsList = s.supportsList.map(function(sp, k){
+        return Object.assign({}, sp, { id: 's_' + _stamp + '_' + i + '_' + k });
+      });
+    }
+    // La grille liee suit l'import ; si elle n'a pas ete transmise, le lien
+    // est retire proprement plutot que de pointer dans le vide.
+    if (s.grilleId) s.grilleId = _gMap[s.grilleId] || '';
   });
   upsert(imported);
   var toast = document.createElement('div');
@@ -80967,14 +80993,37 @@ var LL_CORBEILLE_KEY = 'lessonloom-corbeille';
 var LL_CORBEILLE_MAX = 15;
 
 function llCorbeilleGet(){ try{ return JSON.parse(localStorage.getItem(LL_CORBEILLE_KEY)||'[]'); }catch(e){ return []; } }
-function llCorbeilleSave(arr){ localStorage.setItem(LL_CORBEILLE_KEY, JSON.stringify(arr)); }
+function llCorbeilleSave(arr){ try{ localStorage.setItem(LL_CORBEILLE_KEY, JSON.stringify(arr)); }catch(e){ try{ if(arr.length>3){ localStorage.setItem(LL_CORBEILLE_KEY, JSON.stringify(arr.slice(0,3))); } }catch(e2){} } }
 
 window.__ll_preDeleteSeq = function(id, sequences) {
   var seq = (sequences||[]).find(function(s){ return s.id===id; });
   if (!seq) return;
   var arr = llCorbeilleGet();
+
+  // Anti-doublon : l'application peut executer deux fois la meme suppression.
+  // Sans cette garde, la corbeille se remplit deux fois plus vite.
+  if (arr.length && arr[0] && arr[0].type==='sequence' && arr[0].id===id
+      && (Date.now() - (arr[0].deletedAt||0)) < 3000) return;
+
+  // LOT 4 — On memorise aussi la PLACE de la sequence : sa progression et ses
+  // semaines de calendrier. Sans cela, la restauration rendait la sequence
+  // mais pas sa place, silencieusement.
+  var progIds = [], calEvs = [];
+  try {
+    var d0 = window.__ll_getData ? window.__ll_getData() : null;
+    if (d0) {
+      (d0.progressions||[]).forEach(function(p){
+        if (p && (p.sequenceIds||[]).indexOf(id) !== -1) progIds.push(p.id);
+      });
+      calEvs = ((d0.calendar||{}).events||[])
+        .filter(function(e){ return e && e.sequenceId === id; })
+        .map(function(e){ return JSON.parse(JSON.stringify(e)); });
+    }
+  } catch(e) {}
+
   arr.unshift({ type:'sequence', id:seq.id, data:JSON.parse(JSON.stringify(seq)),
-    deletedAt:Date.now(), label:(seq.titre||'Sans titre')+(seq.niveau?' \u2014 '+seq.niveau:'') });
+    deletedAt:Date.now(), label:(seq.titre||'Sans titre')+(seq.niveau?' \u2014 '+seq.niveau:''),
+    progIds: progIds, calEvs: calEvs });
   if (arr.length > LL_CORBEILLE_MAX) arr = arr.slice(0, LL_CORBEILLE_MAX);
   llCorbeilleSave(arr);
 };
@@ -80983,6 +81032,8 @@ window.__ll_preDeleteSea = function(id, activeSeq) {
   var sea = (activeSeq.seances||[]).find(function(s){ return s.id===id; });
   if (!sea) return;
   var arr = llCorbeilleGet();
+  if (arr.length && arr[0] && arr[0].type==='seance' && arr[0].id===id
+      && (Date.now() - (arr[0].deletedAt||0)) < 3000) return;
   arr.unshift({ type:'seance', id:sea.id, data:JSON.parse(JSON.stringify(sea)),
     deletedAt:Date.now(), label:sea.titre||'S\u00E9ance sans titre',
     parentSeqId:activeSeq.id, parentSeqTitle:activeSeq.titre||'S\u00E9quence sans titre' });
@@ -80997,9 +81048,42 @@ window.llRestoreFromCorbeille = function(idx) {
   if (item.type === 'sequence') {
     if (!window.__ll_upsertSequence) { alert('Action non disponible.'); return; }
     window.__ll_upsertSequence(Object.assign({}, item.data, {id:item.id}));
+
+    // LOT 4 — On rend aussi sa PLACE a la sequence : progression et calendrier.
+    // Les elements deja presents dans la corbeille avant ce correctif n'ont pas
+    // ces informations : on les restaure alors comme avant, sans erreur.
+    var nProg = 0, nCal = 0;
+    try {
+      if ((item.progIds||[]).length && typeof window.__ll_upsertProgression === 'function') {
+        var dd = window.__ll_getData ? window.__ll_getData() : null;
+        (item.progIds||[]).forEach(function(pid){
+          var p = ((dd&&dd.progressions)||[]).filter(function(x){ return x.id===pid; })[0];
+          if (!p) return;
+          var ids = (p.sequenceIds||[]).slice();
+          if (ids.indexOf(item.id) === -1) {
+            ids.push(item.id);
+            window.__ll_upsertProgression(Object.assign({}, p, { sequenceIds: ids }));
+            nProg++;
+          }
+        });
+      }
+    } catch(e) {}
+    try {
+      if ((item.calEvs||[]).length && typeof window.__ll_upsertCalEvent === 'function') {
+        (item.calEvs||[]).forEach(function(ev){
+          window.__ll_upsertCalEvent(JSON.parse(JSON.stringify(ev)));
+          nCal++;
+        });
+      }
+    } catch(e) {}
+
     arr.splice(idx,1); llCorbeilleSave(arr); llRefreshBiblio();
+    var extra = '';
+    if (nProg && nCal) extra = ' (progression et calendrier r\u00E9tablis)';
+    else if (nProg) extra = ' (progression r\u00E9tablie)';
+    else if (nCal) extra = ' (calendrier r\u00E9tabli)';
     var t=document.createElement('div');
-    t.textContent='\u2713 S\u00E9quence \u00AB '+item.label+' \u00BB restaur\u00E9e';
+    t.textContent='\u2713 S\u00E9quence \u00AB '+item.label+' \u00BB restaur\u00E9e'+extra;
     window.llToast(t,'ok');
   } else if (item.type === 'seance') {
     var data=window.__ll_getData?window.__ll_getData():null; if(!data)return;
@@ -82563,6 +82647,11 @@ llHookAll = function() {
   function hookTFPreview() {
     var sea = window.__ll_activeSeance;
     var old = document.getElementById('__ll_tf_preview_badge');
+    // LOT 10 — Garde de contexte. Ces elements n'appartiennent QU'A l'apercu
+    // d'une SEANCE. L'editeur de SEQUENCE possede lui aussi un .preview-panel
+    // avec un h1 : sans cette garde, le badge et la grille de la derniere
+    // seance ouverte s'inseraient dans la fiche de la sequence.
+    if (!document.querySelector('[data-testid="sea-titre"]')) { if (old) old.remove(); return; }
     if (!sea || !sea.isTacheFinale) { if (old) old.remove(); return; }
     var previewH1 = document.querySelector('.preview-panel h1');
     if (!previewH1) return;
@@ -82996,6 +83085,11 @@ llHookAll = function() {
   function hookTIPreview() {
     var sea = window.__ll_activeSeance;
     var old = document.getElementById('__ll_ti_preview_badge');
+    // LOT 10 — Garde de contexte. Ces elements n'appartiennent QU'A l'apercu
+    // d'une SEANCE. L'editeur de SEQUENCE possede lui aussi un .preview-panel
+    // avec un h1 : sans cette garde, le badge et la grille de la derniere
+    // seance ouverte s'inseraient dans la fiche de la sequence.
+    if (!document.querySelector('[data-testid="sea-titre"]')) { if (old) old.remove(); return; }
     if (!sea || !sea.isTacheInter || sea.isTacheFinale) { if (old) old.remove(); return; }
     var previewH1 = document.querySelector('.preview-panel h1');
     if (!previewH1) return;
@@ -83114,6 +83208,11 @@ llHookAll = function() {
     var sea = window.__ll_activeSeance;
     var seq = window.__ll_activeSeq;
     var old = document.getElementById('__ll_gr_preview');
+    // LOT 10 — Garde de contexte. Ces elements n'appartiennent QU'A l'apercu
+    // d'une SEANCE. L'editeur de SEQUENCE possede lui aussi un .preview-panel
+    // avec un h1 : sans cette garde, le badge et la grille de la derniere
+    // seance ouverte s'inseraient dans la fiche de la sequence.
+    if (!document.querySelector('[data-testid="sea-titre"]')) { if (old) old.remove(); return; }
     if (!sea || !seq || !sea.grilleId) { if (old) old.remove(); return; }
 
     var g = (seq.grilles || []).find(function(x) { return x.id === sea.grilleId; });
@@ -84574,9 +84673,29 @@ llHookAll = function() {
   // context switch. The main llHookAll runs on a 350ms debounce which is
   // slow enough to let stale nodes flash on screen; this observer runs
   // immediately and only removes, never injects.
+  // LOT 11 — Inventaire exhaustif. Le mode atelier (retire au lot 2) balayait
+  // par accident tout element etranger glisse dans une zone geree par React :
+  // un element mal place etait efface une fraction de seconde plus tard, donc
+  // invisible. Sans ce balayage accidentel, chaque element doit etre nettoye
+  // explicitement. On ne retire QUE ce qui n'appartient qu'a la seance.
   var LIST_ONLY = ['__ll_coverage'];
-  var EDITOR_ONLY = ['__ll_obj_suggest', '__ll_grille_link', '__ll_tf_editor_badge', '__ll_ti_editor_badge'];
-  var PREVIEW_ONLY = ['__ll_tf_preview_badge', '__ll_ti_preview_badge', '__ll_gr_preview'];
+  var EDITOR_ONLY = [
+    '__ll_obj_suggest',        // pastilles Objectifs de la sequence
+    '__ll_grille_link',        // selecteur de grille liee a la tache
+    '__ll_tf_editor_badge',    // badge Tache finale (editeur)
+    '__ll_ti_editor_badge',    // badge Tache intermediaire (editeur)
+    '__ll_disp',               // bloc Dispositif de la tache (editeur)
+    '__ll_tick_panel',         // panneau Cocher les objectifs traites
+    '__ll_sea_tick_summary',   // recapitulatif de reemploi
+    '__ll_flash_copy_btn'      // bouton 📥 Ajouter a une sequence (seances flash uniquement)
+  ];
+  var PREVIEW_ONLY = [
+    '__ll_tf_preview_badge',   // badge Tache finale (apercu A4)
+    '__ll_ti_preview_badge',   // badge Tache intermediaire (apercu A4)
+    '__ll_gr_preview',         // grille liee affichee dans l'apercu
+    '__ll_disp_prev',          // Dispositif de la tache dans l'apercu
+    '__ll_a4_ticks'            // badges de coches sur l'apercu A4
+  ];
 
   function drop(ids) {
     for (var i = 0; i < ids.length; i++) {
@@ -84586,18 +84705,32 @@ llHookAll = function() {
   }
 
   function fastClean() {
-    var inEditor = !!document.querySelector('.editor-panel');
-    var inPreview = !!document.querySelector('.preview-panel');
+    // LOT 10/11 — Les DEUX editeurs possedent un .editor-panel et un
+    // .preview-panel. Seul [data-testid="sea-titre"] distingue la seance.
+    // Les variables "Any" conservent le sens d'origine la ou il etait juste.
+    var inAnyEditor  = !!document.querySelector('.editor-panel');
+    var inAnyPreview = !!document.querySelector('.preview-panel');
+    var inSeance     = !!document.querySelector('[data-testid="sea-titre"]');
+    var inEditor  = inAnyEditor  && inSeance;
+    var inPreview = inAnyPreview && inSeance;
     var listDash = document.querySelector('[x-id="SeancesView_308_8"]');
-    var inList = !!(listDash && listDash.offsetParent !== null) && !inEditor && !inPreview;
+    var inList = !!(listDash && listDash.offsetParent !== null) && !inAnyEditor && !inAnyPreview;
 
     if (!inList) drop(LIST_ONLY);
     if (!inEditor) drop(EDITOR_ONLY);
     if (!inPreview) drop(PREVIEW_ONLY);
 
+    // LOT 10 — Le panneau de coherence des grilles restait a l'ecran 350 ms
+    // apres un changement d'onglet dans l'editeur de sequence : d'ou le bloc
+    // fantome. Il est desormais retire des que la barre Grilles n'est plus
+    // visible. On retire seulement, on n'injecte jamais.
+    var grBar = document.querySelector('[x-id="SequenceEditor_723_6"]');
+    if (!grBar || grBar.offsetParent === null) drop(['__ll_coh']);
+
     // Restore bars from the hide-niveaux feature must never appear
     // outside the two home pages.
-    if (inEditor || inPreview || inList) {
+    // Volontairement base sur les variables "Any" : comportement inchange.
+    if (inAnyEditor || inAnyPreview || inList) {
       document.querySelectorAll('.__ll_restore_bar').forEach(function(el) { el.remove(); });
       document.querySelectorAll('.__ll_hide_btn').forEach(function(el) { el.remove(); });
     }
@@ -84616,7 +84749,22 @@ llHookAll = function() {
     });
   }
 
-  var fastObs = new MutationObserver(fastClean);
+  // LOT 5 — Frein d'une image d'ecran, meme modele que l'observateur des
+  // etoiles de grille et que llBiblioFast. Sans lui, fastClean se
+  // declenchait a chaque rafale de modifications, y compris pendant la
+  // frappe, et balayait toute la page a chaque fois. Le role est
+  // inchange : il ne fait toujours que retirer, jamais injecter.
+  var _fcPending = false;
+  function fastCleanFrame() {
+    if (_fcPending) return;
+    _fcPending = true;
+    requestAnimationFrame(function() {
+      _fcPending = false;
+      try { fastClean(); } catch (e) {}
+    });
+  }
+
+  var fastObs = new MutationObserver(fastCleanFrame);
 
   function start() {
     try {
@@ -84640,13 +84788,320 @@ window.addEventListener('load',function(){
   obs.disconnect();
   obs=new MutationObserver(function(){
     clearTimeout(_llObsTimer);
-    _llObsTimer=setTimeout(function(){hookS();renderLib();hookImageInputs();hookCecrlCustomDesc();hookHighlight();hookSeanceExport();hookSauvegardeBtn();},200);
+    _llObsTimer=setTimeout(function(){hookS();hookImageInputs();hookCecrlCustomDesc();hookHighlight();hookSeanceExport();hookSauvegardeBtn();},200);
     clearTimeout(_llHookTimer);
     _llHookTimer=setTimeout(llHookAll, 350);
   });
   obs.observe(document.body,{childList:true,subtree:true});
 });
 })();
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   LOT 1 — FILET DE SECURITE STOCKAGE
+   Si le navigateur refuse d'enregistrer (memoire pleine), l'application
+   ne peut plus rien sauvegarder. Sans ce filet, l'ecran continue
+   d'afficher le travail comme si tout allait bien, et tout est perdu au
+   prochain rechargement. Ici : bandeau rouge persistant + telechargement
+   immediat d'une sauvegarde de secours a partir des donnees en memoire.
+   Tout est enferme dans des try/catch : ce code ne peut jamais faire
+   tomber l'application, meme s'il echoue lui-meme.
+   ═══════════════════════════════════════════════════════════════════ */
+(function(){
+  if (window.__ll_saveGuard_ready) return;
+  window.__ll_saveGuard_ready = true;
+
+  var bar = null;        // bandeau complet
+  var pill = null;       // version reduite
+  var lastData = null;   // dernieres donnees connues en memoire
+
+  function stamp(){
+    var d = new Date(), p = function(n){ return ('0'+n).slice(-2); };
+    return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'_'+p(d.getHours())+'h'+p(d.getMinutes());
+  }
+
+  function doDownload(){
+    try{
+      var payload = null;
+      if (lastData) { payload = JSON.stringify(lastData); }
+      if (!payload) {
+        try { payload = JSON.stringify(window.__ll_getData()); } catch(e){}
+      }
+      if (!payload) { payload = localStorage.getItem('le-sequenceur-data-v2') || '{}'; }
+      var blob = new Blob([payload], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'lesson-loom_SECOURS_' + stamp() + '.json';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function(){
+        try { document.body.removeChild(a); URL.revokeObjectURL(url); } catch(e){}
+      }, 600);
+    }catch(e){
+      try { alert("Le téléchargement a échoué.\n\nNe fermez pas cet onglet : recopiez à la main le travail des dernières minutes avant de quitter."); } catch(e2){}
+    }
+  }
+
+  function injectStyle(){
+    if (document.getElementById('__ll_saveguard_css')) return;
+    var st = document.createElement('style');
+    st.id = '__ll_saveguard_css';
+    st.textContent =
+      '#__ll_saveguard_bar{position:fixed;top:0;left:0;right:0;z-index:2147483000;'+
+      'background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;'+
+      'font-family:inherit;padding:12px 16px;display:flex;align-items:center;gap:14px;'+
+      'box-shadow:0 6px 24px rgba(0,0,0,.35);flex-wrap:wrap}'+
+      '#__ll_saveguard_pill{position:fixed;top:10px;right:14px;z-index:2147483000;'+
+      'background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;font-family:inherit;'+
+      'border:none;border-radius:20px;padding:7px 14px;font-size:12px;font-weight:800;'+
+      'cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.3)}'+
+      '#__ll_saveguard_bar button{font-family:inherit;cursor:pointer;border:none;'+
+      'border-radius:8px;font-weight:800;font-size:12px;padding:9px 14px}'+
+      '@media print{#__ll_saveguard_bar,#__ll_saveguard_pill{display:none !important}}';
+    document.head.appendChild(st);
+  }
+
+  function showPill(){
+    if (pill) return;
+    pill = document.createElement('button');
+    pill.id = '__ll_saveguard_pill';
+    pill.textContent = '\u26A0 Enregistrement bloqué';
+    pill.title = 'Cliquez pour rouvrir l\u2019alerte';
+    pill.onclick = function(){
+      try { if (pill) { pill.remove(); pill = null; } showBar(); } catch(e){}
+    };
+    document.body.appendChild(pill);
+  }
+
+  function showBar(){
+    if (bar && document.body.contains(bar)) return;
+    injectStyle();
+    bar = document.createElement('div');
+    bar.id = '__ll_saveguard_bar';
+
+    var txt = document.createElement('div');
+    txt.style.cssText = 'flex:1;min-width:240px;line-height:1.4';
+    var t1 = document.createElement('div');
+    t1.style.cssText = 'font-size:14px;font-weight:800;margin-bottom:2px';
+    t1.textContent = '\u26A0 Vos modifications ne sont plus enregistrées';
+    var t2 = document.createElement('div');
+    t2.style.cssText = 'font-size:12px;opacity:.95';
+    t2.textContent = 'La mémoire du navigateur est pleine. Ce qui est à l\u2019écran est encore là, mais sera perdu si vous fermez l\u2019onglet. Téléchargez votre sauvegarde maintenant.';
+    txt.appendChild(t1); txt.appendChild(t2);
+    bar.appendChild(txt);
+
+    var dl = document.createElement('button');
+    dl.style.cssText = 'background:#fff;color:#b91c1c';
+    dl.textContent = '\u2B07 Télécharger ma sauvegarde maintenant';
+    dl.onclick = doDownload;
+    bar.appendChild(dl);
+
+    var mini = document.createElement('button');
+    mini.style.cssText = 'background:rgba(255,255,255,.18);color:#fff';
+    mini.textContent = 'Réduire';
+    mini.title = 'L\u2019alerte reste visible en petit tant que le problème dure';
+    mini.onclick = function(){
+      try { if (bar) { bar.remove(); bar = null; } showPill(); } catch(e){}
+    };
+    bar.appendChild(mini);
+
+    document.body.appendChild(bar);
+  }
+
+  function clearAll(){
+    try { if (bar) { bar.remove(); bar = null; } } catch(e){}
+    try { if (pill) { pill.remove(); pill = null; } } catch(e){}
+  }
+
+  /* Appelee par l'application quand un enregistrement A ECHOUE. */
+  window.__ll_saveFailed = function(err, data){
+    try {
+      if (data) lastData = data;
+      if (document.body) showBar(); else
+        window.addEventListener('DOMContentLoaded', function(){ try{ showBar(); }catch(e){} });
+    } catch(e){}
+  };
+
+  /* Appelee par l'application quand un enregistrement A REUSSI. */
+  window.__ll_saveOk = function(){
+    try { if (bar || pill) clearAll(); } catch(e){}
+  };
+})();
+
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   LOT 6A — BARRE DE MISE EN FORME (Gras / Italique / Souligné / Listes)
+   Blocs concernés : déroulé d'activité, trace écrite, devoirs — les trois
+   utilisent le même composant, d'où un seul défaut pour six boutons.
+
+   Cause : au moment où l'on APPUIE sur un bouton, celui-ci prend le focus
+   avant même le clic. La zone de saisie le perd, et le navigateur efface
+   la sélection. Redonner le focus ensuite ne rend pas la sélection : la
+   commande s'applique donc à rien.
+
+   Correctif : empêcher le bouton de prendre le focus à l'appui. Le clic,
+   lui, fonctionne exactement comme avant. Aucune modification du bundle,
+   aucune injection dans le DOM géré par React — un simple écouteur ancré
+   sur l'identifiant x-id de la barre d'outils.
+   ═══════════════════════════════════════════════════════════════════ */
+(function(){
+  if (window.__ll_rtToolbarFix_ready) return;
+  window.__ll_rtToolbarFix_ready = true;
+
+  var TOOLBAR = '[x-id="SeancesView_56_6"]';
+
+  document.addEventListener('mousedown', function(e){
+    try {
+      var t = e.target;
+      if (!t || typeof t.closest !== 'function') return;
+      if (!t.closest(TOOLBAR)) return;
+      // Le focus reste dans la zone de saisie : la sélection survit au clic.
+      e.preventDefault();
+    } catch (err) {}
+  }, true);
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   LOT 6B — ANTI-DÉBORDEMENT DANS L'APERÇU A4 (hors tableaux)
+
+   Le navigateur sait couper entre deux mots, jamais à l'intérieur d'un
+   mot, sauf autorisation explicite. Tous les documents générés
+   (PDF de séquence, export Word, impression de la progression, grilles
+   distribuées) portent déjà cette autorisation — 14 fois dans le fichier.
+   L'aperçu à l'écran ne l'avait nulle part : il débordait donc là où le
+   document imprimé, lui, se coupait proprement.
+
+   Les tableaux sont explicitement remis à leur comportement actuel, sans
+   aucune exception : largeurs de colonnes strictement inchangées.
+   ═══════════════════════════════════════════════════════════════════ */
+(function(){
+  if (document.getElementById('__ll_a4_wrap_css')) return;
+
+  function inject(){
+    if (document.getElementById('__ll_a4_wrap_css')) return;
+    var st = document.createElement('style');
+    st.id = '__ll_a4_wrap_css';
+    st.textContent =
+      /* Blocs de texte de l'aperçu : un mot trop long peut être coupé. */
+      '.preview-panel p,.preview-panel li,.preview-panel h1,.preview-panel h2,' +
+      '.preview-panel h3,.preview-panel h4,.preview-panel section,' +
+      '.preview-panel div,.preview-panel span,.preview-panel blockquote{' +
+      'overflow-wrap:break-word}' +
+      /* Tableaux : comportement d'origine restauré, rien ne bouge. */
+      '.preview-panel table,.preview-panel thead,.preview-panel tbody,' +
+      '.preview-panel tr,.preview-panel th,.preview-panel td,' +
+      '.preview-panel th *,.preview-panel td *{overflow-wrap:normal}';
+    document.head.appendChild(st);
+  }
+
+  if (document.head) inject();
+  else window.addEventListener('DOMContentLoaded', inject);
+})();
+
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   LOT 8 — PUCES ET NUMÉROS DES LISTES
+
+   Les boutons "liste à puces" et "liste numérotée" ont toujours
+   fonctionné : la liste était bien créée dans le texte. Mais la
+   bibliothèque de styles de l'application applique une remise à zéro
+   globale — ol, ul, menu { list-style:none; margin:0; padding:0 } —
+   qui supprime puces, numéros et décalage. La liste s'affichait donc
+   exactement comme le texte d'avant : invisible à l'œil.
+
+   Ici, on rend leur apparence aux seules listes SANS CLASSE, c'est-à-
+   dire celles que l'utilisatrice crée elle-même. Les listes internes de
+   l'aperçu (.a4-list et consorts) portent toutes une classe et sont donc
+   exclues d'office : elles ne peuvent pas bouger.
+   ═══════════════════════════════════════════════════════════════════ */
+(function(){
+  if (document.getElementById('__ll_list_markers_css')) return;
+
+  var EDITOR = '[x-id="SeancesView_66_6"]';
+  var PREV   = '.preview-panel';
+
+  function inject(){
+    if (document.getElementById('__ll_list_markers_css')) return;
+    var st = document.createElement('style');
+    st.id = '__ll_list_markers_css';
+    st.textContent =
+      /* Listes à puces */
+      EDITOR + ' ul:not([class]),' + PREV + ' ul:not([class]){' +
+      'list-style:disc outside;margin:6px 0;padding-left:22px}' +
+      /* Listes numérotées */
+      EDITOR + ' ol:not([class]),' + PREV + ' ol:not([class]){' +
+      'list-style:decimal outside;margin:6px 0;padding-left:22px}' +
+      /* Listes imbriquées : second niveau en cercle creux */
+      EDITOR + ' ul:not([class]) ul,' + PREV + ' ul:not([class]) ul{' +
+      'list-style:circle outside;margin:2px 0}' +
+      /* Espacement des lignes, strictement limité à ces listes */
+      EDITOR + ' ul:not([class])>li,' + EDITOR + ' ol:not([class])>li,' +
+      PREV + ' ul:not([class])>li,' + PREV + ' ol:not([class])>li{' +
+      'margin:2px 0;padding:0}';
+    document.head.appendChild(st);
+  }
+
+  if (document.head) inject();
+  else window.addEventListener('DOMContentLoaded', inject);
+})();
+
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   LOT 4A — MESURE COMPLÈTE DE L'ESPACE NAVIGATEUR
+
+   La jauge de la fenêtre 💾 ne mesurait qu'une seule clé de stockage sur
+   les dix-sept utilisées. Elle ignorait notamment la corbeille, qui
+   conserve jusqu'à quinze séquences en copie intégrale et peut à elle
+   seule peser autant que les données principales. La consommation réelle
+   pouvait donc être le double de ce qu'affichait la barre.
+
+   Ici, on additionne tout ce que l'application occupe réellement, clé par
+   clé, et on distingue trois postes lisibles.
+   ═══════════════════════════════════════════════════════════════════ */
+(function(){
+  if (window.__ll_storageUsage) return;
+
+  var MAIN = 'le-sequenceur-data-v2';
+  var CORB = 'lessonloom-corbeille';
+  var QUOTA = 5 * 1024 * 1024; // 5 Mo, valeur usuelle des navigateurs
+
+  function poids(cle, val){
+    // Le navigateur stocke la clé ET la valeur : les deux comptent.
+    try { return (String(cle).length + String(val == null ? '' : val).length) * 2; }
+    catch (e) { return 0; }
+  }
+
+  window.__ll_storageUsage = function(){
+    var total = 0, main = 0, corb = 0;
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        var v;
+        try { v = localStorage.getItem(k); } catch (e) { v = ''; }
+        var p = poids(k, v);
+        total += p;
+        if (k === MAIN) main = p;
+        else if (k === CORB) corb = p;
+      }
+    } catch (e) {}
+    var autres = Math.max(0, total - main - corb);
+    var ko = function(n){ return (n / 1024).toFixed(1); };
+    return {
+      octets: total,
+      totalKo: ko(total),
+      mainKo: ko(main),
+      corbeilleKo: ko(corb),
+      autresKo: ko(autres),
+      pct: Math.min(100, total / QUOTA * 100)
+    };
+  };
+})();
+
 </script>
 
 </body>
