@@ -4,6 +4,8 @@
 
 Application autonome (un seul fichier HTML) qui fonctionne directement dans le navigateur, sans installation, sans serveur, sans compte. Toutes les données restent sur votre ordinateur.
 
+*Version du 12 août 2026*
+
 ---
 
 ## Prérequis
@@ -15,15 +17,20 @@ Application autonome (un seul fichier HTML) qui fonctionne directement dans le n
 
 ## Découvrir l'application
 
-Au premier lancement, le **guide de démarrage** s'affiche automatiquement (5 slides). Il reste accessible à tout moment via le bouton ✨ dans le bandeau.
+Au premier lancement, le **guide de démarrage** s'affiche automatiquement (7 slides). Il reste accessible à tout moment via le bouton ✨ dans le bandeau.
 
-Le bouton **✨ Démo** lance un **tour guidé interactif en 19 étapes** avec spotlight sur chaque fonctionnalité, et ouvre une séquence de démonstration (*Fairy Tales Revisited*) pour les étapes nécessitant un exemple concret. Cette séquence de démonstration n'est jamais comptée dans vos statistiques et n'apparaît pas dans les listes de choix.
+Le bouton **✨ Démo** lance un **tour guidé interactif en 19 étapes** avec spotlight sur chaque fonctionnalité, et ouvre une séquence de démonstration (*Fairy Tales Revisited*) pour les étapes nécessitant un exemple concret.
+
+Cette séquence n'est jamais comptée dans vos statistiques, n'apparaît pas dans
+les listes de choix, et **elle est retirée de vos données dès que vous quittez
+le tour** — qui vous ramène alors à l'accueil. Elle ne passe pas par la
+corbeille.
 
 ---
 
 ## Navigation
 
-Six onglets principaux :
+Sept onglets :
 
 | Onglet | Contenu |
 |--------|---------|
@@ -32,7 +39,8 @@ Six onglets principaux :
 | 📈 Progression | Plan annuel par niveau de classe |
 | 📅 Calendrier | Calendrier scolaire annuel |
 | 📊 Évaluations | Toutes les grilles, toutes séquences confondues |
-| 📚 Bibliothèque | Grilles, séances flash, sorties, manuels, archives, corbeille |
+| 📚 Bibliothèque | Manuels, grilles, idées de séance flash, activités favorites, sorties, supports, archives, corbeille |
+| 📖 Programmes EN | Grammaire, phonologie et programmes officiels par niveau |
 
 ---
 
@@ -42,11 +50,13 @@ Six onglets principaux :
 
 Chaque séquence contient : titre, niveau, année scolaire, couleur, axe culturel, problématique, objectif culturel, compétences CECRL ciblées, liste de séances, grilles d'évaluation.
 
-**Niveaux disponibles** : 6ème à 3ème, Seconde/Première/Terminale LV A/B/C, AMC, LLCER, voie technologique, niveaux génériques.
+**Niveaux disponibles** : 6ème à 3ème, Seconde/Première/Terminale LV A/B/C, voie technologique (STMG, STI2D…), AMC, LLCER, DNL, niveaux génériques. Tous sont rangés dans l'ordre pédagogique partout où ils apparaissent.
 
 **Import de liste** — bouton `📋 Liste` à côté de Lexique, Grammaire et Phonologie : collez des items séparés par virgule ou saut de ligne, tout est ajouté d'un coup.
 
 **Duplication de séquence** — bouton 📋 sur chaque carte. Choix du titre, du niveau de destination, et des éléments à inclure. La copie est totalement indépendante : chaque séance et chaque grille reçoit un nouvel identifiant, et les liens entre tâches et grilles sont réécrits vers la copie.
+
+Le titre proposé se numérote : une séquence dupliquée deux fois donne « (copie) » puis « (copie 2) », jamais « (copie) (copie) ».
 
 **🔗 Grilles liées aux tâches** — bloc repliable listant quelle grille est rattachée à quelle séance-tâche. Signale les liens devenus invalides.
 
@@ -64,7 +74,7 @@ Titre, durée, objectif principal, supports avec liens cliquables, objectifs lex
 
 **✅ Cocher les objectifs traités** — panneau repliable sous les activités. Un badge ×N indique combien de séances réemploient chaque objectif. Ces coches alimentent le bilan de la progression.
 
-> ℹ️ Si vous ajoutez un objectif alors que ce panneau est déjà affiché, quittez la page et revenez pour le voir apparaître. *(Correctif prévu.)*
+Le panneau se met à jour **immédiatement** : ajoutez un mot de lexique ou un point de grammaire, il apparaît aussitôt, sans quitter la page.
 
 **Marquage des tâches** — badges `🏁 Tâche finale` et `🔷 Tâche intermédiaire`, mutuellement exclusifs. Ils apparaissent dans l'aperçu A4, les cartes de progression et tous les exports.
 
@@ -72,7 +82,9 @@ Titre, durée, objectif principal, supports avec liens cliquables, objectifs lex
 
 **Grille liée à une tâche** — une séance marquée peut être associée à une grille de la séquence, affichée en entier dans l'aperçu A4.
 
-**Modèles d'activités** — activités récurrentes enregistrables en favoris ⭐.
+**⭐ Activités favorites** — le bouton ⭐ de chaque bloc d'activité enregistre celle-ci comme modèle réutilisable, **avec son titre, sa durée et son déroulé mis en forme**.
+
+Pour la réutiliser : bouton **⭐ Insérer une activité favorite** sous la jauge ⏱ Durée cours. Une fenêtre s'ouvre, avec un aperçu du déroulé de chaque modèle et une recherche à partir de six favorites. Un clic pose l'activité complète dans la séance.
 
 #### Texte enrichi
 
@@ -123,6 +135,8 @@ Soit **294 descripteurs de Pré-A1 à C2**. La compréhension audiovisuelle est 
 
 **Gestion rapide** — étoile ⭐ pour les favoris, croix ✕ pour supprimer. La suppression nettoie automatiquement les liens des séances concernées.
 
+**Réutiliser une grille favorite** — deux chemins équivalents : le bouton **⭐ Grilles favorites** dans la barre Grilles de l'éditeur de séquence, ou le bouton **+ Séquence** sur une carte de grille dans la Bibliothèque. Dans les deux cas la grille est copiée, avec un identifiant neuf, dans la séquence choisie.
+
 **Distribution aux élèves** — fichier HTML autonome avec listes de classes enregistrées, trois modes d'impression et téléchargement individuel par élève.
 
 ---
@@ -139,7 +153,12 @@ Soit **294 descripteurs de Pré-A1 à C2**. La compréhension audiovisuelle est 
 
 ### 📅 Calendrier
 
-Visualisation hebdomadaire, vacances et jours fériés intégrés, placement de séquences sur des semaines, sorties et voyages scolaires. Cliquez un événement pour le modifier ou le supprimer.
+Trois vues — **Semaine**, **Mois**, **Année** — qui affichent toutes les mêmes
+informations : vacances, jours fériés, séquences placées, sorties et voyages.
+Cliquez un événement pour le modifier ou le supprimer.
+
+Les titres longs sont **tronqués proprement** et le titre entier reste lisible
+au survol : les colonnes gardent leur largeur quoi qu'il arrive.
 
 > Le sélecteur « Placer une séquence » ne propose que vos vraies séquences.
 
@@ -149,11 +168,11 @@ Visualisation hebdomadaire, vacances et jours fériés intégrés, placement de 
 
 Tous les encarts sont **repliés à l'ouverture**, avec un **compteur** dans chaque en-tête.
 
-- **📚 Manuels** — comparatifs des séquences des manuels de Seconde, Première et Terminale
+- **📚 Manuels** — comparatifs des séquences des manuels, en trois rangées : **collège** (6ème, 5ème, 4ème, 3ème), **lycée tronc commun** (Seconde, Première, Terminale) et **lycée spécialité LLCER** (Première, Terminale). Consultables et téléchargeables sans quitter l'application
 - **📋 Grilles à imprimer** — grilles fabriquées pour être imprimées telles quelles. N'apparaît que si l'encart contient quelque chose
 - **🎯 Grilles d'évaluation** — *Créées sans séquence* et *⭐ Favorites issues de vos séquences*
-- **⚡ Idées pour séance flash** — séances réutilisables, importables dans une séquence avec 📥
-- **⭐ Activités favorites**
+- **⚡ Idées pour séance flash** — un titre, un niveau, une durée, quelques notes. À ne pas confondre avec les **vraies séances flash** : celles-ci se créent depuis la carte ⚡ **Séances Flash** de l'onglet Séquences, et rejoignent ensuite n'importe quelle séquence avec le bouton 📥
+- **⭐ Activités favorites** — un point vert signale les modèles dont le déroulé est mémorisé
 - **🚌 Sorties & voyages scolaires**
 - **📄 Supports & images** et **🎯 Stratégies**
 - **📦 Archives** — séquences archivées, restaurables
@@ -174,16 +193,20 @@ Seules vos vraies séquences sont comptées. Les archivées sont signalées à p
 ### ✨ Confort d'utilisation
 
 - **Échap ferme n'importe quelle fenêtre** qui s'ouvre par-dessus
-- Les **messages de confirmation** apparaissent en bas de l'écran et s'empilent
-- Blocs repliables, fenêtres et changements d'onglet **en douceur**
+- Les **messages de confirmation** apparaissent en haut de l'écran et s'empilent
+- **Tous les blocs repliables s'ouvrent en douceur**, au même rythme
+- Les blocs de l'éditeur de séance sont **repliés à l'ouverture** : l'aperçu A4
+  étant à jour en permanence, vous ne dépliez que ce que vous voulez voir
 - Tout est **navigable au clavier**
 - Les **animations réduites** du système sont respectées automatiquement
+- L'application **s'affiche d'un seul tenant** : plus de bouton ni de panneau
+  qui arrive après coup
 
 ---
 
 ### 📖 Programmes EN
 
-Bouton dans le bandeau — grammaire, phonologie et programmes officiels par niveau, consultables et téléchargeables sans quitter l'application.
+**Septième onglet de la barre de navigation** — grammaire, phonologie et programmes officiels par niveau, consultables et téléchargeables sans quitter l'application.
 
 ---
 
@@ -210,6 +233,11 @@ Bouton **💾** dans le bandeau — deux formats :
 
 **Partage d'une séquence** — bouton *Partager (HTML)* sur la fiche séquence ; réception par *📥 Importer une séquence HTML* depuis la page d'accueil, ou par lien avec `#import=`. La séquence reçue arrive complète : ses séances, ses grilles et **les liens entre les tâches et leurs grilles** sont préservés, avec des identifiants neufs pour rester indépendante de l'original.
 
+**Restauration protégée** — avant d'appliquer un fichier, l'application vérifie
+qu'il s'agit bien d'une sauvegarde Lesson Loom. Un fichier étranger est refusé
+et vos données ne sont pas touchées. **Le nom du fichier n'entre pas en
+compte** : renommez vos sauvegardes comme il vous plaît.
+
 > ⚠️ Les données sont stockées dans le navigateur. Sauvegardez régulièrement, notamment avant de vider le cache ou de changer de navigateur.
 
 ---
@@ -235,14 +263,17 @@ Depuis Lesson Loom : **Exporter → ⚡ Copier pour QuizLoom** → sélectionnez
 
 - Les **avertissements techniques** visibles dans la console du navigateur (touche F12) sont sans effet sur le fonctionnement : ils proviennent de l'outil ayant servi à fabriquer l'application.
 - Dans la fiche de **séquence complète en PDF**, la mise en forme du texte (gras, listes) n'est pas reprise : ce document produit du texte simple.
+- Un discret repère **⚡ Hors-ligne** apparaît en bas à gauche si vous ouvrez le
+  fichier depuis votre ordinateur plutôt que depuis le site. Il ne s'affiche
+  jamais sur lessonloom.fr.
 
 ---
 
 ## Licence et auteure
 
-Outil pédagogique personnel — usage non commercial.
+Outil pédagogique personnel.
 
-🌟 **Lesson Loom** — Développé pour les enseignants d'anglais LV1 dans le secondaire français.
-Dérivé de [Le Séquenceur LV](https://github.com/charlirollo/sequenceur-lv) par Charlie Rollo (AGPLv3).
+🪄 **Lesson Loom** — Conçue et développée par **Maïwena Gadegbeku** pour les enseignants d'anglais LV1 du secondaire français.
+Basée sur [Le Séquenceur LV](https://forge.apps.education.fr/rollocharlie/le-sequenceur) de Charlie Rollo (AGPLv3).
 
-© Août 2026 [Maïwena Gadegbeku](mailto:maiwena.gadegbeku@ac-rennes.fr)
+© Juin 2026 [Maïwena Gadegbeku](mailto:maiwena.gadegbeku@ac-rennes.fr)
