@@ -34513,7 +34513,9 @@ const A4Preview = ({
   // ---- Composantes (style PDF) ----
   const renderComposantes = () => {
     var _s$tags3, _s$tags4, _s$tags5, _s$tags6;
-    const lex = (((_s$tags3 = s.tags) === null || _s$tags3 === void 0 ? void 0 : _s$tags3.lexique) || []).map(t => t.text);
+    /* LOT 54 — si la sequence a des groupes de lexique remplis, la case
+       affiche les groupes ; sinon la liste des mots, comme avant. */
+    const lex = (window.__ll_lexAff && window.__ll_lexAff(s)) || (((_s$tags3 = s.tags) === null || _s$tags3 === void 0 ? void 0 : _s$tags3.lexique) || []).map(t => t.text);
     const gram = (((_s$tags4 = s.tags) === null || _s$tags4 === void 0 ? void 0 : _s$tags4.grammar) || []).map(t => t.text);
     const phono = (((_s$tags5 = s.tags) === null || _s$tags5 === void 0 ? void 0 : _s$tags5.phono) || []).map(t => t.text);
     const prag = (((_s$tags6 = s.tags) === null || _s$tags6 === void 0 ? void 0 : _s$tags6.pragma) || []).map(t => `${t.level ? `(${t.level}) ` : ''}${t.text}`);
@@ -58307,7 +58309,8 @@ const buildSequenceBlock = (seq, index) => {
   }
 
   // Composantes
-  const lex = (((_seq$tags4 = seq.tags) === null || _seq$tags4 === void 0 ? void 0 : _seq$tags4.lexique) || []).map(t => esc(t.text));
+  /* LOT 55 — meme regle que l'apercu A4. */
+  const lex = ((window.__ll_lexAff && window.__ll_lexAff(seq)) || (((_seq$tags4 = seq.tags) === null || _seq$tags4 === void 0 ? void 0 : _seq$tags4.lexique) || []).map(t => t.text)).map(x => esc(x));
   const gram = (((_seq$tags5 = seq.tags) === null || _seq$tags5 === void 0 ? void 0 : _seq$tags5.grammar) || []).map(t => esc(t.text));
   const phono = (((_seq$tags6 = seq.tags) === null || _seq$tags6 === void 0 ? void 0 : _seq$tags6.phono) || []).map(t => esc(t.text));
   const prag = (((_seq$tags7 = seq.tags) === null || _seq$tags7 === void 0 ? void 0 : _seq$tags7.pragma) || []).map(t => `${t.level ? `(${t.level}) ` : ''}${esc(t.text)}`);
@@ -59533,7 +59536,9 @@ const buildHtml = seq => {
   }
 
   // Composantes
-  const lex = (((_seq$tags3 = seq.tags) === null || _seq$tags3 === void 0 ? void 0 : _seq$tags3.lexique) || []).map(t => sanitize(t.text));
+  /* LOT 54 — meme regle que l'apercu a l'ecran. Les noms de groupes
+     passent par le meme nettoyage que les mots. */
+  const lex = ((window.__ll_lexAff && window.__ll_lexAff(seq)) || (((_seq$tags3 = seq.tags) === null || _seq$tags3 === void 0 ? void 0 : _seq$tags3.lexique) || []).map(t => t.text)).map(x => sanitize(x));
   const gram = (((_seq$tags4 = seq.tags) === null || _seq$tags4 === void 0 ? void 0 : _seq$tags4.grammar) || []).map(t => sanitize(t.text));
   const phono = (((_seq$tags5 = seq.tags) === null || _seq$tags5 === void 0 ? void 0 : _seq$tags5.phono) || []).map(t => sanitize(t.text));
   const prag = (((_seq$tags6 = seq.tags) === null || _seq$tags6 === void 0 ? void 0 : _seq$tags6.pragma) || []).map(t => `${t.level ? `(${t.level}) ` : ''}${sanitize(t.text)}`);
@@ -59789,7 +59794,10 @@ const exportWord = seq => {
   }
 
   // ── COMPOSANTES LINGUISTIQUES ─────────────────────────────────
-  const lex=((sq.tags&&sq.tags.lexique)||[]);
+  /* LOT 55 — meme regle que l'apercu A4 : les groupes remplacent la liste
+     des mots. Sans groupe rempli, le document reste identique. */
+  const __lexG = window.__ll_lexAff ? window.__ll_lexAff(sq) : null;
+  const lex = __lexG ? __lexG.map(x => ({ text: x })) : ((sq.tags&&sq.tags.lexique)||[]);
   const gram=((sq.tags&&sq.tags.grammar)||[]);
   const phono=((sq.tags&&sq.tags.phono)||[]);
   const prag=((sq.tags&&sq.tags.pragma)||[]);
@@ -60414,7 +60422,8 @@ const exportMarkdown = seq => {
   }
 
   // Composantes
-  const lex = (((_seq$tags0 = seq.tags) === null || _seq$tags0 === void 0 ? void 0 : _seq$tags0.lexique) || []).map(t => t.text);
+  /* LOT 55 — meme regle que l'apercu A4. */
+  const lex = (window.__ll_lexAff && window.__ll_lexAff(seq)) || (((_seq$tags0 = seq.tags) === null || _seq$tags0 === void 0 ? void 0 : _seq$tags0.lexique) || []).map(t => t.text);
   const gram = (((_seq$tags1 = seq.tags) === null || _seq$tags1 === void 0 ? void 0 : _seq$tags1.grammar) || []).map(t => t.text);
   const phono = (((_seq$tags10 = seq.tags) === null || _seq$tags10 === void 0 ? void 0 : _seq$tags10.phono) || []).map(t => t.text);
   const prag = (((_seq$tags11 = seq.tags) === null || _seq$tags11 === void 0 ? void 0 : _seq$tags11.pragma) || []).map(t => `${t.level ? `(${t.level}) ` : ''}${t.text}`);
@@ -76711,6 +76720,11 @@ function llTodoSave(seqId, texte){
   window.__ll_upsertSequence(maj);
   return true;
 }
+/* LOT 57 bis — mise a disposition du reste du fichier. Les blocs de fin de
+   fichier vivent dans un autre compartiment et ne voyaient pas cette
+   fonction : leur appel echouait sans bruit et la note n'etait pas ecrite.
+   Une seule regle d'ecriture pour la Bibliotheque et pour l'editeur. */
+try { window.llTodoSave = llTodoSave; } catch (e) {}
 
 function llInjectBiblioSections(){
   var container=llFindBiblioContainer();
@@ -76741,8 +76755,14 @@ function llInjectBiblioSections(){
     if(x.id==='__ll_flash_seances__'||x.id==='__ll_eval_grilles__'||x.id==='__ll_tour_demo__') return false;
     return true;
   });
-  var __nbTodo=__seqTodo.filter(function(x){return x.todo&&String(x.todo).trim();}).length;
-  if(__seqTodo.length){
+  /* LOT 58 — le tableau ne liste plus que les sequences qui portent VRAIMENT
+     une note. Avant, toutes y figuraient avec un champ vide : la liste
+     s'allongeait sans rien apprendre. On ecrit desormais une note depuis
+     l'editeur de sequence (bouton 📌 Notes, lot 57), et elle apparait ici. */
+  var __toutesTodo=__seqTodo;
+  __seqTodo=__seqTodo.filter(function(x){return x.todo&&String(x.todo).trim();});
+  var __nbTodo=__seqTodo.length;
+  if(__toutesTodo.length){
     var __st=llMakeBibCard('__ll_biblio_todo','\uD83D\uDCCC','\u00c0 faire','rgba(245,158,11,.15)','#92400e',null,__nbTodo);
     var __tb=document.createElement('table'); __tb.className='ll-bib-tbl';
     var __th=document.createElement('thead'); var __tr0=document.createElement('tr');
@@ -76789,7 +76809,16 @@ function llInjectBiblioSections(){
       tr.appendChild(c1); tr.appendChild(c2); tr.appendChild(c3); tr.appendChild(c4);
       __tbd.appendChild(tr);
     });
-    __tb.appendChild(__tbd); __st.body.appendChild(__tb);
+    if(!__seqTodo.length){
+      /* LOT 58 — liste vide : on explique ou ecrire, on ne laisse pas un
+         tableau sans lignes. */
+      var __vide=document.createElement('div');
+      __vide.style.cssText='padding:14px 4px;font-size:12px;color:var(--text-muted);line-height:1.6';
+      __vide.textContent='Aucune note pour l’instant. Ouvrez une séquence, onglet Identité, et cliquez 📌 Notes pour écrire où vous en êtes : elle apparaîtra ici.';
+      __st.body.appendChild(__vide);
+    } else {
+      __tb.appendChild(__tbd); __st.body.appendChild(__tb);
+    }
     /* Une seule ecoute pour tout le tableau : les champs peuvent etre
        reconstruits sans perdre leur reaction. */
     var __tt=null;
@@ -81546,11 +81575,33 @@ function llSeqColorRepaint(swatches, couleur) {
 }
 
 function llHookSeqColorPicker() {
+  /* LOT 52 — un seul bloc « Couleur de la sequence », et uniquement dans
+     l'onglet Identite. Avant : le bloc s'accrochait au champ « Sous-titre /
+     Theme », marquait ce champ comme deja servi, mais n'etait jamais retire
+     au changement d'onglet. Le champ etant refabrique a neuf au retour, un
+     exemplaire de plus s'ajoutait a chaque aller-retour (quatre observes).
+     On ne se fie plus a une marque posee sur un element qui disparait : on
+     regarde la place reellement occupee dans la page. */
   var anchor=document.querySelector('[x-id="SequenceEditor_241_6"]');
-  if(!anchor||anchor.dataset.llColorHk)return;
-  anchor.dataset.llColorHk='1';
-  var seq=window.__ll_editingSeq||window.__ll_activeSeq;if(!seq)return;
-  var row=document.createElement('div');row.className='fg';row.id='__ll_color_picker_row';row.style.cssText='margin-bottom:10px';
+  var vus=document.querySelectorAll('.__ll_cpick');
+  var seq=window.__ll_editingSeq||window.__ll_activeSeq;
+  if(!anchor||anchor.offsetParent===null||!seq){
+    for(var q0=0;q0<vus.length;q0++) vus[q0].remove();
+    return;
+  }
+  var garde=null;
+  for(var q1=0;q1<vus.length;q1++){
+    var el=vus[q1];
+    if(!garde && el.nextElementSibling===anchor && el.dataset.llSeqid===seq.id){ garde=el; }
+    else { el.remove(); }
+  }
+  if(garde){
+    /* Deja en place et pour la bonne sequence : on repeint seulement, ce qui
+       evite de reconstruire le bloc a chaque passage. */
+    try{ llSeqColorRepaint(garde.lastElementChild, seq.color); }catch(e){}
+    return;
+  }
+  var row=document.createElement('div');row.className='fg __ll_cpick';row.id='__ll_color_picker_row';row.dataset.llSeqid=seq.id;row.style.cssText='margin-bottom:10px';
   var lbl=document.createElement('label');lbl.className='fl';lbl.textContent='Couleur de la s\u00E9quence';
   var swatches=document.createElement('div');swatches.style.cssText='display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;align-items:center';
   LL_SEQ_COLORS.forEach(function(col){
@@ -85231,7 +85282,8 @@ llHookAll = function() {
     '__ll_tick_panel',         // panneau Cocher les objectifs traites
     '__ll_sea_tick_summary',   // recapitulatif de reemploi
     '__ll_flash_copy_btn',     // bouton 📥 Ajouter a une sequence (seances flash uniquement)
-    '__ll_fav_act_modal'       // LOT 26 — fenetre de choix des activites favorites
+    '__ll_fav_act_modal',      // LOT 26 — fenetre de choix des activites favorites
+    '__ll_lexgrp_sea'          // LOT 56 — rangee des groupes de lexique
   ];
   var PREVIEW_ONLY = [
     '__ll_tf_preview_badge',   // badge Tache finale (apercu A4)
@@ -85274,6 +85326,26 @@ llHookAll = function() {
     // sans en inventer une nouvelle. Son etat deplie/replie est memorise.
     var grBar = document.querySelector('[x-id="SequenceEditor_723_6"]');
     if (!grBar || grBar.offsetParent === null) drop(['__ll_coh', '__ll_grlink']);
+
+    // LOT 52 — le bloc « Couleur de la sequence » n'appartient qu'a l'onglet
+    // Identite. On le retire des que son champ d'attache n'est plus visible,
+    // sans attendre le passage general de 350 ms. On ne retire que ce qui
+    // porte notre propre marque ; on n'injecte rien ici.
+    var cpAnchor = document.querySelector('[x-id="SequenceEditor_241_6"]');
+    if (!cpAnchor || cpAnchor.offsetParent === null) {
+      document.querySelectorAll('.__ll_cpick').forEach(function(el) { el.remove(); });
+      // LOT 57 — le bouton 📌 Notes et son champ vivent dans ce bloc.
+      document.querySelectorAll('.__ll_note_btn, #__ll_note_zone').forEach(function(el) { el.remove(); });
+    }
+
+    // LOT 53 — le panneau « Groupes de lexique » n'appartient qu'a l'onglet
+    // Linguistique de l'editeur de SEQUENCE. Il est retire des que son cadre
+    // d'attache disparait, ou des qu'on est dans l'editeur de seance, sans
+    // attendre son propre passage. On ne retire que notre marque.
+    var lgAnchor = document.querySelector('[x-id="SequenceEditor_473_6"]');
+    if (!lgAnchor || lgAnchor.offsetParent === null || inSeance) {
+      document.querySelectorAll('.__ll_lexgrp').forEach(function(el) { el.remove(); });
+    }
 
     // LOT 34 — la carte ⚡ Seances Flash restait a l'ecran 350 ms apres
     // qu'on ait quitte la page « Seances par niveau » : on la voyait passer
@@ -85925,6 +85997,975 @@ window.addEventListener('load',function(){
   }
   if (document.body) demarrer();
   else document.addEventListener('DOMContentLoaded', demarrer);
+})();
+
+// ═══════════════════════════════════════════════════════════════════
+// LOT 53 — GROUPES DE LEXIQUE (bloc autonome, supprimable seul)
+//
+// Ce qu'il fait : dans l'editeur de SEQUENCE, onglet Linguistique, sous le
+// champ Lexique, un panneau replie ou l'on cree ses propres groupes et ou
+// l'on range les mots dedans. Un mot peut appartenir a deux groupes.
+//
+// Ce qu'il ne fait PAS encore : rien n'est change sur l'apercu A4, les
+// documents imprimes, les exports, ni dans l'editeur de seance. C'est
+// volontaire — ces sorties viennent aux lots suivants.
+//
+// Ou sont rangees les donnees :
+//   seq.lexGroups        = liste des noms de groupes, dans l'ordre choisi
+//   seq.tags.lexique[i].groups = liste des groupes du mot (0, 1 ou plusieurs)
+// Tout ce qui lit un mot aujourd'hui lit son texte : rien n'est perturbe.
+// Une sequence partagee avec une collegue restee sur l'ancienne version
+// s'affiche normalement, le rangement etant simplement ignore.
+//
+// Ancrage : [x-id="SequenceEditor_473_6"], le cadre du champ Lexique. Cet
+// identifiant n'existe qu'une fois dans toute l'application et uniquement
+// dans l'editeur de sequence : aucune detection par texte affiche.
+// ═══════════════════════════════════════════════════════════════════
+(function() {
+  if (window.__ll_lexgrp_ready) return;
+  window.__ll_lexgrp_ready = true;
+
+  var ANCRE = '[x-id="SequenceEditor_473_6"]';
+  var CLE_OUVERT = '__ll_lexgrp_open';
+  var saisieEnCours = '';   // survit aux reconstructions du panneau
+  var renommageOuvert = false;  // suspend la refabrication pendant une saisie
+
+  // ── Habillage ────────────────────────────────────────────────────
+  function css() {
+    if (document.getElementById('__ll_lexgrp_css')) return;
+    var s = document.createElement('style');
+    s.id = '__ll_lexgrp_css';
+    s.textContent = [
+      '#__ll_lexgrp { margin:2px 0 14px; padding:9px 12px; background:var(--card); border:1px solid var(--border); border-radius:11px; border-left:3px solid var(--accent-y); }',
+      '#__ll_lexgrp .lg-head { display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; gap:8px; }',
+      '#__ll_lexgrp .lg-t { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; color:#a16207; display:flex; align-items:center; gap:5px; transition:opacity .15s; }',
+      '#__ll_lexgrp .lg-head:hover .lg-t { opacity:.75; }',
+      '#__ll_lexgrp .lg-chev { font-size:9px; display:inline-block; transition:transform .42s cubic-bezier(.25,.1,.25,1); }',
+      '#__ll_lexgrp[data-open="0"] .lg-chev { transform:rotate(-90deg); }',
+      '#__ll_lexgrp .lg-count { font-size:10px; font-weight:800; padding:1px 7px; border-radius:9px; background:rgba(234,179,8,.14); color:#a16207; font-variant-numeric:tabular-nums; }',
+      '#__ll_lexgrp .lg-body { overflow:hidden; transition:max-height .42s cubic-bezier(.25,.1,.25,1), opacity .34s ease, margin-top .42s cubic-bezier(.25,.1,.25,1); max-height:none; opacity:1; margin-top:9px; }',
+      '#__ll_lexgrp[data-open="0"] .lg-body { max-height:0; opacity:0; margin-top:0; }',
+      '#__ll_lexgrp .lg-row { display:flex; align-items:center; gap:7px; padding:4px 0; border-bottom:1px dashed var(--border); }',
+      '#__ll_lexgrp .lg-row:last-of-type { border-bottom:none; }',
+      '#__ll_lexgrp .lg-nom { font-size:12px; font-weight:700; color:var(--text); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }',
+      '#__ll_lexgrp .lg-nb { font-size:10px; font-weight:800; color:var(--text-muted); flex-shrink:0; font-variant-numeric:tabular-nums; }',
+      '#__ll_lexgrp .lg-b { font-size:10px; font-weight:700; padding:2px 8px; border-radius:6px; border:1px solid var(--border); background:var(--panel); color:var(--text-muted); cursor:pointer; font-family:inherit; flex-shrink:0; transition:color .15s, border-color .15s; }',
+      '#__ll_lexgrp .lg-b:hover { color:var(--accent2); border-color:var(--accent2); }',
+      '#__ll_lexgrp .lg-b.lg-danger:hover { color:#dc2626; border-color:#dc2626; }',
+      '#__ll_lexgrp .lg-libre { font-size:11px; color:var(--text-muted); padding:6px 0 2px; font-style:italic; }',
+      '#__ll_lexgrp .lg-vide { font-size:11px; color:var(--text-muted); padding:4px 0 8px; line-height:1.5; }',
+      '#__ll_lexgrp .lg-new { display:flex; gap:6px; margin-top:9px; }',
+      '#__ll_lexgrp .lg-new input { flex:1; min-width:0; background:var(--panel); border:1px solid var(--border); color:var(--text); padding:6px 10px; border-radius:7px; font-family:inherit; font-size:12px; outline:none; }',
+      '#__ll_lexgrp .lg-new input:focus { border-color:var(--accent-y); }',
+      '#__ll_lexgrp .lg-add { background:var(--accent-y); color:#713f12; border:none; border-radius:7px; padding:6px 12px; font-family:inherit; font-size:11px; font-weight:800; cursor:pointer; flex-shrink:0; }',
+      '#__ll_lexgrp .lg-add:hover { filter:brightness(.94); }',
+      '#__ll_lexgrp .lg-ren { flex:1; min-width:0; background:var(--panel); border:1px solid var(--accent-y); color:var(--text); padding:4px 8px; border-radius:6px; font-family:inherit; font-size:12px; outline:none; }',
+      '.__ll_lexgrp_ov { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:9999; display:flex; align-items:center; justify-content:center; animation:__llLgIn .18s ease; }',
+      '@keyframes __llLgIn { from { opacity:0; } to { opacity:1; } }',
+      '.__ll_lexgrp_box { background:var(--panel); border-radius:16px; padding:20px 22px; min-width:380px; max-width:90vw; max-height:80vh; display:flex; flex-direction:column; box-shadow:0 20px 50px rgba(0,0,0,.4); animation:__llLgUp .24s cubic-bezier(.25,.1,.25,1); }',
+      '@keyframes __llLgUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }',
+      '.__ll_lexgrp_box h3 { font-family:Playfair Display,serif; font-size:17px; font-weight:800; margin:0 0 4px; }',
+      '.__ll_lexgrp_box .lg-sub { font-size:12px; color:var(--text-muted); margin:0 0 14px; }',
+      '.__ll_lexgrp_box .lg-mots { overflow-y:auto; flex:1; margin-bottom:14px; }',
+      '.__ll_lexgrp_box .lg-mot { display:flex; align-items:center; gap:9px; padding:6px 9px; border-radius:8px; cursor:pointer; font-size:12.5px; }',
+      '.__ll_lexgrp_box .lg-mot:hover { background:var(--card); }',
+      '.__ll_lexgrp_box .lg-mot input { width:15px; height:15px; accent-color:#eab308; cursor:pointer; margin:0; flex-shrink:0; }',
+      '.__ll_lexgrp_box .lg-ail { font-size:9.5px; font-weight:700; color:var(--text-muted); background:var(--card); padding:1px 6px; border-radius:8px; margin-left:auto; flex-shrink:0; }',
+      '.__ll_lexgrp_box .lg-pied { display:flex; gap:8px; justify-content:flex-end; }',
+      '@media print { #__ll_lexgrp { display:none !important; } }'
+    ].join('\n');
+    document.head.appendChild(s);
+  }
+
+  // ── Lecture et ecriture des donnees ──────────────────────────────
+  // Toujours relire la sequence dans les donnees fraiches avant d'ecrire :
+  // window.__ll_curSeq peut porter une copie plus ancienne.
+  function seqFraiche() {
+    var c = window.__ll_curSeq;
+    if (!c || !c.id || typeof window.__ll_getData !== 'function') return null;
+    var d = window.__ll_getData() || {};
+    var l = d.sequences || [];
+    for (var i = 0; i < l.length; i++) if (l[i].id === c.id) return l[i];
+    return null;
+  }
+
+  function motsDe(seq) { return (seq && seq.tags && seq.tags.lexique) || []; }
+  function groupesDe(seq) { return (seq && seq.lexGroups) || []; }
+  function groupesDuMot(m) { return (m && m.groups) || []; }
+
+  function ecrire(seq, groupes, mots) {
+    if (typeof window.__ll_upsertSequence !== 'function') return;
+    var tags = Object.assign({}, seq.tags || {});
+    tags.lexique = mots;
+    window.__ll_upsertSequence(Object.assign({}, seq, { lexGroups: groupes, tags: tags }));
+  }
+
+  function compte(seq, nom) {
+    var n = 0, mots = motsDe(seq);
+    for (var i = 0; i < mots.length; i++) {
+      if (groupesDuMot(mots[i]).indexOf(nom) >= 0) n++;
+    }
+    return n;
+  }
+
+  function nbLibres(seq) {
+    var n = 0, mots = motsDe(seq), gs = groupesDe(seq);
+    for (var i = 0; i < mots.length; i++) {
+      var g = groupesDuMot(mots[i]), dedans = false;
+      for (var j = 0; j < g.length; j++) if (gs.indexOf(g[j]) >= 0) dedans = true;
+      if (!dedans) n++;
+    }
+    return n;
+  }
+
+  // ── Actions ──────────────────────────────────────────────────────
+  function creer(nom) {
+    nom = String(nom || '').trim();
+    if (!nom) return;
+    if (nom.length > 40) nom = nom.slice(0, 40);
+    var seq = seqFraiche();
+    if (!seq) return;
+    var gs = groupesDe(seq).slice();
+    for (var i = 0; i < gs.length; i++) {
+      if (gs[i].toLowerCase() === nom.toLowerCase()) {
+        if (window.llToast) window.llToast('Le groupe « ' + gs[i] + ' » existe déjà.', 'info');
+        return;
+      }
+    }
+    gs.push(nom);
+    ecrire(seq, gs, motsDe(seq));
+    saisieEnCours = '';
+    if (window.llToast) window.llToast('Groupe « ' + nom + ' » créé.', 'ok');
+  }
+
+  function renommer(ancien, nouveau) {
+    nouveau = String(nouveau || '').trim();
+    if (!nouveau || nouveau === ancien) return;
+    if (nouveau.length > 40) nouveau = nouveau.slice(0, 40);
+    var seq = seqFraiche();
+    if (!seq) return;
+    var gs = groupesDe(seq).slice();
+    for (var i = 0; i < gs.length; i++) {
+      if (gs[i].toLowerCase() === nouveau.toLowerCase() && gs[i] !== ancien) {
+        if (window.llToast) window.llToast('Un groupe porte déjà ce nom.', 'info');
+        return;
+      }
+    }
+    gs = gs.map(function(g) { return g === ancien ? nouveau : g; });
+    var mots = motsDe(seq).map(function(m) {
+      var g = groupesDuMot(m);
+      if (g.indexOf(ancien) < 0) return m;
+      return Object.assign({}, m, { groups: g.map(function(x) { return x === ancien ? nouveau : x; }) });
+    });
+    ecrire(seq, gs, mots);
+  }
+
+  function supprimer(nom) {
+    var seq = seqFraiche();
+    if (!seq) return;
+    var gs = groupesDe(seq).filter(function(g) { return g !== nom; });
+    var mots = motsDe(seq).map(function(m) {
+      var g = groupesDuMot(m);
+      if (g.indexOf(nom) < 0) return m;
+      return Object.assign({}, m, { groups: g.filter(function(x) { return x !== nom; }) });
+    });
+    ecrire(seq, gs, mots);
+    if (window.llToast) window.llToast('Groupe « ' + nom + ' » supprimé. Ses mots sont conservés.', 'ok');
+  }
+
+  function ranger(nom, coches) {
+    var seq = seqFraiche();
+    if (!seq) return;
+    var mots = motsDe(seq).map(function(m, i) {
+      var g = groupesDuMot(m).filter(function(x) { return x !== nom; });
+      if (coches[i]) g = g.concat([nom]);
+      return Object.assign({}, m, { groups: g });
+    });
+    ecrire(seq, groupesDe(seq), mots);
+  }
+
+  // ── Fenetre de rangement ─────────────────────────────────────────
+  function ouvrirRangement(nom) {
+    var seq = seqFraiche();
+    if (!seq) return;
+    var mots = motsDe(seq);
+    if (!mots.length) {
+      if (window.llToast) window.llToast('Aucun mot de lexique à ranger pour l’instant.', 'info');
+      return;
+    }
+    var vieux = document.querySelector('.__ll_lexgrp_ov');
+    if (vieux) vieux.remove();
+
+    var ov = document.createElement('div');
+    ov.className = '__ll_lexgrp_ov';
+    var box = document.createElement('div');
+    box.className = '__ll_lexgrp_box';
+
+    var h = document.createElement('h3');
+    h.textContent = '\uD83D\uDDC2\uFE0F ' + nom;
+    box.appendChild(h);
+    var sub = document.createElement('p');
+    sub.className = 'lg-sub';
+    sub.textContent = 'Cochez les mots qui appartiennent à ce groupe. Un mot peut être dans plusieurs groupes.';
+    box.appendChild(sub);
+
+    var liste = document.createElement('div');
+    liste.className = 'lg-mots';
+    var cases = [];
+    mots.forEach(function(m, i) {
+      var lig = document.createElement('label');
+      lig.className = 'lg-mot';
+      var c = document.createElement('input');
+      c.type = 'checkbox';
+      c.checked = groupesDuMot(m).indexOf(nom) >= 0;
+      cases.push(c);
+      lig.appendChild(c);
+      var t = document.createElement('span');
+      t.textContent = m.text || '';
+      lig.appendChild(t);
+      var autres = groupesDuMot(m).filter(function(x) { return x !== nom; });
+      if (autres.length) {
+        var a = document.createElement('span');
+        a.className = 'lg-ail';
+        a.textContent = 'aussi : ' + autres.join(', ');
+        lig.appendChild(a);
+      }
+      liste.appendChild(lig);
+    });
+    box.appendChild(liste);
+
+    var pied = document.createElement('div');
+    pied.className = 'lg-pied';
+    var annul = document.createElement('button');
+    annul.className = 'btn btn-ghost btn-sm';
+    annul.textContent = 'Annuler';
+    var ok = document.createElement('button');
+    ok.className = 'btn btn-green btn-sm';
+    ok.textContent = 'Enregistrer';
+    pied.appendChild(annul);
+    pied.appendChild(ok);
+    box.appendChild(pied);
+
+    function fermer() {
+      ov.remove();
+      document.removeEventListener('keydown', echap);
+    }
+    function echap(e) { if (e.key === 'Escape') fermer(); }
+    document.addEventListener('keydown', echap);
+    annul.onclick = fermer;
+    ov.onclick = function(e) { if (e.target === ov) fermer(); };
+    ok.onclick = function() {
+      ranger(nom, cases.map(function(c) { return c.checked; }));
+      fermer();
+    };
+
+    ov.appendChild(box);
+    document.body.appendChild(ov);
+  }
+
+  // ── Construction du panneau ──────────────────────────────────────
+  function estOuvert() {
+    try { return localStorage.getItem(CLE_OUVERT) === '1'; } catch (e) { return false; }
+  }
+  function noterOuvert(v) {
+    try { localStorage.setItem(CLE_OUVERT, v ? '1' : '0'); } catch (e) {}
+  }
+
+  function empreinte(seq) {
+    var gs = groupesDe(seq);
+    return seq.id + '|' + motsDe(seq).length + '|' + nbLibres(seq) + '|' +
+      gs.map(function(g) { return g + ':' + compte(seq, g); }).join('|');
+  }
+
+  function construire(seq, ancre) {
+    var boite = document.createElement('div');
+    boite.id = '__ll_lexgrp';
+    boite.className = '__ll_lexgrp';
+    boite.dataset.llSig = empreinte(seq);
+    boite.dataset.open = estOuvert() ? '1' : '0';
+
+    var gs = groupesDe(seq);
+
+    // En-tete
+    var tete = document.createElement('div');
+    tete.className = 'lg-head';
+    var titre = document.createElement('span');
+    titre.className = 'lg-t';
+    var chev = document.createElement('span');
+    chev.className = 'lg-chev';
+    chev.textContent = '\u25BC';
+    titre.appendChild(chev);
+    titre.appendChild(document.createTextNode('\uD83D\uDDC2\uFE0F Groupes de lexique'));
+    var pastille = document.createElement('span');
+    pastille.className = 'lg-count';
+    pastille.textContent = String(gs.length);
+    tete.appendChild(titre);
+    tete.appendChild(pastille);
+    tete.addEventListener('click', function() {
+      var o = boite.dataset.open === '1';
+      boite.dataset.open = o ? '0' : '1';
+      noterOuvert(!o);
+      if (window.llAnimPanel) window.llAnimPanel(boite.querySelector('.lg-body'), !o);
+    });
+    boite.appendChild(tete);
+
+    // Corps
+    var corps = document.createElement('div');
+    corps.className = 'lg-body';
+
+    if (!gs.length) {
+      var vide = document.createElement('div');
+      vide.className = 'lg-vide';
+      vide.textContent = 'Aucun groupe pour l’instant. Donnez un nom à votre premier groupe — par exemple un thème, un champ lexical ou une séance — puis rangez-y vos mots.';
+      corps.appendChild(vide);
+    }
+
+    gs.forEach(function(nom) {
+      var lig = document.createElement('div');
+      lig.className = 'lg-row';
+
+      var etiq = document.createElement('span');
+      etiq.className = 'lg-nom';
+      etiq.textContent = nom;
+      lig.appendChild(etiq);
+
+      var nb = document.createElement('span');
+      nb.className = 'lg-nb';
+      var n = compte(seq, nom);
+      nb.textContent = n + (n > 1 ? ' mots' : ' mot');
+      lig.appendChild(nb);
+
+      var bRanger = document.createElement('button');
+      bRanger.className = 'lg-b';
+      bRanger.textContent = 'Ranger…';
+      bRanger.title = 'Choisir les mots de ce groupe';
+      bRanger.onclick = function(e) { e.stopPropagation(); ouvrirRangement(nom); };
+      lig.appendChild(bRanger);
+
+      var bRen = document.createElement('button');
+      bRen.className = 'lg-b';
+      bRen.textContent = '\u270F\uFE0F';
+      bRen.title = 'Renommer ce groupe';
+      bRen.onclick = function(e) {
+        e.stopPropagation();
+        /* LOT 53 bis — trois defauts corriges ici.
+           1. Un second clic sur le crayon tentait de remplacer une etiquette
+              qui n'etait deja plus la : erreur a l'ecran. On ne remplace plus
+              rien, on masque l'etiquette et on pose le champ a cote.
+           2. Pendant la saisie, le panneau pouvait etre refabrique par son
+              passage regulier et emporter le champ : la frappe semblait
+              perdue. Un verrou suspend la refabrication tant qu'un nom est en
+              cours de modification.
+           3. La touche Entree validait sans refermer le champ : on ne voyait
+              rien changer. Elle referme desormais tout de suite ; l'affichage
+              se remet a jour depuis les donnees au passage suivant. */
+        var deja = lig.querySelector('.lg-ren');
+        if (deja) { deja.focus(); return; }
+        var champ = document.createElement('input');
+        champ.className = 'lg-ren';
+        champ.value = nom;
+        champ.maxLength = 40;
+        etiq.style.display = 'none';
+        lig.insertBefore(champ, etiq);
+        renommageOuvert = true;
+        champ.focus();
+        champ.select();
+        var fait = false;
+        function refermer() {
+          renommageOuvert = false;
+          if (champ.parentNode) champ.parentNode.removeChild(champ);
+          etiq.style.display = '';
+        }
+        function valider() {
+          if (fait) return;
+          fait = true;
+          var v = champ.value;
+          refermer();
+          renommer(nom, v);
+        }
+        champ.addEventListener('keydown', function(ev) {
+          if (ev.key === 'Enter') { ev.preventDefault(); valider(); }
+          else if (ev.key === 'Escape') { ev.preventDefault(); fait = true; refermer(); }
+        });
+        champ.addEventListener('blur', valider);
+      };
+      lig.appendChild(bRen);
+
+      var bSup = document.createElement('button');
+      bSup.className = 'lg-b lg-danger';
+      bSup.textContent = '\uD83D\uDDD1\uFE0F';
+      bSup.title = 'Supprimer ce groupe (les mots sont conservés)';
+      bSup.onclick = function(e) {
+        e.stopPropagation();
+        if (bSup.dataset.sur === '1') { supprimer(nom); return; }
+        bSup.dataset.sur = '1';
+        bSup.textContent = 'Supprimer ?';
+        bSup.title = 'Cliquez à nouveau pour confirmer';
+        setTimeout(function() {
+          if (!bSup.parentNode) return;
+          bSup.dataset.sur = '0';
+          bSup.textContent = '\uD83D\uDDD1\uFE0F';
+        }, 3000);
+      };
+      lig.appendChild(bSup);
+
+      corps.appendChild(lig);
+    });
+
+    if (gs.length) {
+      var libres = document.createElement('div');
+      libres.className = 'lg-libre';
+      var nl = nbLibres(seq);
+      libres.textContent = nl === 0
+        ? 'Tous les mots sont rangés.'
+        : (nl + (nl > 1 ? ' mots ne sont dans aucun groupe.' : ' mot n’est dans aucun groupe.'));
+      corps.appendChild(libres);
+    }
+
+    // Creation
+    var neuf = document.createElement('div');
+    neuf.className = 'lg-new';
+    var champ = document.createElement('input');
+    champ.type = 'text';
+    champ.placeholder = 'Nom du nouveau groupe…';
+    champ.maxLength = 40;
+    champ.value = saisieEnCours;
+    champ.addEventListener('input', function() { saisieEnCours = champ.value; });
+    champ.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); creer(champ.value); }
+    });
+    var bAdd = document.createElement('button');
+    bAdd.className = 'lg-add';
+    bAdd.textContent = '+ Créer';
+    bAdd.onclick = function(e) { e.stopPropagation(); creer(champ.value); };
+    neuf.appendChild(champ);
+    neuf.appendChild(bAdd);
+    corps.appendChild(neuf);
+
+    boite.appendChild(corps);
+    ancre.parentNode.insertBefore(boite, ancre.nextSibling);
+  }
+
+  // ── Passage regulier ─────────────────────────────────────────────
+  // Meme regle que le bloc Couleur (lot 52) : on ne se fie pas a une marque,
+  // on regarde la place reellement occupee. L'empreinte ignore le contenu du
+  // champ de saisie, qui est conserve a part.
+  function passage() {
+    var ancre = document.querySelector(ANCRE);
+    var vus = document.querySelectorAll('.__ll_lexgrp');
+    var enSeance = !!document.querySelector('[data-testid="sea-titre"]');
+    var seq = seqFraiche();
+
+    if (!ancre || ancre.offsetParent === null || enSeance || !seq) {
+      for (var i = 0; i < vus.length; i++) vus[i].remove();
+      renommageOuvert = false;
+      return;
+    }
+
+    /* LOT 53 bis — tant qu'un nom de groupe est en cours de modification, on
+       ne refabrique pas le panneau : le champ de saisie disparaitrait sous
+       les doigts. Le verrou tombe des que la saisie est validee ou annulee,
+       et aussi si le panneau a disparu entre-temps. */
+    if (renommageOuvert) {
+      var ouvert = document.querySelector('.__ll_lexgrp .lg-ren');
+      if (ouvert) return;
+      renommageOuvert = false;
+    }
+
+    var sig = empreinte(seq);
+    var garde = null;
+    for (var j = 0; j < vus.length; j++) {
+      var el = vus[j];
+      if (!garde && el.previousElementSibling === ancre && el.dataset.llSig === sig) garde = el;
+      else el.remove();
+    }
+    if (garde) return;
+
+    css();
+    construire(seq, ancre);
+  }
+
+  window.__ll_lexgrpPassage = passage;
+
+  /* LOT 54 — Ce qui doit s'ecrire dans la case Lexique des documents.
+     Retourne :
+       - null si la sequence n'a aucun groupe qui contienne au moins un mot.
+         Dans ce cas les documents affichent la liste des mots, exactement
+         comme avant : une sequence deja faite ne change pas d'apparence.
+       - sinon la liste des groupes non vides avec leur nombre de mots, et,
+         s'il reste des mots hors groupes, un rappel de leur nombre.
+     Les groupes vides ne figurent pas sur un document : ils n'apprennent
+     rien au lecteur. Ils restent visibles dans l'editeur. */
+  window.__ll_lexAff = function(seq) {
+    try {
+      if (!seq) return null;
+      var gs = (seq.lexGroups || []).filter(function(g) { return g && String(g).trim(); });
+      if (!gs.length) return null;
+      var mots = ((seq.tags || {}).lexique) || [];
+      if (!mots.length) return null;
+
+      var sortie = [], ranges = 0;
+      var dedans = {};
+      gs.forEach(function(g) {
+        var n = 0;
+        for (var i = 0; i < mots.length; i++) {
+          var l = (mots[i] && mots[i].groups) || [];
+          if (l.indexOf(g) >= 0) { n++; dedans[i] = 1; }
+        }
+        if (n) sortie.push(g + ' (' + n + ')');
+      });
+      if (!sortie.length) return null;   // groupes crees mais aucun mot range
+
+      for (var k = 0; k < mots.length; k++) if (dedans[k]) ranges++;
+      var libres = mots.length - ranges;
+      if (libres > 0) sortie.push('+ ' + libres + (libres > 1 ? ' non class\u00e9s' : ' non class\u00e9'));
+      return sortie;
+    } catch (e) { return null; }
+  };
+
+  if (!window.__ll_lexgrp_horloge) {
+    window.__ll_lexgrp_horloge = setInterval(function() {
+      try { passage(); } catch (e) {}
+    }, 400);
+  }
+  try { passage(); } catch (e) {}
+
+})();
+
+// ═══════════════════════════════════════════════════════════════════
+// LOT 56 — GROUPES DE LEXIQUE DANS L'EDITEUR DE SEANCE
+//          (bloc autonome, supprimable seul)
+//
+// Ce qu'il fait : dans l'editeur de SEANCE, au-dessus du panneau
+// « Objectifs de la sequence », une rangee de boutons, un par groupe de
+// lexique. Un clic verse tous les mots du groupe dans le lexique de la
+// seance. Chaque mot reste ensuite modifiable et supprimable un par un,
+// comme s'il avait ete tape a la main.
+//
+// Un second clic sur un groupe entierement present retire ses mots de la
+// seance — meme logique que les pastilles du panneau du dessous.
+//
+// Ecriture : la route deja eprouvee du panneau B5 — relecture des donnees
+// fraiches, puis reecriture de la seance dans sa sequence.
+//
+// Ancrage : le panneau #__ll_obj_suggest lui-meme. S'il n'est pas la, notre
+// rangee ne l'est pas non plus : aucun ancrage a inventer.
+// ═══════════════════════════════════════════════════════════════════
+(function() {
+  if (window.__ll_lexgrpSea_ready) return;
+  window.__ll_lexgrpSea_ready = true;
+
+  function css() {
+    if (document.getElementById('__ll_lexgrp_sea_css')) return;
+    var s = document.createElement('style');
+    s.id = '__ll_lexgrp_sea_css';
+    s.textContent = [
+      '#__ll_lexgrp_sea { margin-bottom:10px; padding:9px 14px; background:var(--card); border:1px solid var(--border); border-radius:10px; border-left:3px solid var(--accent-y); animation:__llSoftIn .34s ease both; }',
+      '#__ll_lexgrp_sea .gs-t { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; color:#a16207; margin-bottom:3px; }',
+      '#__ll_lexgrp_sea .gs-sub { font-size:9px; color:var(--text-muted); margin-bottom:8px; font-style:italic; }',
+      '#__ll_lexgrp_sea .gs-row { display:flex; flex-wrap:wrap; gap:5px; }',
+      '#__ll_lexgrp_sea .gs-b { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:12px; font-size:10.5px; font-weight:700; font-family:inherit; cursor:pointer; border:1px solid rgba(234,179,8,.35); background:transparent; color:#a16207; transition:background .15s, opacity .15s; }',
+      '#__ll_lexgrp_sea .gs-b:hover { background:rgba(234,179,8,.14); }',
+      '#__ll_lexgrp_sea .gs-b[data-etat="tout"] { background:rgba(234,179,8,.10); opacity:.6; }',
+      '#__ll_lexgrp_sea .gs-nb { font-size:9px; font-weight:800; opacity:.75; }',
+      '@media (prefers-reduced-motion: reduce) { #__ll_lexgrp_sea { animation:none; } }',
+      '@media print { #__ll_lexgrp_sea { display:none !important; } }'
+    ].join('\n');
+    document.head.appendChild(s);
+  }
+
+  // La sequence parente est retrouvee par l'identifiant de la SEANCE ouverte.
+  // On ne se fie jamais a __ll_activeSeq, qui n'est jamais remis a zero.
+  function contexte() {
+    if (!document.querySelector('[data-testid="sea-titre"]')) return null;
+    var ref = window.__ll_activeSeance;
+    if (!ref || !ref.id || typeof window.__ll_getData !== 'function') return null;
+    var d = window.__ll_getData() || {};
+    var seqs = d.sequences || [];
+    for (var i = 0; i < seqs.length; i++) {
+      var l = seqs[i].seances || [];
+      for (var j = 0; j < l.length; j++) {
+        if (l[j].id === ref.id) return { seq: seqs[i], sea: l[j] };
+      }
+    }
+    return null;
+  }
+
+  function motsDuGroupe(seq, nom) {
+    var out = [];
+    var mots = ((seq.tags || {}).lexique) || [];
+    for (var i = 0; i < mots.length; i++) {
+      var m = mots[i];
+      if (!m || !m.text) continue;
+      if (((m.groups) || []).indexOf(nom) >= 0) out.push(m);
+    }
+    return out;
+  }
+
+  function texteDe(x) { return typeof x === 'object' ? (x && x.text) : x; }
+
+  function presence(sea, mots) {
+    var liste = sea.objLex || [];
+    var dedans = 0;
+    for (var i = 0; i < mots.length; i++) {
+      for (var j = 0; j < liste.length; j++) {
+        if (texteDe(liste[j]) === mots[i].text) { dedans++; break; }
+      }
+    }
+    if (!mots.length) return 'vide';
+    if (dedans === 0) return 'rien';
+    if (dedans === mots.length) return 'tout';
+    return 'partie';
+  }
+
+  // Verse les mots manquants, ou retire ceux du groupe si tout y est deja.
+  function basculer(seqId, seaId, nom) {
+    if (typeof window.__ll_getData !== 'function' || typeof window.__ll_upsertSequence !== 'function') return;
+    var d = window.__ll_getData() || {};
+    var seq = (d.sequences || []).filter(function(s) { return s.id === seqId; })[0];
+    if (!seq) return;
+    var sea = (seq.seances || []).filter(function(s) { return s.id === seaId; })[0];
+    if (!sea) return;
+
+    var mots = motsDuGroupe(seq, nom);
+    if (!mots.length) return;
+    var etat = presence(sea, mots);
+    var liste = (sea.objLex || []).slice();
+    var n = 0;
+
+    if (etat === 'tout') {
+      var aRetirer = {};
+      mots.forEach(function(m) { aRetirer[m.text] = 1; });
+      var avant = liste.length;
+      liste = liste.filter(function(x) { return !aRetirer[texteDe(x)]; });
+      n = avant - liste.length;
+    } else {
+      mots.forEach(function(m) {
+        for (var j = 0; j < liste.length; j++) if (texteDe(liste[j]) === m.text) return;
+        liste.push({ text: m.text, level: m.level || undefined });
+        n++;
+      });
+    }
+
+    var seances = (seq.seances || []).map(function(s) {
+      if (s.id !== seaId) return s;
+      var c = Object.assign({}, s);
+      c.objLex = liste;
+      return c;
+    });
+    window.__ll_upsertSequence(Object.assign({}, seq, { seances: seances }));
+
+    if (window.llToast && n) {
+      window.llToast(etat === 'tout'
+        ? (n + (n > 1 ? ' mots retirés' : ' mot retiré') + ' de cette séance.')
+        : (n + (n > 1 ? ' mots ajoutés' : ' mot ajouté') + ' au lexique de cette séance.'), 'ok');
+    }
+  }
+
+  function empreinte(seq, sea) {
+    var gs = (seq.lexGroups || []);
+    return seq.id + '|' + sea.id + '|' + gs.map(function(g) {
+      var m = motsDuGroupe(seq, g);
+      return g + ':' + m.length + ':' + presence(sea, m);
+    }).join('|');
+  }
+
+  function construire(seq, sea, ancre) {
+    var boite = document.createElement('div');
+    boite.id = '__ll_lexgrp_sea';
+    boite.className = '__ll_lexgrp_sea';
+    boite.dataset.llSig = empreinte(seq, sea);
+
+    var t = document.createElement('div');
+    t.className = 'gs-t';
+    t.textContent = '\uD83D\uDDC2\uFE0F Groupes de lexique';
+    boite.appendChild(t);
+
+    var sub = document.createElement('div');
+    sub.className = 'gs-sub';
+    sub.textContent = 'Cliquer pour verser tout un groupe dans le lexique de cette séance';
+    boite.appendChild(sub);
+
+    var rangee = document.createElement('div');
+    rangee.className = 'gs-row';
+
+    (seq.lexGroups || []).forEach(function(nom) {
+      var mots = motsDuGroupe(seq, nom);
+      if (!mots.length) return;               // un groupe vide n'a rien a verser
+      var etat = presence(sea, mots);
+
+      var b = document.createElement('button');
+      b.className = 'gs-b';
+      b.dataset.etat = etat;
+      b.textContent = (etat === 'tout' ? '\u2713 ' : '+ ') + nom;
+
+      var nb = document.createElement('span');
+      nb.className = 'gs-nb';
+      nb.textContent = etat === 'partie'
+        ? (mots.filter(function(m) { return presence(sea, [m]) === 'tout'; }).length + '/' + mots.length)
+        : String(mots.length);
+      b.appendChild(nb);
+
+      b.title = etat === 'tout'
+        ? 'Tous les mots de ce groupe sont dans la séance — cliquer pour les retirer'
+        : (etat === 'partie'
+            ? 'Cliquer pour ajouter les mots qui manquent'
+            : 'Cliquer pour ajouter les ' + mots.length + ' mots de ce groupe');
+
+      b.addEventListener('click', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        basculer(seq.id, sea.id, nom);
+      });
+      rangee.appendChild(b);
+    });
+
+    if (!rangee.children.length) return;      // aucun groupe rempli : pas de rangee
+    boite.appendChild(rangee);
+    ancre.parentNode.insertBefore(boite, ancre);
+  }
+
+  function passage() {
+    var vus = document.querySelectorAll('.__ll_lexgrp_sea');
+    var ancre = document.getElementById('__ll_obj_suggest');
+    var ctx = contexte();
+
+    if (!ancre || !ctx || !(ctx.seq.lexGroups || []).length) {
+      for (var i = 0; i < vus.length; i++) vus[i].remove();
+      return;
+    }
+
+    var sig = empreinte(ctx.seq, ctx.sea);
+    var garde = null;
+    for (var j = 0; j < vus.length; j++) {
+      var el = vus[j];
+      if (!garde && el.nextElementSibling === ancre && el.dataset.llSig === sig) garde = el;
+      else el.remove();
+    }
+    if (garde) return;
+
+    css();
+    construire(ctx.seq, ctx.sea, ancre);
+  }
+
+  window.__ll_lexgrpSeaPassage = passage;
+
+  if (!window.__ll_lexgrpSea_horloge) {
+    window.__ll_lexgrpSea_horloge = setInterval(function() {
+      try { passage(); } catch (e) {}
+    }, 400);
+  }
+  try { passage(); } catch (e) {}
+
+})();
+
+// ═══════════════════════════════════════════════════════════════════
+// LOT 57 — 📌 NOTES DANS L'EDITEUR DE SEQUENCE
+//          (bloc autonome, supprimable seul)
+//
+// Ce qu'il fait : un bouton « 📌 Notes » a cote des pastilles de couleur,
+// onglet Identite. Il ouvre un champ ou l'on ecrit ou l'on en est sur cette
+// sequence. Ce qui y est ecrit est la meme note que celle du 📌 A faire de
+// la Bibliotheque : un seul texte, deux endroits pour l'ecrire.
+//
+// La note est rangee dans la sequence (seq.todo, deja en place depuis le
+// lot 48) : elle suit les sauvegardes, les autres ordinateurs, et voyage au
+// partage. Elle n'apparait sur aucun document imprime.
+//
+// Ecriture : llTodoSave, la route du lot 48 — relecture des donnees fraiches
+// puis ecriture ciblee. Enregistrement pendant la frappe (apres une courte
+// pause) et a la sortie du champ, comme dans la Bibliotheque. Le texte est
+// donc deja en surete meme si l'affichage est refabrique entre-temps.
+//
+// Ancrage : la rangee de pastilles du bloc « Couleur de la sequence »,
+// assainie au lot 52. Meme precedent que le ⭐ du lot 25 : on greffe un
+// bouton dans une rangee qui peut etre redessinee, et on le repose s'il a
+// disparu.
+// ═══════════════════════════════════════════════════════════════════
+(function() {
+  if (window.__ll_seqnote_ready) return;
+  window.__ll_seqnote_ready = true;
+
+  var CLE_OUVERT = '__ll_seqnote_open';
+  var minuteur = null;
+
+  function css() {
+    if (document.getElementById('__ll_seqnote_css')) return;
+    var s = document.createElement('style');
+    s.id = '__ll_seqnote_css';
+    s.textContent = [
+      '.__ll_note_btn { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:700; padding:2px 9px; border:1px solid var(--border); border-radius:5px; background:var(--card); color:var(--text-muted); font-family:inherit; cursor:pointer; flex-shrink:0; transition:color .15s, border-color .15s, background .15s; }',
+      '.__ll_note_btn:hover { color:var(--accent3); border-color:var(--accent3); }',
+      '.__ll_note_btn[data-remplie="1"] { color:#b45309; border-color:rgba(245,158,11,.5); background:rgba(245,158,11,.10); }',
+      '.__ll_note_btn[data-ouvert="1"] { color:var(--accent3); border-color:var(--accent3); }',
+      '#__ll_note_zone { margin-top:8px; }',
+      '#__ll_note_zone textarea { width:100%; min-height:54px; resize:vertical; background:rgba(245,158,11,.07); border:1px solid rgba(245,158,11,.28); border-left:3px solid rgba(245,158,11,.55); color:var(--text); padding:7px 10px; border-radius:8px; font-family:inherit; font-size:12px; outline:none; transition:border-color .2s, background .2s; }',
+      '#__ll_note_zone textarea::placeholder { color:var(--text-muted); opacity:.75; }',
+      '#__ll_note_zone textarea:focus { border-color:rgba(245,158,11,.6); border-left-color:#f59e0b; background:rgba(245,158,11,.11); }',
+      '#__ll_note_zone .nz-aide { font-size:9px; color:var(--text-muted); font-style:italic; margin-top:3px; }',
+      '@media print { .__ll_note_btn, #__ll_note_zone { display:none !important; } }'
+    ].join('\n');
+    document.head.appendChild(s);
+  }
+
+  function estOuvert() {
+    try { return localStorage.getItem(CLE_OUVERT) === '1'; } catch (e) { return false; }
+  }
+  function noterOuvert(v) {
+    try { localStorage.setItem(CLE_OUVERT, v ? '1' : '0'); } catch (e) {}
+  }
+
+  // La sequence de l'editeur de SEQUENCE, relue dans les donnees fraiches.
+  // LOT 57 bis — meme repere que le bloc « Couleur de la sequence » auquel le
+  // bouton est adosse. Deux voisins qui designent la sequence autrement
+  // finissent forcement par se contredire.
+  function seqFraiche() {
+    var c = window.__ll_editingSeq || window.__ll_activeSeq || window.__ll_curSeq;
+    if (!c || !c.id || typeof window.__ll_getData !== 'function') return null;
+    var d = window.__ll_getData() || {};
+    var l = d.sequences || [];
+    for (var i = 0; i < l.length; i++) if (l[i].id === c.id) return l[i];
+    return null;
+  }
+
+  /* LOT 57 bis — la fonction d'ecriture de la note (lot 48) vit dans un autre
+     compartiment du fichier : depuis ce bloc, elle etait tout simplement
+     introuvable. L'appel echouait sans bruit et rien n'etait enregistre.
+     Elle est desormais mise a disposition a l'endroit meme ou elle est ecrite
+     (voir plus haut dans le fichier) : une seule regle d'ecriture, un seul
+     endroit. Si malgre tout elle manquait, on le signale au lieu de laisser
+     croire que le texte est enregistre. */
+  var dejaSignale = false;
+  function enregistrer(seqId, texte) {
+    if (typeof window.llTodoSave === 'function') { window.llTodoSave(seqId, texte); return true; }
+    if (!dejaSignale) {
+      dejaSignale = true;
+      if (window.llToast) window.llToast('La note n’a pas pu être enregistrée.', 'warn');
+    }
+    return false;
+  }
+
+  function fermerZone(bouton) {
+    var z = document.getElementById('__ll_note_zone');
+    if (z) z.remove();
+    if (bouton) bouton.dataset.ouvert = '0';
+    noterOuvert(false);
+  }
+
+  function ouvrirZone(rangee, bouton, seq) {
+    if (document.getElementById('__ll_note_zone')) return;
+    var ligne = rangee.parentNode;      // le bloc « Couleur de la sequence »
+    if (!ligne) return;
+
+    var z = document.createElement('div');
+    z.id = '__ll_note_zone';
+
+    var champ = document.createElement('textarea');
+    champ.placeholder = 'Où en suis-je sur cette séquence ? Ce qui reste à préparer, à photocopier, à revoir…';
+    champ.value = seq.todo || '';
+    champ.dataset.seqid = seq.id;
+
+    champ.addEventListener('input', function() {
+      clearTimeout(minuteur);
+      var id = champ.dataset.seqid, v = champ.value;
+      minuteur = setTimeout(function() {
+        enregistrer(id, v);
+        if (bouton) bouton.dataset.remplie = String(v).trim() ? '1' : '0';
+      }, 600);
+    });
+    champ.addEventListener('blur', function() {
+      clearTimeout(minuteur);
+      enregistrer(champ.dataset.seqid, champ.value);
+      if (bouton) bouton.dataset.remplie = String(champ.value).trim() ? '1' : '0';
+    });
+    champ.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') { e.preventDefault(); champ.blur(); fermerZone(bouton); }
+    });
+
+    var aide = document.createElement('div');
+    aide.className = 'nz-aide';
+    aide.textContent = 'Enregistré au fil de la frappe. Se retrouve dans 📌 À faire, à la Bibliothèque.';
+
+    z.appendChild(champ);
+    z.appendChild(aide);
+    ligne.appendChild(z);
+    if (bouton) bouton.dataset.ouvert = '1';
+    noterOuvert(true);
+    champ.focus();
+  }
+
+  function passage() {
+    var ligne = document.getElementById('__ll_color_picker_row');
+    var seq = seqFraiche();
+
+    // Hors de l'onglet Identite de l'editeur de sequence : on retire tout.
+    if (!ligne || !seq) {
+      var vus = document.querySelectorAll('.__ll_note_btn');
+      for (var i = 0; i < vus.length; i++) vus[i].remove();
+      var z0 = document.getElementById('__ll_note_zone');
+      if (z0) z0.remove();
+      return;
+    }
+
+    css();
+    var rangee = ligne.lastElementChild;   // la rangee des pastilles de couleur
+    if (!rangee || rangee.id === '__ll_note_zone') rangee = ligne.children[1];
+    if (!rangee) return;
+
+    var b = ligne.querySelector('.__ll_note_btn');
+    if (!b) {
+      b = document.createElement('button');
+      b.className = '__ll_note_btn';
+      b.type = 'button';
+      b.textContent = '\uD83D\uDCCC Notes';
+      b.title = 'Écrire où j’en suis sur cette séquence';
+      b.dataset.ouvert = '0';
+      b.addEventListener('click', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (document.getElementById('__ll_note_zone')) { fermerZone(b); return; }
+        var s = seqFraiche();
+        if (s) ouvrirZone(rangee, b, s);
+      });
+      rangee.appendChild(b);
+    }
+
+    // Etat du bouton, recalcule apres la pose (jamais avant).
+    var champ = document.querySelector('#__ll_note_zone textarea');
+    if (!champ || document.activeElement !== champ) {
+      b.dataset.remplie = String(seq.todo || '').trim() ? '1' : '0';
+    }
+    b.title = String(seq.todo || '').trim()
+      ? 'Note en cours sur cette séquence'
+      : 'Écrire où j’en suis sur cette séquence';
+
+    // Le champ suit la sequence ouverte, et se rouvre si on l'avait laisse
+    // ouvert. On ne touche jamais au texte pendant qu'il est en cours d'ecriture.
+    if (champ) {
+      if (champ.dataset.seqid !== seq.id) {
+        clearTimeout(minuteur);
+        champ.dataset.seqid = seq.id;
+        champ.value = seq.todo || '';
+      } else if (document.activeElement !== champ && champ.value !== (seq.todo || '')) {
+        champ.value = seq.todo || '';
+      }
+      b.dataset.ouvert = '1';
+    } else if (estOuvert()) {
+      ouvrirZone(rangee, b, seq);
+      var c2 = document.querySelector('#__ll_note_zone textarea');
+      if (c2) c2.blur();
+    }
+  }
+
+  window.__ll_seqnotePassage = passage;
+
+  if (!window.__ll_seqnote_horloge) {
+    window.__ll_seqnote_horloge = setInterval(function() {
+      try { passage(); } catch (e) {}
+    }, 400);
+  }
+  try { passage(); } catch (e) {}
+
 })();
 </script>
 </body>
