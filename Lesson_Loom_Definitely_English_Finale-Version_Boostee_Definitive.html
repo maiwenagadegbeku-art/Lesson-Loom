@@ -36578,7 +36578,7 @@ const A4Preview = ({
       "x-dynamic": "true",
       "x-source-type": "computed",
       "x-source-editable": "false",
-      children: ["Lesson Loom \u2014 fiche de bord ", /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxDEV)("span", {
+      children: ["\uD83E\uDE84 Lesson Loom \u2014 fiche de bord ", /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxDEV)("span", {
         "data-ve-dynamic": "true",
         "x-excluded": "true",
         style: {
@@ -37531,7 +37531,6 @@ const CecrlPresetModal = ({
     '4ème': ['A2', 'A2+'],
     '3ème': ['A2+', 'B1'],
     'Seconde': ['B1', 'B2'],
-    'Seconde_Techno': ['B1', 'B2'],
     'Première': ['B2'],
     'Première_Techno': ['B2'],
     'Terminale': ['B2'],
@@ -38641,10 +38640,13 @@ const GrilleEditor = ({
         total.className = 'total';
         total.textContent = `TOTAL : /${(_g$totalPoints = g.totalPoints) !== null && _g$totalPoints !== void 0 ? _g$totalPoints : ''}`;
         wrap.appendChild(total);
-        if (prefs !== null && prefs !== void 0 && prefs.profName) {
+        /* LOT 49 — la signature de l'outil s'affiche toujours ; le nom du
+           professeur seulement s'il a ete renseigne. */
+        {
           const pf = doc.createElement('div');
           pf.className = 'prof-foot';
-          pf.textContent = '· ' + prefs.profName;
+          pf.textContent = '🪄 Lesson Loom'
+            + ((prefs && prefs.profName) ? (' · ' + prefs.profName) : '');
           wrap.appendChild(pf);
         }
       }
@@ -46725,15 +46727,14 @@ const SeancePreview = ({
       fileName: _jsxFileName,
       lineNumber: 161,
       columnNumber: 9
-    }, undefined), (prefs === null || prefs === void 0 ? void 0 : prefs.profName) && /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxDEV)("div", {
+    }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxDEV)("div", {
       style: {
         marginTop: 18,
         paddingTop: 10,
         borderTop: '1px solid #e2e8f0',
-        textAlign: 'right',
+        textAlign: 'center',
         fontSize: 10 * fontScale,
-        color: '#94a3b8',
-        fontStyle: 'italic'
+        color: '#94a3b8'
       },
       "x-file-name": "SeancePreview",
       "x-line-number": "170",
@@ -46745,7 +46746,7 @@ const SeancePreview = ({
       "x-source-var": "prefs",
       "x-source-path": "profName",
       "x-source-editable": "false",
-      children: ["\xB7 ", /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxDEV)("span", {
+      children: ["\uD83E\uDE84 Lesson Loom", /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxDEV)("span", {
         "data-ve-dynamic": "true",
         "x-excluded": "true",
         style: {
@@ -46761,7 +46762,7 @@ const SeancePreview = ({
         "x-source-var": "prefs",
         "x-source-path": "profName",
         "x-source-editable": "false",
-        children: prefs.profName
+        children: (prefs && prefs.profName) ? (" \xB7 " + prefs.profName) : ""
       }, void 0, false)]
     }, void 0, true, {
       fileName: _jsxFileName,
@@ -46872,7 +46873,7 @@ var _jsxFileName = "/app/frontend/src/components/SequenceEditor.jsx",
 
 
 
-const hasLvSelector = niv => niv === 'Seconde' || niv === 'Première' || niv === 'Terminale' || niv === 'Seconde_Techno' || niv === 'Première_Techno' || niv === 'Terminale_Techno';
+const hasLvSelector = niv => niv === 'Seconde' || niv === 'Première' || niv === 'Terminale' || niv === 'Première_Techno' || niv === 'Terminale_Techno';
 const isDNL = niv => niv === 'DNL' || niv === 'Autre';
 const grammarKey = (niveau, lv) => hasLvSelector(niveau) ? `${niveau}_${lv}` : niveau;
 const TABS = [{
@@ -47807,9 +47808,6 @@ const IdentiteSection = ({
           }, void 0, true), (0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxDEV)("optgroup", {
             label: "── Voie Technologique ──",
             children: [(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxDEV)("option", {
-              value: "Seconde_Techno",
-              children: "Seconde Techno"
-            }, void 0, false),(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxDEV)("option", {
               value: "Première_Techno",
               children: "Première Techno (STMG, STI2D…)"
             }, void 0, false),(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxDEV)("option", {
@@ -56077,10 +56075,6 @@ const NIVEAUX_LYCEE = [{
   label: '3ème',
   group: 'Collège'
 }, {
-  value: 'Seconde_Techno',
-  label: 'Seconde Techno',
-  group: 'Voie Technologique'
-}, {
   value: 'Première_Techno',
   label: 'Première Techno (STMG, STI2D…)',
   group: 'Voie Technologique'
@@ -56171,7 +56165,6 @@ const AXES = {
   }
 };
 // Voie technologique = mêmes axes que le tronc commun
-AXES['Seconde_Techno'] = AXES['Seconde'];
 AXES['Première_Techno'] = AXES['Première'];
 AXES['Terminale_Techno'] = AXES['Terminale'];
 
@@ -58748,7 +58741,7 @@ const generateDistributionHtml = (grille, students, sequenceTitle = '', profName
     <button class="btn ghost" onclick="toggleAll(true)">📂 Tout déplier</button>
     <button class="btn ghost" onclick="toggleAll(false)">📁 Tout replier</button>
     <span style="flex:1"></span>
-    <span style="font-size:11px; color:var(--muted);">💾 Notes sauvegardées localement.${profName ? ' · <b>' + escAttr(profName) + '</b>' : ''}</span>
+    <span style="font-size:11px; color:var(--muted);">💾 Notes sauvegardées localement. · 🪄 Lesson Loom${profName ? ' · <b>' + escAttr(profName) + '</b>' : ''}</span>
   </div>
   <div id="students-list"></div>
   <div id="recap-print"></div>
@@ -59695,7 +59688,7 @@ table{width:100%;border-collapse:collapse;margin-bottom:5pt;table-layout:fixed}
 th,td{border:1pt solid #cbd5e1;padding:5pt 7pt;vertical-align:top;font-size:9.5pt;word-wrap:break-word;overflow-wrap:break-word}
 th{font-weight:700;background:#f1f5f9}
 @media print{body{margin:1cm}@page{margin:1.5cm;size:A4}}
-</style></head><body>${body}<script>window.onload=function(){window.print();}<\/script></body></html>`);
+</style></head><body>${body}<div style="margin-top:14pt;padding-top:6pt;border-top:1pt solid #e2e8f0;text-align:center;font-size:8pt;color:#94a3b8">\uD83E\uDE84 Lesson Loom \u2014 fiche de bord${seq.annee ? ' \u00b7 ' + sanitize(seq.annee) : ''}${(typeof prefs !== 'undefined' && prefs && prefs.profName) ? ' \u00b7 ' + sanitize(prefs.profName) : ''}</div><script>window.onload=function(){window.print();}<\/script></body></html>`);
   win.document.close();
 };
 const exportWord = seq => {
@@ -60786,12 +60779,17 @@ const openPrintGrille = (g, {
       total.className = 'total';
       total.textContent = `TOTAL : /${(_g$totalPoints = g.totalPoints) !== null && _g$totalPoints !== void 0 ? _g$totalPoints : ''}`;
       wrap.appendChild(total);
-      if (profName) {
-        const pf = doc.createElement('div');
-        pf.className = 'prof-foot';
-        pf.textContent = '· ' + profName;
-        wrap.appendChild(pf);
-      }
+    }
+    /* LOT 51 — la signature s'affiche desormais quel que soit le nombre de
+       grilles par page, et l'outil est nomme meme sans nom de professeur.
+       (Il existe DEUX fabriques de grilles presque identiques dans ce
+       fichier : celle-ci est celle qui sert reellement.) */
+    {
+      const pf = doc.createElement('div');
+      pf.className = 'prof-foot';
+      pf.textContent = '\uD83E\uDE84 Lesson Loom'
+        + (profName ? (' · ' + profName) : '');
+      wrap.appendChild(pf);
     }
     return wrap;
   };
@@ -63155,7 +63153,7 @@ var _jsxFileName = "/app/frontend/src/views/ProgressionView.jsx",
 
 
 
-const hasLvSelector = niv => niv === 'Seconde' || niv === 'Première' || niv === 'Terminale' || niv === 'Seconde_Techno' || niv === 'Première_Techno' || niv === 'Terminale_Techno';
+const hasLvSelector = niv => niv === 'Seconde' || niv === 'Première' || niv === 'Terminale' || niv === 'Première_Techno' || niv === 'Terminale_Techno';
 const grammarKey = (niveau, lv) => hasLvSelector(niveau) ? `${niveau}_${lv}` : niveau;
 const ProgressionView = () => {
   _s();
@@ -73798,15 +73796,101 @@ function hookImageInputs(){
 // ═══ SEARCH OVERLAY ═════════════════════════════════════════
 var sOv;
 function mkS(){if(sOv)return sOv;var d=document.createElement('div');d.id='__ll_sov';d.style.display='none';
-d.innerHTML='<div style="position:fixed;inset:0;z-index:9500;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding-top:8vh;animation:__smo_fi .15s ease" onclick="if(event.target===this)document.getElementById(\'__ll_sov\').style.display=\'none\'"><div style="width:min(640px,92vw);background:var(--panel);border-radius:16px;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,0.25);overflow:hidden;display:flex;flex-direction:column;max-height:80vh;animation:__smo_sd .2s cubic-bezier(.34,1.1,.64,1)" onclick="event.stopPropagation()"><div style="display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border)"><span style="color:var(--accent2);font-size:18px">\uD83D\uDD0D</span><input id="__smo_i" placeholder="S\u00E9quences, s\u00E9ances, grilles\u2026" autocomplete="off" spellcheck="false" style="flex:1;border:none;outline:none;background:transparent;font-size:15px;color:var(--text);font-weight:600;font-family:inherit"/><button onclick="document.getElementById(\'__ll_sov\').style.display=\'none\'" class="btn btn-ghost btn-sm">\u2715</button></div><div id="__smo_r" style="overflow-y:auto;flex:1;padding:6px 0"><div style="padding:32px;text-align:center;color:var(--text-muted)">Tapez au moins 2 caract\u00E8res\u2026</div></div><div style="border-top:1px solid var(--border);padding:8px 18px;background:var(--card);display:flex;gap:16px;font-size:11px;color:var(--text-muted)"><span><kbd style="background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:10px">\u00C9chap</kbd> fermer</span></div></div></div>';
+d.innerHTML='<div style="position:fixed;inset:0;z-index:9500;background:rgba(15,23,42,0.55);backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding-top:8vh;animation:__smo_fi .15s ease" onclick="if(event.target===this)document.getElementById(\'__ll_sov\').style.display=\'none\'"><div style="width:min(640px,92vw);background:var(--panel);border-radius:16px;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,0.25);overflow:hidden;display:flex;flex-direction:column;max-height:80vh;animation:__smo_sd .2s cubic-bezier(.34,1.1,.64,1)" onclick="event.stopPropagation()"><div style="display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border)"><span style="color:var(--accent2);font-size:18px">\uD83D\uDD0D</span><input id="__smo_i" placeholder="S\u00E9quences, s\u00E9ances, grilles\u2026" autocomplete="off" spellcheck="false" style="flex:1;border:none;outline:none;background:transparent;font-size:15px;color:var(--text);font-weight:600;font-family:inherit"/><button onclick="document.getElementById(\'__ll_sov\').style.display=\'none\'" class="btn btn-ghost btn-sm">\u2715</button></div><div id="__smo_r" style="overflow-y:auto;flex:1;padding:6px 0"><div style="padding:32px;text-align:center;color:var(--text-muted)">Tapez au moins 2 caract\u00E8res\u2026</div></div><div style="border-top:1px solid var(--border);padding:8px 18px;background:var(--card);display:flex;gap:16px;font-size:11px;color:var(--text-muted)"><span><kbd style="background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:10px">\u00C9chap</kbd> fermer</span><span>\uD83D\uDCA1 Astuce\u00A0: <kbd style="background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:10px">Ctrl</kbd> + <kbd style="background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:10px">K</kbd> (ou <kbd style="background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:10px">\u2318</kbd> + <kbd style="background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:10px">K</kbd>) pour ouvrir la recherche</span></div></div></div>';
 document.body.appendChild(d);var _smt;d.querySelector('#__smo_i').addEventListener('input',function(){var v=this.value;clearTimeout(_smt);_smt=setTimeout(function(){doS(v)},120)});d.querySelector('#__smo_i').addEventListener('keydown',function(e){if(e.key==='Escape')d.style.display='none'});sOv=d;return d}
 function openS(){var d=mkS();d.style.display='block';var i=d.querySelector('#__smo_i');i.value='';setTimeout(function(){i.focus()},60);d.querySelector('#__smo_r').innerHTML='<div style="padding:32px;text-align:center;color:var(--text-muted)">Tapez au moins 2 caract\u00E8res\u2026</div>'}
+/* LOT 38 — Deux aides communes pour elargir la recherche sans alourdir.
+   llSTags  : cherche dans une liste de mots-cles (lexique, grammaire,
+              phonologie, culture) quelle que soit sa forme.
+   llSTexte : cherche dans un texte mis en forme, balises retirees. */
+function llSTags(liste, q){
+  if(!liste || !liste.length) return false;
+  for(var i=0;i<liste.length;i++){
+    var e=liste[i];
+    var txt = (e && typeof e==='object') ? (e.text||e.label||e.nom||'') : e;
+    if(norm(String(txt)).includes(q)) return true;
+  }
+  return false;
+}
+function llSTexte(v, q){
+  if(!v) return false;
+  return norm(String(v).replace(/<[^>]+>/g,' ')).includes(q);
+}
 function doS(q){var b=document.getElementById('__smo_r');q=norm(q.trim());if(q.length<2){b.innerHTML='<div style="padding:32px;text-align:center;color:var(--text-muted)">Tapez au moins 2 caract\u00E8res\u2026</div>';return}var data=getData(),hits=[],IC={seq:'\uD83D\uDCDD',sea:'\u270F\uFE0F',gri:'\uD83D\uDCCB',prog:'\uD83C\uDFAF'},BG={seq:'rgba(108,99,255,0.08)',sea:'rgba(62,207,142,0.08)',gri:'rgba(249,115,22,0.08)',prog:'rgba(6,182,212,0.08)'};
-(data.sequences||[]).forEach(function(seq){if(norm(seq.titre).includes(q)||norm(seq.axe).includes(q)||norm(seq.problematique).includes(q)||(seq.tags&&seq.tags.lexique||[]).some(function(t){return norm(t.text).includes(q)})||(seq.tags&&seq.tags.grammar||[]).some(function(t){return norm(t.text).includes(q)}))hits.push({t:'seq',ti:seq.titre||'(sans titre)',su:(seq.niveau||'').replace(/_/g,' ')+(seq.axe?' \xB7 '+seq.axe:''),ba:(seq.seances||[]).length+' s\u00E9ance(s)',ta:'seq',sid:seq.id});(seq.seances||[]).forEach(function(s){var found=norm(s.titre).includes(q)||norm(s.objectif).includes(q);if(!found){var extra=((s.trace||'')+(s.devoirs||'')).replace(/<[^>]+>/g,'').slice(0,500);if(norm(extra).includes(q)){found=true}else{for(var ai=0,al=(s.activites||[]);ai<al.length&&!found;ai++){var ac=al[ai];if(norm((ac.label||'')+(ac.contenu||'').replace(/<[^>]+>/g,'').slice(0,300)).includes(q))found=true}}}if(found)hits.push({t:'sea',ti:s.titre||'(sans titre)',su:'\u21B3 '+(seq.titre||''),ta:'sea',sid:seq.id,said:s.id})});(seq.grilles||[]).forEach(function(g){if(norm(g.name).includes(q))hits.push({t:'gri',ti:g.name||'(grille)',su:seq.titre+' \xB7 '+(g.competence||''),ta:'eval',sid:seq.id,gid:g.id})})});
+/* LOT 37 — trois objets ne sont pas des sequences de travail : la
+   collection des seances flash, la bibliotheque de grilles d'evaluation et
+   la sequence de demonstration du tour guide. Ils sortaient dans les
+   resultats et menaient a des ecrans de coulisses. Ils ne sont plus listes.
+   Rien d'autre ne change pour eux : ils existent, s'ouvrent et fonctionnent
+   exactement comme avant. Les seances flash restent trouvables. */
+(data.sequences||[]).forEach(function(seq){var __llFlash = (seq.id==='__ll_flash_seances__')||!!seq.isFlash;var __llCoul = __llFlash||!!seq.isEvalLib||(seq.id==='__ll_eval_grilles__')||(seq.id==='__ll_tour_demo__');/* LOT 38 — DEUX corrections ici.
+   (a) Le filtre des coulisses ne s'appliquait qu'au titre : sans les
+       parentheses ci-dessous, une coulisse dont l'axe correspondait
+       ressortait quand meme. Defaut introduit au lot 37, repare.
+   (b) La recherche ne regardait que 5 champs sur une sequence. Elle en
+       regarde maintenant 9, dont la tache finale et la phonologie. */
+var __t=seq.tags||{};
+if(!__llCoul && (norm(seq.titre).includes(q)||norm(seq.axe).includes(q)||norm(seq.axeMineur).includes(q)||norm(seq.problematique).includes(q)||llSTexte(seq.objectifCulturel,q)||llSTexte(seq.tache,q)||llSTags(__t.lexique,q)||llSTags(__t.grammar,q)||llSTags(__t.phono,q)||llSTags(__t.culture,q)))hits.push({t:'seq',ti:seq.titre||'(sans titre)',su:(seq.niveau||'').replace(/_/g,' ')+(seq.axe?' \xB7 '+seq.axe:''),ba:(seq.seances||[]).length+' s\u00E9ance(s)',ta:'seq',sid:seq.id});/* LOT 38 — la recherche ignorait les objectifs lexicaux, grammaticaux,
+   phonologiques et pragmatiques d'une seance, ainsi que le nom de ses
+   supports. Ce sont pourtant les mots-cles les plus utiles pour retrouver
+   « ou avais-je travaille le present perfect ». */
+(seq.seances||[]).forEach(function(s){var found=norm(s.titre).includes(q)||norm(s.objectif).includes(q)||llSTags(s.objLex,q)||llSTags(s.objGram,q)||llSTags(s.objPhon,q)||llSTags(s.objPrag,q)||llSTags(s.supportsList,q);if(!found){var extra=((s.trace||'')+(s.devoirs||'')).replace(/<[^>]+>/g,'').slice(0,500);if(norm(extra).includes(q)){found=true}else{for(var ai=0,al=(s.activites||[]);ai<al.length&&!found;ai++){var ac=al[ai];if(norm((ac.label||'')+(ac.contenu||'').replace(/<[^>]+>/g,'').slice(0,300)).includes(q))found=true}}}if(found&&!(__llCoul&&!__llFlash))hits.push({t:'sea',ti:s.titre||'(sans titre)',su:__llFlash?'\u26A1 S\u00E9ance flash':('\u21B3 '+(seq.titre||'')),ta:'sea',sid:seq.id,said:s.id,fl:__llFlash})});(seq.grilles||[]).forEach(function(g){if(!__llCoul&&norm(g.name).includes(q))hits.push({t:'gri',ti:g.name||'(grille)',su:seq.titre+' \xB7 '+(g.competence||''),ta:'eval',sid:seq.id,gid:g.id})})});
 (data.progressions||[]).forEach(function(p){if(norm(p.title).includes(q))hits.push({t:'prog',ti:p.title||'(sans titre)',su:p.niveau||'',ta:'prog'})});
 if(!hits.length){b.innerHTML='<div style="padding:32px;text-align:center;color:var(--text-muted)">\uD83E\uDD37 Aucun r\u00E9sultat</div>';return}
-b.innerHTML=hits.slice(0,12).map(function(h,i){return'<div data-i="'+i+'" style="display:flex;align-items:center;gap:12px;padding:10px 18px;cursor:pointer;transition:background .1s" onmouseover="this.style.background=\'rgba(108,99,255,0.06)\'" onmouseout="this.style.background=\'\'"><div style="width:32px;height:32px;border-radius:8px;flex-shrink:0;background:'+BG[h.t]+';display:flex;align-items:center;justify-content:center;font-size:14px">'+IC[h.t]+'</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(h.ti)+'</div><div style="font-size:11px;color:var(--text-muted)">'+esc(h.su)+'</div></div>'+(h.ba?'<div style="font-size:10px;color:var(--accent2);font-weight:700">'+esc(h.ba)+'</div>':'')+'<span style="color:var(--text-muted)">\u2192</span></div>'}).join('');
-Array.prototype.slice.call(b.querySelectorAll('[data-i]')).forEach(function(el){el.addEventListener('click',function(){var h=hits[parseInt(el.dataset.i,10)];document.getElementById('__ll_sov').style.display='none';if(h.sid&&typeof window.__ll_openSequenceById==='function'){window.__ll_openSequenceById(h.sid,h.gid||null,h.said||null);if(h.ta==='eval'){setTimeout(function(){if(typeof window.__ll_navigateTo==='function')window.__ll_navigateTo('eval')},120)}return}if(typeof window.__ll_navigateTo==='function'){window.__ll_navigateTo(h.ta);return}var t=document.querySelector('[data-testid="nav-tab-'+h.ta+'"]');if(t)t.click()})})}
+/* LOT 38 — le plafond etait de 12 sans que rien ne le dise : les resultats
+   suivants disparaissaient en silence. Il passe a 20, et une ligne annonce
+   le total quand il y en a davantage. */
+var __LIM=20, __plus=hits.length>__LIM;
+b.innerHTML=hits.slice(0,__LIM).map(function(h,i){return'<div data-i="'+i+'" style="display:flex;align-items:center;gap:12px;padding:10px 18px;cursor:pointer;transition:background .1s" onmouseover="this.style.background=\'rgba(108,99,255,0.06)\'" onmouseout="this.style.background=\'\'"><div style="width:32px;height:32px;border-radius:8px;flex-shrink:0;background:'+BG[h.t]+';display:flex;align-items:center;justify-content:center;font-size:14px">'+IC[h.t]+'</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(h.ti)+'</div><div style="font-size:11px;color:var(--text-muted)">'+esc(h.su)+'</div></div>'+(h.ba?'<div style="font-size:10px;color:var(--accent2);font-weight:700">'+esc(h.ba)+'</div>':'')+'<span style="color:var(--text-muted)">\u2192</span></div>'}).join('')+(__plus?'<div style="padding:10px 18px;text-align:center;font-size:11px;color:var(--text-muted);border-top:1px solid var(--border)">'+hits.length+' r\u00E9sultats \u00B7 les '+__LIM+' premiers sont affich\u00E9s \u00B7 pr\u00E9cisez votre recherche</div>':'');
+/* LOT 36 — Les resultats de recherche ouvrent enfin l'element.
+   Avant, tout passait par __ll_openSequenceById, qui depose l'identifiant
+   dans une memoire lue UNIQUEMENT par l'onglet Seances (voir l'effet sur
+   targetSeqId dans SeancesView). Pour un resultat de type sequence, cette
+   commande basculait donc sur l'onglet Sequences ou personne ne relevait le
+   message : rien ne s'ouvrait, et depuis l'onglet Sequences rien ne bougeait
+   du tout. On aiguille desormais chaque type vers la commande qui le sert :
+     sequence -> __ll_openSeqEditor, avec le meme motif d'attente que le
+                 bouton « Gerer / Creer » de la bibliotheque de grilles ;
+     seance   -> __ll_openSeanceInView, qui fonctionne deja ;
+     grille   -> l'editeur de la sequence, grille mise en evidence ;
+     autre    -> l'onglet correspondant, comme avant.
+   Aucune retouche du coeur. */
+function llSearchOpenSeqEditor(seqId, grilleId, essai){
+  essai = essai || 0;
+  if(grilleId){ try{ window.__ll_highlightGrilleId = grilleId; }catch(e){} }
+  if(typeof window.__ll_openSeqEditor === 'function'){
+    try{ window.__ll_openSeqEditor(seqId); }catch(e){}
+    return;
+  }
+  if(essai >= 12){
+    if(typeof window.llToast === 'function')
+      window.llToast('Impossible d\u2019ouvrir cette s\u00E9quence. R\u00E9essayez.','warn');
+    return;
+  }
+  setTimeout(function(){ llSearchOpenSeqEditor(seqId, null, essai+1); }, 60);
+}
+function llSearchGoto(h){
+  var ov=document.getElementById('__ll_sov'); if(ov) ov.style.display='none';
+  if(h.sid && h.said && typeof window.__ll_openSeanceInView === 'function'){
+    /* LOT 37 — pour une seance flash, on emprunte exactement la sequence de
+       commandes du bouton Editer du panneau flash : on previent qu'une
+       navigation flash est en cours, puis on ouvre. */
+    if(h.fl){
+      var fp=document.getElementById('__ll_flash_panel'); if(fp) fp.remove();
+      window._llFlashNavPending=true;
+      setTimeout(function(){ window._llFlashNavPending=false; },900);
+    }
+    window.__ll_openSeanceInView(h.sid, h.said); return;
+  }
+  if(h.sid){
+    if(typeof window.__ll_navigateTo === 'function') window.__ll_navigateTo('seq');
+    setTimeout(function(){ llSearchOpenSeqEditor(h.sid, h.gid||null, 0); }, 60);
+    return;
+  }
+  if(typeof window.__ll_navigateTo === 'function'){ window.__ll_navigateTo(h.ta); return; }
+  var t=document.querySelector('[data-testid="nav-tab-'+h.ta+'"]'); if(t) t.click();
+}
+Array.prototype.slice.call(b.querySelectorAll('[data-i]')).forEach(function(el){el.addEventListener('click',function(){var h=hits[parseInt(el.dataset.i,10)];if(h) llSearchGoto(h);})})}
 function hookS(){var b=document.querySelector('[data-testid="search-btn"]');if(!b||b.__h)return;b.__h=1;b.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openS()},true);if(!b.querySelector('kbd')){var k=document.createElement('kbd');k.textContent='\u2318K';k.style.cssText='font-size:9px;margin-left:4px;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:0 4px;color:var(--text-muted);font-family:inherit';b.appendChild(k)}}
 document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openS()}if(e.key==='Escape'){var o=document.getElementById('__ll_sov');if(o&&o.style.display!=='none')o.style.display='none'}});
 
@@ -75049,7 +75133,7 @@ var LL_NIV_ORDER = ['6ème','5ème','4ème','3ème',
   /* LOT 30 — la voie technologique existait dans le selecteur, dans les
      axes, en grammaire et en phonologie, mais pas ici : elle etait rangee
      apres tout le reste. */
-  'Seconde_Techno','Première_Techno','Terminale_Techno',
+  'Première_Techno','Terminale_Techno',
   'Première_AMC','Terminale_AMC',
   'Première_LLCER','Terminale_LLCER',
   'Seconde','Première','Terminale'];
@@ -75062,9 +75146,13 @@ var LL_NIV_LABELS = {
   'Première_LLCER':'Première LLCER','Terminale_LLCER':'Terminale LLCER',
   /* LOT 30 — sans ces trois noms, le tableau de bord et la carte CECRL
      affichaient « Seconde_Techno », avec son tiret bas. */
-  'Seconde_Techno':'Seconde Techno','Première_Techno':'Première Techno','Terminale_Techno':'Terminale Techno'
+  'Première_Techno':'Première Techno','Terminale_Techno':'Terminale Techno'
 };
-function llNivLabel(n){ return LL_NIV_LABELS[n]||n; }
+/* LOT 34 (D bis) — un niveau inconnu (fichier ancien, sequence recue d'un
+   collegue) s'affichait avec son tiret bas. Les cartes de sequence le
+   remplacaient deja par une espace ; le tableau de bord et la carte CECRL
+   font desormais pareil. */
+function llNivLabel(n){ return LL_NIV_LABELS[n] || String(n||'').replace(/_/g,' '); }
 
 /* LOT 30 — Nom d'une copie. Avant, chaque duplication rajoutait « (copie) »
    au titre precedent : « Titre (copie) (copie) (copie) ». On compte
@@ -75375,6 +75463,25 @@ function llUpdateActivityGauge(){
 }
 
 // Bouton ⭐ sur chaque carte d'activité
+/* LOT 39 — Deplacer une activite d'un cran. Meme route d'ecriture que
+   l'insertion d'une activite favorite (lots 25 et 26) : on relit la seance
+   dans les donnees fraiches, on recompose la liste, on ecrit. On n'imite
+   jamais la frappe et on ne fait jamais confiance a un repere implicite. */
+function llMoveActivity(idx, sens){
+  var fr = llActFresh();
+  if(!fr){ window.llToast('Ouvrez d’abord une séance.','info'); return false; }
+  if(typeof window.__ll_upsertSequence !== 'function') return false;
+  var acts = (fr.sea.activites||[]).slice();
+  var j = idx + sens;
+  if(isNaN(idx) || idx<0 || idx>=acts.length || j<0 || j>=acts.length) return false;
+  var tmp = acts[idx]; acts[idx] = acts[j]; acts[j] = tmp;
+  var seances = (fr.seq.seances||[]).map(function(se){
+    return se.id === fr.sea.id ? Object.assign({}, se, { activites: acts }) : se;
+  });
+  window.__ll_upsertSequence(Object.assign({}, fr.seq, { seances: seances }));
+  return true;
+}
+
 function llHookActivityCards(){
   document.querySelectorAll('[data-testid^="activity-"]').forEach(function(card){
     if(card.__llstar)return;
@@ -75398,8 +75505,61 @@ function llHookActivityCards(){
       if(__a){ llSaveActAsFav(__a.label||'', __a.duree||0, fb, __a.contenu||''); }
       else { llSaveActAsFav(labelInp?labelInp.value:'',dureeInp?dureeInp.value:'0',fb,''); }
     };
+    /* LOT 39 — les deux fleches, posees par le meme mecanisme que le ⭐
+       (lot 25). Elles vivent dans un petit groupe : React ne voit qu'un
+       seul enfant etranger de plus, pas deux. Aspect repris des fleches
+       de la progression : memes glyphes, meme classe, meme grisage.
+       Le clic est ecoute par le groupe, pas par chaque fleche : ce bloc
+       est redessine trois fois par seconde (voir lot 28). */
+    var moveWrap=document.createElement('span');
+    moveWrap.className='__ll_act_move';
+    moveWrap.style.cssText='display:inline-flex;gap:2px;flex-shrink:0;margin-right:2px';
+    function mkArrow(sens,glyphe,libelle){
+      var a=document.createElement('button');
+      a.type='button';
+      a.setAttribute('data-llmove',String(sens));
+      a.title=libelle;
+      a.textContent=glyphe;
+      a.style.cssText='background:none;border:none;cursor:pointer;color:var(--text-muted);font-family:inherit;font-size:11px;line-height:1;padding:4px 5px;border-radius:5px;transition:color .15s,background .15s';
+      a.onmouseenter=function(){ if(!this.disabled){ this.style.color='var(--accent2)'; this.style.background='rgba(108,99,255,.10)'; } };
+      a.onmouseleave=function(){ this.style.color='var(--text-muted)'; this.style.background='none'; };
+      return a;
+    }
+    var upBtn=mkArrow(-1,'\u2191','Monter cette activit\u00e9');
+    var dnBtn=mkArrow(1,'\u2193','Descendre cette activit\u00e9');
+    moveWrap.appendChild(upBtn); moveWrap.appendChild(dnBtn);
+    if(!moveWrap.__llmv){
+      moveWrap.__llmv=true;
+      moveWrap.addEventListener('click',function(e){
+        var b=e.target&&e.target.closest?e.target.closest('[data-llmove]'):null;
+        if(!b||b.disabled)return;
+        e.preventDefault(); e.stopPropagation();
+        var i=parseInt((card.getAttribute('data-testid')||'').replace('activity-',''),10);
+        llMoveActivity(i, parseInt(b.getAttribute('data-llmove'),10));
+      });
+    }
+    starBtn.style.marginLeft='8px';
+    trashBtn.style.marginLeft='8px';
     trashBtn.parentNode.insertBefore(fb,trashBtn);
     trashBtn.parentNode.insertBefore(starBtn,fb);
+    trashBtn.parentNode.insertBefore(moveWrap,starBtn);
+  });
+  /* LOT 39 — la premiere et la derniere fleche sont grisees et inactives,
+     comme dans la progression. Recalcule a chaque passage, APRES la pose,
+     car le nombre d'activites change. On ne fait que modifier l'aspect de
+     boutons deja poses : rien n'est ajoute ni retire ici. */
+  var __cards=document.querySelectorAll('[data-testid^="activity-"]');
+  var __n=__cards.length;
+  __cards.forEach(function(c,i){
+    var w=c.querySelector('.__ll_act_move');
+    if(!w)return;
+    w.querySelectorAll('[data-llmove]').forEach(function(a){
+      var sens=parseInt(a.getAttribute('data-llmove'),10);
+      var bloque=(sens<0&&i===0)||(sens>0&&i===__n-1);
+      a.disabled=bloque;
+      a.style.opacity=bloque?'.22':'1';
+      a.style.cursor=bloque?'default':'pointer';
+    });
   });
 }
 
@@ -76535,6 +76695,23 @@ function llEnhanceBiblioReact(){
   });
 }
 
+/* LOT 48 — ecriture de la note. Relecture fraiche, ecriture ciblee :
+   la route validee depuis le lot 24. */
+function llTodoSave(seqId, texte){
+  if(typeof window.__ll_getData !== 'function') return false;
+  if(typeof window.__ll_upsertSequence !== 'function') return false;
+  var d = window.__ll_getData() || {};
+  var fresh = null;
+  (d.sequences||[]).forEach(function(x){ if(x.id === seqId) fresh = x; });
+  if(!fresh) return false;
+  var v = String(texte==null?'':texte).trim();
+  if((fresh.todo||'') === v) return true;
+  var maj = Object.assign({}, fresh);
+  if(v) maj.todo = v; else delete maj.todo;
+  window.__ll_upsertSequence(maj);
+  return true;
+}
+
 function llInjectBiblioSections(){
   var container=llFindBiblioContainer();
   if(!container)return;
@@ -76547,6 +76724,87 @@ function llInjectBiblioSections(){
   function anchor(){return document.getElementById('ll-bib-supports')||null;}
   function insertBefore(el){
     var a=anchor();if(a)container.insertBefore(el,a);else container.appendChild(el);
+  }
+
+  /* LOT 48 — \uD83D\uDCCC A faire : note d'avancement par sequence, ecrite et lue
+     depuis la Bibliotheque. Le champ dans l'editeur de sequence a ete
+     abandonne apres quatre tentatives : tout element pose dans ce panneau
+     y est retire aussitot. La Bibliotheque, elle, est construite par la
+     meme mecanique que les manuels et les activites favorites.
+     La note est rangee DANS la sequence : elle suit les sauvegardes JSON,
+     les autres ordinateurs, et voyage au partage. Absente de l'A4. */
+  var __todoAnchor=document.getElementById('ll-bib-grilles')||anchor();
+  var __dTodo=(typeof window.__ll_getData==='function')?(window.__ll_getData()||{}):{};
+  var __seqTodo=(__dTodo.sequences||[]).filter(function(x){
+    if(!x||!x.id) return false;
+    if(x.isFlash||x.isEvalLib) return false;
+    if(x.id==='__ll_flash_seances__'||x.id==='__ll_eval_grilles__'||x.id==='__ll_tour_demo__') return false;
+    return true;
+  });
+  var __nbTodo=__seqTodo.filter(function(x){return x.todo&&String(x.todo).trim();}).length;
+  if(__seqTodo.length){
+    var __st=llMakeBibCard('__ll_biblio_todo','\uD83D\uDCCC','\u00c0 faire','rgba(245,158,11,.15)','#92400e',null,__nbTodo);
+    var __tb=document.createElement('table'); __tb.className='ll-bib-tbl';
+    var __th=document.createElement('thead'); var __tr0=document.createElement('tr');
+    ['S\u00e9quence','Niveau','\u00c0 faire',''].forEach(function(h){
+      var e=document.createElement('th'); e.textContent=h; __tr0.appendChild(e);
+    });
+    __th.appendChild(__tr0); __tb.appendChild(__th);
+    var __tbd=document.createElement('tbody');
+    /* Les sequences portant une note d'abord, puis les autres. */
+    __seqTodo.sort(function(a,b){
+      var na=(a.todo&&String(a.todo).trim())?0:1, nb=(b.todo&&String(b.todo).trim())?0:1;
+      return na-nb || String(a.titre||'').localeCompare(String(b.titre||''));
+    });
+    __seqTodo.forEach(function(sq){
+      var tr=document.createElement('tr');
+      var c1=document.createElement('td');
+      var stg=document.createElement('strong'); stg.textContent=sq.titre||'Sans titre';
+      c1.appendChild(stg);
+      var c2=document.createElement('td');
+      c2.textContent=(sq.niveau||'').replace(/_/g,' ');
+      var c3=document.createElement('td'); c3.style.width='45%';
+      var inp=document.createElement('input');
+      inp.type='text'; inp.className='fi';
+      inp.value=sq.todo||'';
+      inp.placeholder='\u2014';
+      inp.style.cssText='font-size:11.5px;padding:5px 9px;'
+        +(sq.todo&&String(sq.todo).trim()?'border-left:3px solid var(--warn-border)':'opacity:.75');
+      inp.dataset.seqid=sq.id;
+      c3.appendChild(inp);
+      var c4=document.createElement('td'); c4.style.textAlign='center';
+      var ob=document.createElement('button');
+      ob.className='btn btn-ghost btn-sm';
+      ob.style.cssText='font-size:11px;padding:3px 9px';
+      ob.textContent='Ouvrir';
+      ob.title='Ouvrir cette s\u00e9quence';
+      ob.onclick=(function(id){return function(e){
+        e.stopPropagation();
+        if(typeof window.__ll_navigateTo==='function') window.__ll_navigateTo('seq');
+        setTimeout(function(){
+          if(typeof window.__ll_openSeqEditor==='function') window.__ll_openSeqEditor(id);
+        },80);
+      };})(sq.id);
+      c4.appendChild(ob);
+      tr.appendChild(c1); tr.appendChild(c2); tr.appendChild(c3); tr.appendChild(c4);
+      __tbd.appendChild(tr);
+    });
+    __tb.appendChild(__tbd); __st.body.appendChild(__tb);
+    /* Une seule ecoute pour tout le tableau : les champs peuvent etre
+       reconstruits sans perdre leur reaction. */
+    var __tt=null;
+    __st.body.addEventListener('input',function(e){
+      var f=e.target; if(!f||!f.dataset||!f.dataset.seqid) return;
+      clearTimeout(__tt);
+      var id=f.dataset.seqid, v=f.value;
+      __tt=setTimeout(function(){ llTodoSave(id,v); },600);
+    });
+    __st.body.addEventListener('change',function(e){
+      var f=e.target; if(!f||!f.dataset||!f.dataset.seqid) return;
+      clearTimeout(__tt); llTodoSave(f.dataset.seqid,f.value);
+    });
+    if(__todoAnchor)container.insertBefore(__st.wrap,__todoAnchor);
+    else container.appendChild(__st.wrap);
   }
 
   // ── 1. Manuels — top, avant la section React Grilles ──────────────────
@@ -77088,6 +77346,54 @@ function llHookFlashBtn(){
 }
 
 // Flash seances in Bibliothèque
+/* LOT 31 — 🌱 Développer en séance. Un seul chemin : l'idée devient une
+   vraie séance dans la collection ⚡ Séances Flash. Pas de fenetre, pas de
+   choix de destination. Les donnees sont relues au moment du clic, et la
+   collection est retrouvee par son identifiant — jamais par un repere
+   implicite. L'idee reste dans la Bibliotheque. */
+window.llGrowFlashIdea=function(flashId){
+  var getData=window.__ll_getData, upsert=window.__ll_upsertSequence;
+  if(typeof getData!=='function'||typeof upsert!=='function'){
+    window.llToast('Action impossible : rechargez la page et réessayez.','warn');return;
+  }
+  var idee=null, liste=llGetFlash();
+  for(var i=0;i<liste.length;i++){ if(liste[i].id===flashId){ idee=liste[i]; break; } }
+  if(!idee){ window.llToast('Idée introuvable.','warn'); return; }
+
+  var data=getData()||{}, seqs=data.sequences||[], collection=null;
+  for(var j=0;j<seqs.length;j++){ if(seqs[j].id==='__ll_flash_seances__'){ collection=seqs[j]; break; } }
+  if(!collection){ window.llToast('Collection des séances flash introuvable.','warn'); return; }
+
+  /* LOT 32 — une seance ne possede ni niveau, ni duree, ni notes : ces
+     trois informations etaient ecrites sans qu'aucun ecran sache les
+     afficher. Elles sont desormais rassemblees en texte simple dans
+     « Objectif principal », champ libre visible dans l'editeur ET sur la
+     feuille A4. Le titre reste le titre. */
+  var rappel=[];
+  if(idee.niveau&&String(idee.niveau).trim())rappel.push(String(idee.niveau).trim());
+  if(idee.duree)rappel.push(idee.duree+' min');
+  var entete=rappel.length?('Idée flash — '+rappel.join(' · ')):'Idée flash';
+  var corps=(idee.notes||'').trim();
+  var objectif=corps?(entete+'\n\n'+corps):entete;
+
+  var nouvelle={
+    id:'sea_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),
+    titre:idee.title||'Séance flash',
+    objectif:objectif,
+    imageUrl:'',imageShape:'banner',font:'',fontScale:1,
+    objLex:[],objGram:[],objPhon:[],objPrag:[],compActs:[],
+    supportsList:[{id:'s_'+Date.now(),label:'',url:''}],
+    activites:[],
+    trace:'',devoirs:'',parentObjectives:[],
+    createdAt:Date.now(),
+    fromFlash:idee.id
+  };
+  var maj={}; for(var k in collection){ if(Object.prototype.hasOwnProperty.call(collection,k)) maj[k]=collection[k]; }
+  maj.seances=(collection.seances||[]).concat([nouvelle]);
+  upsert(maj);
+  window.llToast('\uD83C\uDF31 « '+nouvelle.titre+' » créée dans ⚡ Séances Flash.','ok');
+};
+
 function llInjectFlashBiblio(container,anchorId){
   if(document.getElementById('__ll_biblio_flash'))return;
   var list=llGetFlash();
@@ -77120,11 +77426,18 @@ function llInjectFlashBiblio(container,anchorId){
       editBtn.className='__ll_flash_edit_btn btn btn-ghost btn-sm';
       editBtn.style.cssText='font-size:11px;padding:3px 9px;margin-right:4px';
       editBtn.title='Voir / Modifier';editBtn.textContent='\u270F\uFE0F Modifier';
+      /* LOT 31 */
+      var growBtn=document.createElement('button');
+      growBtn.dataset.fgrow=f.id;
+      growBtn.className='__ll_flash_grow_btn btn btn-green btn-sm';
+      growBtn.style.cssText='font-size:11px;padding:3px 9px;margin-right:4px';
+      growBtn.title='Créer une vraie séance flash à partir de cette idée';
+      growBtn.textContent='\uD83C\uDF31 Développer';
       var del=document.createElement('button');del.dataset.fid=f.id;
       del.className='__ll_flash_del_btn';
       del.style.cssText='background:none;border:none;cursor:pointer;color:var(--accent-r);font-size:13px';
       del.title='Supprimer';del.innerHTML='\uD83D\uDDD1\uFE0F';
-      td4.appendChild(editBtn);td4.appendChild(del);
+      td4.appendChild(growBtn);td4.appendChild(editBtn);td4.appendChild(del);
       tr.appendChild(td1);tr.appendChild(td2);tr.appendChild(td3);tr.appendChild(td4);
       tbody.appendChild(tr);
     });
@@ -77135,6 +77448,9 @@ function llInjectFlashBiblio(container,anchorId){
       if(del)window.llDeleteFlash(del.getAttribute('data-fid'));
       var ed=e.target.closest('.__ll_flash_edit_btn');
       if(ed)window.llEditFlashSeance(ed.getAttribute('data-fedit'));
+      /* LOT 31 */
+      var gr=e.target.closest('.__ll_flash_grow_btn');
+      if(gr&&typeof window.llGrowFlashIdea==='function')window.llGrowFlashIdea(gr.getAttribute('data-fgrow'));
     });
   }
   var anchor=anchorId?document.getElementById(anchorId):null;
@@ -77474,7 +77790,15 @@ window.llCopyFlashToSeq = function(seaId) {
   if(!seance) return;
 
   // Pick target sequence
-  var realSeqs = (data.sequences || []).filter(function(s) { return !s.isFlash && s.id !== LL_FLASH_SEQ_ID; });
+  /* LOT 33 — la bibliotheque de grilles d'evaluation et la sequence de
+     demonstration du tour guide n'ont rien a faire parmi les destinations
+     d'une seance flash. */
+  var realSeqs = (data.sequences || []).filter(function(s) {
+    return !s.isFlash && !s.isEvalLib
+      && s.id !== LL_FLASH_SEQ_ID
+      && s.id !== LL_EVAL_GRILLES_SEQ_ID
+      && s.id !== '__ll_tour_demo__';
+  });
   if(!realSeqs.length) { window.llToast('Aucune séquence disponible. Créez d’abord une séquence.','info'); return; }
 
   var ov = document.createElement('div');
@@ -77567,9 +77891,25 @@ function llFixFlashLevelTitle() {
       document.querySelectorAll('button.btn-ghost').forEach(function(btn){
         if(!backBtn && /Retour/i.test(btn.textContent)) backBtn = btn;
       });
-      if(backBtn) setTimeout(function(){ backBtn.click(); }, 60);
+      if(backBtn) setTimeout(function(){ backBtn.click(); }, 20);
     }
   });
+}
+
+/* LOT 34 — l'ecran de passage n'etait detecte qu'au balayage suivant, soit
+   jusqu'a un tiers de seconde plus tard. Un clic sur un bouton Retour
+   declenche desormais quelques verifications rapprochees, comme le fait
+   deja la grille des seances. On ne fait qu'avancer l'heure du controle :
+   rien n'est masque, rien n'est retire, rien n'est ajoute. */
+if(!window.__ll_fastBack_ready){
+  window.__ll_fastBack_ready = true;
+  document.addEventListener('click', function(e){
+    var b = e.target && e.target.closest ? e.target.closest('button') : null;
+    if(!b || !/Retour/i.test(b.textContent||'')) return;
+    [0, 25, 60, 120, 220].forEach(function(ms){
+      setTimeout(function(){ try{ llFixFlashLevelTitle(); }catch(err){} }, ms);
+    });
+  }, true);
 }
 
 // ── 1b. CARTE FLASH dans la grille Séances (accueil uniquement) ──────
@@ -78282,7 +78622,6 @@ function llInjectSeanceListTickSummary(){
     { v:'Seconde',              l:'Seconde' },
     { v:'Premi\u00E8re',        l:'Premi\u00E8re' },
     { v:'Terminale',            l:'Terminale' },
-    { v:'Seconde_Techno',       l:'Seconde technologique' },
     { v:'Premi\u00E8re_Techno', l:'Premi\u00E8re technologique' },
     { v:'Terminale_Techno',     l:'Terminale technologique' },
     { v:'Premi\u00E8re_AMC',    l:'Premi\u00E8re AMC' },
@@ -78954,10 +79293,13 @@ llInjectProgBilan = function(){
   if(existing && existing.dataset.llSig === sig && existing.parentNode === timeline) return;
   if(existing) existing.remove();
 
+  /* LOT 43 — seqKey : le reservoir correspondant du cote de la sequence.
+     Il sert a reperer les objectifs annonces dans la sequence mais repris
+     dans aucune seance. */
   var CATS = [
-    {key:'objGram', cat:'gram', label:'\uD83D\uDCDD Grammaire',  color:'#10b981'},
-    {key:'objPhon', cat:'phon', label:'\uD83C\uDFB5 Phonologie', color:'#f59e0b'},
-    {key:'objLex',  cat:'lex',  label:'\uD83D\uDCD6 Lexique',    color:'#6366f1'}
+    {key:'objGram', cat:'gram', label:'\uD83D\uDCDD Grammaire',  color:'#10b981', seqKey:'grammar'},
+    {key:'objPhon', cat:'phon', label:'\uD83C\uDFB5 Phonologie', color:'#f59e0b', seqKey:'phono'},
+    {key:'objLex',  cat:'lex',  label:'\uD83D\uDCD6 Lexique',    color:'#6366f1', seqKey:'lexique'}
   ];
 
   if(!document.getElementById('__ll_bilan_order_css')){
@@ -78974,7 +79316,15 @@ llInjectProgBilan = function(){
       + '.__ll_bl_row:hover{background:rgba(108,99,255,.06)}'
       + '.__ll_bl_det{margin:2px 0 6px 18px;padding-left:8px;border-left:2px solid var(--border);display:none}'
       + '.__ll_bl_det.open{display:block}'
-      + '.__ll_bl_det div{font-size:9.5px;color:var(--text-muted);line-height:1.7}';
+      + '.__ll_bl_det div{font-size:9.5px;color:var(--text-muted);line-height:1.7}'
+      /* LOT 40 — au-dela de dix objectifs, une categorie passe sur deux
+         colonnes. auto-fill : sur ecran etroit, elle revient d'elle-meme a
+         une seule colonne, rien n'est jamais comprime. Chaque objectif et
+         son detail restent solidaires dans une meme case. */
+      + '.__ll_bl_grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:0 18px;align-items:start}'
+      + '.__ll_bl_cell{min-width:0}'
+      + '.__ll_bl_cell .__ll_bl_row{margin-bottom:1px}'
+      + '.__ll_bl_cell .__ll_bl_det{margin-left:14px}';
     document.head.appendChild(st);
   }
 
@@ -79089,6 +79439,19 @@ llInjectProgBilan = function(){
       if(!seq) return;
       var seances = seq.seances || [];
       nSea += seances.length;
+      /* LOT 43 — d'abord les objectifs annonces dans la sequence elle-meme.
+         Ils sont deposes avec la marque « jamais repris ». Si une seance les
+         reprend, la boucle ci-dessous leve cette marque. Aucune ligne en
+         double : le texte sert de cle, comme avant. */
+      CATS.forEach(function(c){
+        if(!c.seqKey) return;
+        (((seq.tags||{})[c.seqKey])||[]).forEach(function(item){
+          var t = (typeof item==='object'?item.text:item)||'';
+          if(!t) return;
+          var b = buckets[c.cat];
+          if(!b[t]) b[t] = { n:0, seances:[], orphelin:true, seqTitre:(seq.titre||'Sans titre') };
+        });
+      });
       seances.forEach(function(sea, idx){
         CATS.forEach(function(c){
           (sea[c.key]||[]).forEach(function(item){
@@ -79097,6 +79460,12 @@ llInjectProgBilan = function(){
             var ok = !!llGetTick(sea.id, c.cat, t);
             var b = buckets[c.cat];
             if(!b[t]) b[t] = { n:0, seances:[] };
+            b[t].orphelin = false;
+            /* LOT 44 — n compte les seances ou l'objectif est CONFIRME
+               (coche dans le panneau ✅). p compte celles ou il est PREVU.
+               L'ecart entre les deux est l'information pedagogique : ce qui
+               etait annonce et ce qui a vraiment ete traite. */
+            b[t].p = (b[t].p||0) + 1;
             if(ok) b[t].n++;
             b[t].seances.push({ seqTitre: seq.titre||'Sans titre', seaTitre: sea.titre||'', num: idx+1, ok: ok });
           });
@@ -79120,17 +79489,39 @@ llInjectProgBilan = function(){
       var keys = Object.keys(b).filter(function(t){ return showAll || b[t].n > 0; });
       if(!keys.length) return;
       hasAny = true;
-      keys.sort(function(x,y){ return b[y].n - b[x].n || x.localeCompare(y); });
+      /* LOT 43 — les objectifs jamais repris passent en fin de categorie. */
+      /* LOT 44 — le tri se fait sur le nombre de seances ou l'objectif est
+         prevu. Auparavant il se faisait sur les coches : sans coche, tous
+         les objectifs se rangeaient par ordre alphabetique et les plus
+         reemployes ne remontaient plus en tete. */
+      keys.sort(function(x,y){
+        var ox = b[x].orphelin ? 1 : 0, oy = b[y].orphelin ? 1 : 0;
+        return ox - oy || (b[y].p||0) - (b[x].p||0) || b[y].n - b[x].n || x.localeCompare(y);
+      });
 
       var wrap = document.createElement('div');
       wrap.style.marginBottom='12px';
       var h = document.createElement('div');
       h.style.cssText='font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:'+c.color+';margin-bottom:5px';
       h.textContent=c.label;
+      /* LOT 40 — le nombre d'objectifs de la categorie, en gris discret. */
+      var hn = document.createElement('span');
+      hn.style.cssText='color:var(--text-muted);font-weight:700;margin-left:7px;letter-spacing:0';
+      hn.textContent='\u00B7\u00A0'+keys.length;
+      h.appendChild(hn);
       wrap.appendChild(h);
+      /* LOT 40 — deux colonnes des que la liste depasse dix entrees.
+         En dessous, la presentation ne change pas d'un pixel. */
+      var __large = keys.length > 10;
+      var hote = wrap;
+      if(__large){
+        hote = document.createElement('div');
+        hote.className = '__ll_bl_grid';
+        wrap.appendChild(hote);
+      }
 
       keys.forEach(function(text){
-        var it = b[text], n = it.n;
+        var it = b[text], n = it.n, p = it.p||0;
         var col = n>0 ? llTickBadgeColor(n) : 'var(--text-muted)';
 
         var row = document.createElement('div');
@@ -79139,20 +79530,58 @@ llInjectProgBilan = function(){
         chevR.style.cssText='font-size:9px;color:var(--text-muted);width:9px;flex-shrink:0';
         chevR.textContent='\u25B8';
         var lab = document.createElement('span');
-        lab.style.cssText='flex:1;line-height:1.4;'+(n===0?'opacity:.6':'');
+        lab.style.cssText='flex:1;line-height:1.4;'+(p===0?'opacity:.6':'');
         lab.textContent=text;
+        /* LOT 44 — « confirme / prevu ». Le nombre de gauche garde la
+           couleur des coches ; celui de droite, discret, dit combien de fois
+           l'objectif etait prevu. Le tiret ne signifie plus qu'une chose :
+           annonce dans la sequence, repris dans aucune seance. */
         var cnt = document.createElement('span');
-        cnt.style.cssText='font-size:11px;font-weight:800;color:'+col+';min-width:26px;text-align:right;flex-shrink:0';
-        cnt.textContent = n>0 ? (n+'\u00D7') : '\u2014';
+        cnt.style.cssText='font-size:11px;font-weight:800;min-width:34px;text-align:right;flex-shrink:0;white-space:nowrap';
+        if(p>0){
+          var cg = document.createElement('span');
+          cg.style.color = col;
+          cg.textContent = String(n);
+          var cd = document.createElement('span');
+          cd.style.cssText = 'color:var(--text-muted);font-weight:700';
+          cd.textContent = '/' + p;
+          cnt.appendChild(cg); cnt.appendChild(cd);
+          cnt.title = n + ' s\u00e9ance(s) confirm\u00e9e(s) sur ' + p + ' o\u00f9 l\u2019objectif est pr\u00e9vu';
+        } else {
+          cnt.style.color = 'var(--text-muted)';
+          cnt.textContent = '\u2014';
+        }
         var barOut = document.createElement('div');
         barOut.style.cssText='width:48px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;flex-shrink:0';
+        /* LOT 44 — la barre remplit selon le prevu, et se colore selon le
+           confirme : on voit d'un coup d'oeil l'ecart entre les deux. */
         var barIn = document.createElement('div');
-        barIn.style.cssText='height:100%;width:'+Math.min(100,n*33)+'%;background:'+(n>0?col:'transparent')+';border-radius:3px';
+        barIn.style.cssText='height:100%;width:'+Math.min(100,p*33)+'%;background:'+(n>0?col:'var(--border)')+';border-radius:3px';
         barOut.appendChild(barIn);
-        row.appendChild(chevR); row.appendChild(lab); row.appendChild(cnt); row.appendChild(barOut);
+        /* LOT 40 — en deux colonnes, la petite barre est retiree : elle dit
+           la meme chose que le compteur et prend 48 px de large. Le compteur
+           et sa couleur restent. Presentation inchangee sur les listes
+           courtes. */
+        row.appendChild(chevR); row.appendChild(lab); row.appendChild(cnt);
+        if(!__large) row.appendChild(barOut);
 
+        /* LOT 43 — marque discrete pour un objectif jamais repris. */
+        if(it.orphelin){
+          lab.style.opacity='.45';
+          lab.style.fontStyle='italic';
+          cnt.textContent='\u2014';
+          cnt.style.color='var(--text-muted)';
+          row.title='Annonc\u00e9 dans la s\u00e9quence, repris dans aucune s\u00e9ance';
+        }
         var det = document.createElement('div');
         det.className='__ll_bl_det';
+        if(it.orphelin){
+          var l0 = document.createElement('div');
+          l0.style.fontStyle='italic';
+          l0.textContent='\u25CB Annonc\u00e9 dans \u00ab\u00a0'+(it.seqTitre||'la s\u00e9quence')
+            +'\u00a0\u00bb, repris dans aucune s\u00e9ance.';
+          det.appendChild(l0);
+        }
         it.seances.forEach(function(s){
           var line = document.createElement('div');
           var mark = s.ok ? '\u2713' : '\u25CB';
@@ -79167,7 +79596,14 @@ llInjectProgBilan = function(){
           var op = det.classList.toggle('open');
           chevR.textContent = op ? '\u25BE' : '\u25B8';
         };
-        wrap.appendChild(row); wrap.appendChild(det);
+        if(__large){
+          var cell = document.createElement('div');
+          cell.className = '__ll_bl_cell';
+          cell.appendChild(row); cell.appendChild(det);
+          hote.appendChild(cell);
+        } else {
+          hote.appendChild(row); hote.appendChild(det);
+        }
       });
       frag.appendChild(wrap);
     });
@@ -79233,7 +79669,6 @@ var LL_NIVEAUX_IMPORT = [
   {v:'Première',      l:'Première'},
   {v:'Terminale',     l:'Terminale'},
   {v:'DNL',           l:'DNL'},
-  {v:'Seconde_Techno',  l:'Seconde Techno'},
   {v:'Première_Techno', l:'Première Techno'},
   {v:'Terminale_Techno',l:'Terminale Techno'},
   {v:'Première_AMC',   l:'Première AMC'},
@@ -82946,7 +83381,11 @@ llHookAll = function() {
     editorPanel.querySelectorAll('label.fl').forEach(function(lbl) {
       if (lbl.querySelector('.__ll_list_btn')) return;
       var txt = labelText(lbl);
-      if (txt === 'lexique' || txt === 'grammaire' || txt === 'phonologie') {
+      /* LOT 42 — le bouton Liste ne sert qu'au lexique : on colle une
+         liste de vocabulaire, jamais une liste de points de grammaire ou
+         de phonologie. Deux boutons en moins a l'ecran. Reversible en
+         reajoutant les deux categories a cette ligne. */
+      if (txt === 'lexique') {
         targets.push({ lbl: lbl, cat: txt });
       }
     });
@@ -82998,11 +83437,19 @@ llHookAll = function() {
             var keyMap = { lexique: 'objLex', grammaire: 'objGram', phonologie: 'objPhon' };
             var seaKey = keyMap[cat];
             if (!seaKey) { pop.remove(); return; }
-            var freshD = window.__ll_getData();
-            var freshSeq = (freshD.sequences || []).find(function(s) { return s.id === seq.id; });
-            if (!freshSeq) { pop.remove(); return; }
-            var freshSea = (freshSeq.seances || []).find(function(s) { return s.id === sea.id; });
-            if (!freshSea) { pop.remove(); return; }
+            /* LOT 41 (a) \u2014 la sequence parente est retrouvee par l'identifiant
+               de la seance (llActFresh, lot 25) au lieu d'etre prise dans
+               __ll_activeSeq, qui n'est jamais remis a zero. Repli sur
+               l'ancien chemin si la fonction n'etait pas disponible. */
+            var freshSeq = null, freshSea = null;
+            var __fr = (typeof llActFresh === 'function') ? llActFresh() : null;
+            if (__fr) { freshSeq = __fr.seq; freshSea = __fr.sea; }
+            else {
+              var freshD = window.__ll_getData();
+              freshSeq = (freshD.sequences || []).find(function(s) { return s.id === seq.id; });
+              if (freshSeq) freshSea = (freshSeq.seances || []).find(function(s) { return s.id === sea.id; });
+            }
+            if (!freshSeq || !freshSea) { pop.remove(); return; }
             var list = (freshSea[seaKey] || []).slice();
             items.forEach(function(text) {
               if (!list.some(function(x) { return (typeof x === 'object' ? x.text : x) === text; })) {
@@ -83010,12 +83457,35 @@ llHookAll = function() {
               }
             });
             var updatedSeances = freshSeq.seances.map(function(s) {
-              if (s.id !== sea.id) return s;
+              if (s.id !== freshSea.id) return s;
               var copy = Object.assign({}, s);
               copy[seaKey] = list;
               return copy;
             });
-            window.__ll_upsertSequence(Object.assign({}, freshSeq, { seances: updatedSeances }));
+            /* LOT 41 (b) \u2014 LE DEFAUT. Le coeur recopie deja chaque mot ajoute
+               a l'unite dans la sequence mere (\u00ab propagation vers la sequence
+               parente pour heritage \u00bb). Ce chemin-ci, celui du bouton
+               \uD83D\uDCCB Liste, ne le faisait pas : les mots colles restaient
+               invisibles dans le detail de la sequence. Meme regle, meme
+               protection contre les doublons. */
+            var tagKeyMapSea = { lexique: 'lexique', grammaire: 'grammar', phonologie: 'phono' };
+            var tagKeySea = tagKeyMapSea[cat];
+            var nextTags = freshSeq.tags || {};
+            if (tagKeySea) {
+              var parentList = ((freshSeq.tags || {})[tagKeySea] || []).slice();
+              var ajoutes = 0;
+              items.forEach(function(text) {
+                if (!parentList.some(function(x) { return (typeof x === 'object' ? x.text : x) === text; })) {
+                  parentList.push({ text: text });
+                  ajoutes++;
+                }
+              });
+              if (ajoutes) {
+                nextTags = Object.assign({}, freshSeq.tags || {});
+                nextTags[tagKeySea] = parentList;
+              }
+            }
+            window.__ll_upsertSequence(Object.assign({}, freshSeq, { seances: updatedSeances, tags: nextTags }));
           } else {
             if (typeof window.__ll_seqAddTag !== 'function') { pop.remove(); return; }
             var tagKeyMap = { lexique: 'lexique', grammaire: 'grammar', phonologie: 'phono' };
@@ -84804,6 +85274,20 @@ llHookAll = function() {
     // sans en inventer une nouvelle. Son etat deplie/replie est memorise.
     var grBar = document.querySelector('[x-id="SequenceEditor_723_6"]');
     if (!grBar || grBar.offsetParent === null) drop(['__ll_coh', '__ll_grlink']);
+
+    // LOT 34 — la carte ⚡ Seances Flash restait a l'ecran 350 ms apres
+    // qu'on ait quitte la page « Seances par niveau » : on la voyait passer
+    // en haut a gauche par-dessus l'apercu A4, et aussi au retour. Sa propre
+    // garde (voir llHookSeancesHomeGrid) la retire deja des que ce titre
+    // n'est plus la ; on applique la meme regle tout de suite.
+    // On retire seulement, on ne masque rien.
+    var homeSea = false;
+    document.querySelectorAll('h1.dash-title').forEach(function(el) {
+      if (el.textContent.trim() === 'Séances par niveau') homeSea = true;
+    });
+    if (!homeSea) {
+      document.querySelectorAll('.__ll_flash_pcard').forEach(function(el) { el.remove(); });
+    }
 
     // Restore bars from the hide-niveaux feature must never appear
     // outside the two home pages.
