@@ -4,7 +4,7 @@
 
 Application autonome (un seul fichier HTML) qui fonctionne directement dans le navigateur, sans installation, sans serveur, sans compte. Toutes les données restent sur votre ordinateur.
 
-*Version du 12 août 2026*
+*Version du 13 août 2026*
 
 ---
 
@@ -52,7 +52,7 @@ Chaque séquence contient : titre, niveau, année scolaire, couleur, axe culture
 
 **Niveaux disponibles** : 6ème à 3ème, Seconde/Première/Terminale LV A/B/C, voie technologique (STMG, STI2D…), AMC, LLCER, DNL, niveaux génériques. Tous sont rangés dans l'ordre pédagogique partout où ils apparaissent.
 
-**Import de liste** — bouton `📋 Liste` à côté de Lexique, Grammaire et Phonologie : collez des items séparés par virgule ou saut de ligne, tout est ajouté d'un coup.
+**Import de liste** — bouton `📋 Liste` à côté de Lexique : collez des mots séparés par virgule ou saut de ligne, tout est ajouté d'un coup. Les mots déjà présents ne sont pas dupliqués. Le même bouton existe dans l'éditeur de séance, où les mots ajoutés remontent aussi dans la séquence.
 
 **Duplication de séquence** — bouton 📋 sur chaque carte. Choix du titre, du niveau de destination, et des éléments à inclure. La copie est totalement indépendante : chaque séance et chaque grille reçoit un nouvel identifiant, et les liens entre tâches et grilles sont réécrits vers la copie.
 
@@ -162,6 +162,10 @@ au survol : les colonnes gardent leur largeur quoi qu'il arrive.
 
 > Le sélecteur « Placer une séquence » ne propose que vos vraies séquences.
 
+**Placer une séquence pour une classe** — le formulaire 📚 commence par vous demander la classe, puis ne propose que les séquences de son niveau : celles du niveau exact d'abord, puis les spécialités de la même famille. Un niveau masqué depuis l'accueil n'apparaît pas.
+
+Chaque séquence placée affiche alors **le nom de la classe** sur sa pastille, avec un liseré de sa couleur — en vue Mois comme en vue Semaine.
+
 ---
 
 ### 📚 Bibliothèque
@@ -210,20 +214,48 @@ Seules vos vraies séquences sont comptées. Les archivées sont signalées à p
 
 ---
 
+### 👥 Mes classes
+
+Bouton **👥** dans le bandeau. Chaque classe porte un nom, un niveau, une couleur, ses créneaux de la semaine et ses demi-groupes.
+
+**Import depuis Pronote** — exportez votre emploi du temps au format `.ics` depuis Pronote, puis déposez le fichier. L'application y lit vos classes, leurs créneaux et leur rythme — chaque semaine ou une semaine sur deux — et vous les présente **avant** d'écrire quoi que ce soit. Rien n'est enregistré sans votre validation.
+
+Deux précautions utiles à connaître :
+
+- **Le niveau n'est jamais deviné.** Vous le choisissez pour chaque classe : selon les établissements, un code commençant par 1 peut désigner une Première comme une Seconde.
+- **Un export de rentrée** ne couvre que deux ou trois semaines. L'application s'adapte, mais elle vous dira qu'elle **ne sait pas** si un créneau revient toutes les semaines plutôt que de l'affirmer à tort. Réimportez en octobre pour affiner.
+
+Les **demi-groupes** sont rattachés à leur classe : une séance faite deux fois, une fois par groupe, compte pour une seule séance.
+
+---
+
 ### 📅 EDT (Emploi du Temps)
 
 Grille hebdomadaire personnalisable, créneaux libres 8h–18h, nom de classe et couleur par créneau.
+
+Le formulaire propose vos classes dans une liste déroulante — vous pouvez toujours taper librement. Un créneau importé garde son rattachement, son demi-groupe et son rythme même après avoir été déplacé ou modifié.
 
 ---
 
 ### 💾 Sauvegarde & Restauration
 
-Bouton **💾** dans le bandeau — deux formats :
+Bouton **💾** dans le bandeau. La fenêtre s'ouvre sur **deux actions**, et rien d'autre :
+
+| Bouton | Ce qu'il fait |
+|--------|-------|
+| **📦 Sauvegarder tout mon travail** | Un seul fichier avec **tout** : vos séquences, vos classes, votre emploi du temps, vos élèves, vos coches, la corbeille et vos réglages |
+| **↺ Restaurer une sauvegarde** | Choisissez un fichier : l'application reconnaît toute seule son format. Vous n'avez pas à savoir lequel vous avez |
+
+> ⚠️ **Si vous utilisez une sauvegarde antérieure à août 2026**, sachez qu'elle ne contient **pas** vos classes ni votre emploi du temps : ces éléments étaient rangés à part et n'étaient pas emportés. L'application vous le dira au moment de la restaurer.
+
+Sous un repli **Autres formats** se trouvent les deux boutons d'origine, conservés :
 
 | Format | Usage |
 |--------|-------|
-| **JSON** | Fichier léger contenant uniquement les données |
-| **HTML complet** | L'application entière avec toutes les données |
+| **JSON allégé** | L'ancien format : les séquences seules, sans les classes ni l'emploi du temps |
+| **HTML complet** | L'application entière avec toutes vos données — y compris vos classes désormais |
+
+**Ouvrir une sauvegarde HTML** — sur un ordinateur vierge, elle installe tout et s'ouvre normalement. Sur un ordinateur qui a **déjà** des données, elle ne remplace rien : un bandeau vous annonce ce qu'elle contient et sa date, et vous propose de la restaurer ou de garder vos données. Une fois installée, elle ne redemande plus rien.
 
 **🗄️ Espace navigateur** — la jauge mesure **l'intégralité** de ce que l'application occupe, avec le détail des trois postes : séquences et séances, corbeille, reste. Le navigateur alloue environ 5 Mo au total.
 
@@ -256,6 +288,7 @@ Depuis Lesson Loom : **Exporter → ⚡ Copier pour QuizLoom** → sélectionnez
 - Aucune donnée n'est envoyée à un serveur, aucun compte requis
 - Fonctionne hors ligne après le premier chargement
 - Les **listes de classes** sont stockées séparément et ne sont jamais incluses dans un export de séquence partagée
+- La **sauvegarde complète** rassemble tous ces rangements séparés dans un seul fichier : c'est celle qu'il faut conserver
 
 ---
 

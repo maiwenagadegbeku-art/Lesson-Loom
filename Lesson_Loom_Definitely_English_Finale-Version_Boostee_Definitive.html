@@ -591,8 +591,34 @@ if(window.self!==window.top){
 <script id="__ll_boot_js">
 (function(){
   var v=document.getElementById('__ll_boot'),done=false;
+
+  /* LOT 70 — dans une sauvegarde HTML, le bandeau de navigation est deja
+     ecrit dans le fichier : cet ecran considerait donc l'interface prete des
+     la premiere image et s'effacait aussitot, laissant voir l'application se
+     remonter. On lui demande de tenir une seconde, mais UNIQUEMENT dans une
+     sauvegarde — reconnaissable au petit programme de donnees qu'elle
+     embarque. Dans l'application d'origine, rien ne change : l'ecran s'efface
+     des que l'interface est prete, comme avant. */
+  var __t0 = Date.now(), __attente = false;
+  var __min = (function(){
+    try{ return document.getElementById('__ll_embedded_data') ? 1000 : 0; }
+    catch(e){ return 0; }
+  })();
+
   function hide(){
-    if(done)return; done=true;
+    if(done) return;
+    if(!v){ done = true; return; }
+    var reste = __min - (Date.now() - __t0);
+    if(reste > 0){
+      if(!__attente){
+        __attente = true;
+        setTimeout(function(){ __attente = false; hide(); }, reste);
+      }
+      return;
+    }
+    done = true;
+    /* Le garde du lot 66 bis — sortir s'il n'y a rien a cacher — est
+       desormais fait en tete de cette fonction. */
     // Deux frames pour laisser le navigateur peindre l'interface avant le fondu
     requestAnimationFrame(function(){requestAnimationFrame(function(){
       v.classList.add('__ll_gone');
@@ -606,6 +632,7 @@ if(window.self!==window.top){
   }
   var obs=new MutationObserver(function(){ if(ready()){obs.disconnect();hide();} });
   function start(){
+    if(!v) return;
     if(ready()){hide();return;}
     try{obs.observe(document.body,{childList:true,subtree:true});}catch(e){}
   }
@@ -74105,21 +74132,78 @@ function openSaveModal(){
     var dataScript=document.createElement('script');
     dataScript.id='__ll_embedded_data';
     try{
+      /* LOT 66 — la sauvegarde HTML n'embarquait que la reserve principale
+         et les preferences. Vos classes, votre emploi du temps, vos coches,
+         vos listes d'eleves et la corbeille en etaient absents : le fichier
+         de secours etait donc incomplet, comme l'etait la sauvegarde JSON
+         avant le lot 65. On embarque desormais tous les rangements, en
+         gardant la meme prudence qu'avant : on n'ecrit rien si l'ordinateur
+         qui ouvre le fichier contient deja des donnees. */
       var curData=typeof window.__ll_getData==='function'?window.__ll_getData():{};
       var curPrefs=localStorage.getItem('le-sequenceur-prefs-v1')||'{}';
-      dataScript.textContent='(function(){try{if(!localStorage.getItem("le-sequenceur-data-v2")){localStorage.setItem("le-sequenceur-data-v2",'+JSON.stringify(JSON.stringify(curData))+');localStorage.setItem("le-sequenceur-prefs-v1",'+JSON.stringify(curPrefs)+');}}catch(e){}})();';
+      var paquet=null;
+      try{ if(typeof window.__ll_fullRamasser==='function') paquet=window.__ll_fullRamasser(); }catch(e){}
+      if(paquet){
+        paquet['le-sequenceur-data-v2']=JSON.stringify(curData);
+        paquet['le-sequenceur-prefs-v1']=curPrefs;
+        /* LOT 67 — le fichier de secours se taisait quand l'ordinateur qui
+           l'ouvrait avait deja des donnees : il ne remplacait rien, par
+           prudence, mais ne le disait pas. On croyait alors avoir perdu son
+           travail. Il propose desormais la restauration, en annoncant ce
+           qu'il contient, et n'ecrit toujours rien sans accord. */
+        var infoLL = { date:'', resume:'' };
+        try{
+          infoLL.date = new Date().toLocaleDateString('fr-FR');
+          if(typeof window.__ll_fullResume === 'function') infoLL.resume = window.__ll_fullResume();
+        }catch(e){}
+        dataScript.textContent = "(function(){\n  try{\n    var P = null, INFO = null;\n    try{ P = JSON.parse(__PAQUET__); INFO = JSON.parse(__INFO__); }catch(e){ return; }\n    if(!P) return;\n\n    /* LOT 67 quater \u2014 apres une restauration, la page se recharge et ce\n       programme se relance : il voyait un stockage occupe (par ce qu'il\n       venait lui-meme d'installer) et reproposait la meme chose, sans fin.\n       Il laisse desormais une marque propre a CE fichier, et se tait s'il\n       la retrouve. Une sauvegarde differente, elle, sera bien proposee. */\n    var EMPREINTE = \"\";\n    try{\n      EMPREINTE = (INFO && INFO.date ? INFO.date : \"?\")\n        + \"|\" + Object.keys(P).length\n        + \"|\" + String(P[\"le-sequenceur-data-v2\"] || \"\").length;\n    }catch(e){}\n\n    function installer(){\n      Object.keys(P).forEach(function(k){ try{ localStorage.setItem(k, P[k]); }catch(e){} });\n      try{ localStorage.setItem(\"__ll_offer_seen\", EMPREINTE); }catch(e){}\n    }\n\n    function dejaFait(){\n      try{ return localStorage.getItem(\"__ll_offer_seen\") === EMPREINTE; }catch(e){ return false; }\n    }\n\n    /* Ordinateur vierge : on installe, comme avant. */\n    var occupe = false;\n    try{ occupe = !!localStorage.getItem(\"le-sequenceur-data-v2\"); }catch(e){ return; }\n    if(!occupe){ installer(); return; }\n\n    /* Ce fichier a deja ete installe ici : on ne redemande rien. */\n    if(dejaFait()) return;\n\n    /* Sinon : on ne touche a rien, mais on le DIT. Sans ce message, on\n       croit avoir perdu son travail alors que le fichier s'est simplement\n       tu par prudence. */\n\n    /* LOT 67 bis \u2014 les clics n'atteignaient pas les boutons : l'application\n       qui se monte derriere pose ses propres couches et ses propres\n       ecouteurs. On ecoute donc au plus haut niveau, avant tout le reste,\n       et l'on remet le bandeau au premier plan tant qu'il est affiche. */\n    var ferme = false;\n\n    /* LOT 67 ter \u2014 on n'intercepte que le clic lui-meme. Annuler\n       l'enfoncement du bouton, comme on le faisait, empechait le\n       navigateur de fabriquer le clic : il en fallait deux sur Edge, et\n       la reponse tardait sur Firefox. On se contente d'ecouter au plus\n       haut niveau, ce qui suffit a passer devant l'application. */\n    function agir(ev){\n      try{\n        var c = ev.target && ev.target.closest ? ev.target.closest(\"#__ll_offer_yes,#__ll_offer_no\") : null;\n        if(!c) return;\n        ev.stopPropagation();\n        if(typeof ev.stopImmediatePropagation === \"function\") ev.stopImmediatePropagation();\n\n        if(c.id === \"__ll_offer_no\"){\n          ferme = true;                 /* on ne le repose plus ensuite */\n          var b1 = document.getElementById(\"__ll_offer\");\n          if(b1) b1.remove();\n          return;\n        }\n        var ok = window.confirm(\"Restaurer cette sauvegarde\\u00a0?\\n\\n\"\n          + (INFO && INFO.resume ? INFO.resume + \"\\n\\n\" : \"\")\n          + \"Tout ce que contient cet ordinateur sera remplac\\u00e9.\\n\"\n          + \"Cette action ne peut pas \\u00eatre annul\\u00e9e.\");\n        if(!ok) return;\n        installer();\n        window.alert(\"\\u2713 Sauvegarde restaur\\u00e9e.\\n\\nLa page va se recharger.\");\n        try{ location.reload(); }catch(e){}\n      }catch(e){}\n    }\n    try{ document.addEventListener(\"click\", agir, true); }catch(e){}\n\n    function bouton(id, texte, style){\n      var b = document.createElement(\"button\");\n      b.id = id;\n      b.type = \"button\";\n      b.textContent = texte;\n      b.style.cssText = style + \";pointer-events:auto;position:relative;z-index:1\";\n      return b;\n    }\n\n    function poser(){\n      if(ferme) return;\n      if(document.getElementById(\"__ll_offer\")) return;\n      if(!document.body) return;\n\n      var d = document.createElement(\"div\");\n      d.id = \"__ll_offer\";\n      d.style.cssText = \"position:fixed;top:0;left:0;right:0;z-index:2147483647;\"\n        + \"background:#fff8e6;border-bottom:2px solid #f59e0b;color:#3a2c07;\"\n        + \"font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:13px;\"\n        + \"padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;\"\n        + \"box-shadow:0 4px 16px rgba(0,0,0,.12);pointer-events:auto;isolation:isolate\";\n\n      var txt = document.createElement(\"div\");\n      txt.style.cssText = \"flex:1;min-width:240px;line-height:1.5\";\n      txt.innerHTML = \"<b>Ce fichier contient une sauvegarde\"\n        + (INFO && INFO.date ? \" du \" + INFO.date : \"\") + \".</b><br>\"\n        + (INFO && INFO.resume ? INFO.resume + \"<br>\" : \"\")\n        + \"Cet ordinateur a d\\u00e9j\\u00e0 des donn\\u00e9es Lesson Loom\\u00a0: \"\n        + \"rien n\\u2019a \\u00e9t\\u00e9 remplac\\u00e9.\";\n      d.appendChild(txt);\n\n      d.appendChild(bouton(\"__ll_offer_yes\", \"\\u21ba Restaurer cette sauvegarde\",\n        \"border:none;border-radius:9px;padding:9px 14px;cursor:pointer;\"\n        + \"font-size:13px;font-weight:800;font-family:inherit;color:#fff;background:#d97706\"));\n\n      d.appendChild(bouton(\"__ll_offer_no\", \"Garder mes donn\\u00e9es\",\n        \"border:1px solid #d6c08a;background:#fff;color:#6b5518;\"\n        + \"border-radius:9px;padding:9px 14px;font-size:13px;font-weight:700;\"\n        + \"font-family:inherit;cursor:pointer\"));\n\n      document.body.appendChild(d);\n    }\n\n    /* Le bandeau doit rester le dernier enfant du corps de page : sinon\n       une couche posee apres lui passerait devant. On y veille pendant\n       une minute, le temps que l'application finisse de se monter. */\n    var tours = 0;\n    var horloge = setInterval(function(){\n      try{\n        tours++;\n        if(tours > 120){ clearInterval(horloge); return; }\n        if(ferme){ clearInterval(horloge); return; }\n        var b = document.getElementById(\"__ll_offer\");\n        if(!b){\n          if(tours < 20) poser();\n          else { clearInterval(horloge); }\n          return;\n        }\n        if(document.body && document.body.lastChild !== b) document.body.appendChild(b);\n      }catch(e){}\n    }, 500);\n\n    if(document.body) poser();\n    else document.addEventListener(\"DOMContentLoaded\", poser);\n  }catch(e){}\n})();"
+          .replace('__PAQUET__', JSON.stringify(JSON.stringify(paquet)))
+          .replace('__INFO__', JSON.stringify(JSON.stringify(infoLL)));
+      } else {
+        dataScript.textContent='(function(){try{if(!localStorage.getItem("le-sequenceur-data-v2")){localStorage.setItem("le-sequenceur-data-v2",'+JSON.stringify(JSON.stringify(curData))+');localStorage.setItem("le-sequenceur-prefs-v1",'+JSON.stringify(curPrefs)+');}}catch(e){}})();';
+      }
     }catch(e){
       dataScript.textContent='/* data injection failed */';
     }
+    /* LOT 67 ter — ce programme etait insere dans la page en cours pour
+       etre photographie avec elle. Or un programme insere dans une page
+       s'execute aussitot : il voyait donc VOTRE stockage, deja rempli, et
+       posait son bandeau chez vous au moment de l'enregistrement. On ne
+       touche plus du tout a la page : le programme est ecrit directement
+       dans le TEXTE du fichier, juste apres l'ouverture de l'en-tete, donc
+       avant tout le reste. */
     var prev=document.getElementById('__ll_embedded_data');
     if(prev)prev.remove();
-    var firstScript=document.head.querySelector('script');
-    if(firstScript)document.head.insertBefore(dataScript,firstScript);
-    else document.head.appendChild(dataScript);
 
     // 3. Capture and download
     var html='<!doctype html>\n'+document.documentElement.outerHTML;
-    dataScript.remove();
+    try{
+      var pose = html.indexOf('<head>');
+      if(pose > 0){
+        pose += 6;
+        html = html.slice(0, pose)
+          + '\n<script id="__ll_embedded_data">' + dataScript.textContent + '<\/script>\n'
+          + html.slice(pose);
+      }
+    }catch(e){}
+
+    /* LOT 66 ter — l'ecran d'accueil se retire de la page une fois
+       l'application montee : une sauvegarde enregistree ensuite ne le
+       contenait plus, et l'on voyait le bandeau se construire a l'ouverture.
+       On le remet dans le TEXTE du fichier, juste avant le petit programme
+       qui sait le faire disparaitre. La page en cours n'est pas touchee :
+       aucun clignotement a l'ecran au moment de l'enregistrement. */
+    try{
+      if(html.indexOf('id="__ll_boot"') < 0){
+        var ecran = '<div id="__ll_boot">'
+          + '<div class="bl">Lesson Loom</div>'
+          + '<div class="bs">Definitely English</div>'
+          + '<div class="bd"><i></i><i></i><i></i></div>'
+          + '</div>\n';
+        var pt = html.indexOf('<script id="__ll_boot_js">');
+        if(pt > 0) html = html.slice(0, pt) + ecran + html.slice(pt);
+      }
+    }catch(e){}
 
     var b=new Blob([html],{type:'text/html;charset=utf-8'});
     var u=URL.createObjectURL(b);var a=document.createElement('a');
@@ -83538,13 +83622,45 @@ llHookAll = function() {
             }
             window.__ll_upsertSequence(Object.assign({}, freshSeq, { seances: updatedSeances, tags: nextTags }));
           } else {
-            if (typeof window.__ll_seqAddTag !== 'function') { pop.remove(); return; }
+            /* LOT 69 — LE DEFAUT. Dans l'editeur de SEQUENCE, les mots etaient
+               ajoutes un par un, dix fois de suite dans le meme instant. Or la
+               fonction d'ajout lit la liste actuelle au moment ou on l'appelle :
+               les dix appels lisaient donc la meme liste de depart et
+               s'ecrasaient l'un l'autre. Un seul mot survivait.
+               On constitue desormais la liste complete en memoire, puis on
+               l'enregistre EN UNE SEULE FOIS — exactement la facon de faire du
+               chemin de la seance, qui, lui, a toujours fonctionne et n'est pas
+               touche ici. L'ancien chemin reste en repli si la sequence ne peut
+               pas etre relue. */
             var tagKeyMap = { lexique: 'lexique', grammaire: 'grammar', phonologie: 'phono' };
             var tagKey = tagKeyMap[cat];
             if (!tagKey) { pop.remove(); return; }
-            items.forEach(function(text) {
-              window.__ll_seqAddTag(tagKey, { text: text });
-            });
+
+            var seqFraiche = null;
+            try {
+              var cur = window.__ll_curSeq;
+              var dd = (typeof window.__ll_getData === 'function') ? window.__ll_getData() : null;
+              if (cur && cur.id && dd) {
+                seqFraiche = (dd.sequences || []).filter(function(s) { return s.id === cur.id; })[0] || null;
+              }
+            } catch (e) {}
+
+            if (seqFraiche && typeof window.__ll_upsertSequence === 'function') {
+              var listeSeq = ((seqFraiche.tags || {})[tagKey] || []).slice();
+              items.forEach(function(text) {
+                if (!listeSeq.some(function(x) { return (typeof x === 'object' ? x.text : x) === text; })) {
+                  listeSeq.push({ text: text });
+                }
+              });
+              var tagsSeq = Object.assign({}, seqFraiche.tags || {});
+              tagsSeq[tagKey] = listeSeq;
+              window.__ll_upsertSequence(Object.assign({}, seqFraiche, { tags: tagsSeq }));
+            } else {
+              if (typeof window.__ll_seqAddTag !== 'function') { pop.remove(); return; }
+              items.forEach(function(text) {
+                window.__ll_seqAddTag(tagKey, { text: text });
+              });
+            }
           }
           pop.remove();
         });
@@ -86968,5 +87084,2004 @@ window.addEventListener('load',function(){
 
 })();
 </script>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   LOT 59 — ANNULER LA SUPPRESSION D'UNE ACTIVITE
+
+   Dans l'editeur de seance, la petite corbeille d'un bloc d'activite
+   efface le titre, la duree et le deroule redige, sans confirmation et
+   sans rattrapage. C'est le seul endroit de l'application ou un clic
+   isole detruit un texte ecrit. Depuis le lot 39, ce bouton a de plus
+   deux voisins immediats (les fleches haut/bas).
+
+   Ici : avant que la suppression ne soit traitee, on met de cote la
+   liste complete des activites de la seance. Si une activite a bien
+   disparu, un petit bandeau propose de la remettre pendant dix
+   secondes. Aucun clic supplementaire quand la suppression est voulue.
+
+   Portee volontairement etroite : une seule seance, jamais la reserve
+   entiere, jamais le calendrier, jamais les reglages. Le bandeau se
+   ferme si l'on change de seance ou si l'on quitte l'editeur.
+
+   Bloc autonome : le supprimer suffit a revenir en arriere.
+   ═══════════════════════════════════════════════════════════════════ */
+(function(){
+  if (window.__ll_undoact_ready) return;
+  window.__ll_undoact_ready = true;
+
+  var CORBEILLE = '[x-id="SeancesView_602_18"]';   /* bouton supprimer d'un bloc d'activite */
+  var CHAMP_TITRE = '[x-id="SeancesView_595_18"]'; /* titre de l'activite, meme ligne */
+  var DUREE = 10000;                                /* duree du bandeau, en millisecondes */
+
+  var memo = null;      /* { seqId, seaId, acts, titre, n } */
+  var bandeau = null;
+  var minuteur = null;
+
+  /* Retrouve la seance ouverte ET sa sequence parente dans les donnees
+     fraiches. La sequence est retrouvee PAR L'IDENTIFIANT DE LA SEANCE,
+     jamais par __ll_activeSeq (jamais remis a zero). Meme regle que le
+     lot 25. Rend null hors editeur de seance. */
+  function seanceFraiche(){
+    try{
+      if(!document.querySelector('[data-testid="sea-titre"]')) return null;
+      var sea0 = window.__ll_activeSeance;
+      if(!sea0 || !sea0.id) return null;
+      if(typeof window.__ll_getData !== 'function') return null;
+      var d = window.__ll_getData();
+      var trouve = null;
+      (d.sequences || []).forEach(function(sq){
+        (sq.seances || []).forEach(function(se){
+          if(se.id === sea0.id) trouve = { seq: sq, sea: se };
+        });
+      });
+      return trouve;
+    }catch(e){ return null; }
+  }
+
+  function fermer(){
+    try{ if(minuteur){ clearTimeout(minuteur); minuteur = null; } }catch(e){}
+    try{
+      if(bandeau){
+        var b = bandeau; bandeau = null;
+        b.style.opacity = '0';
+        b.style.transform = 'translateX(-50%) translateY(8px)';
+        setTimeout(function(){ try{ b.remove(); }catch(e){} }, 300);
+      }
+    }catch(e){}
+    memo = null;
+  }
+
+  /* Remet la liste d'activites mise de cote. On repart des donnees
+     fraiches : seule la rubrique « activites » de cette seance est
+     reecrite, tout le reste est laisse tel quel. */
+  function remettre(){
+    var m = memo;
+    if(!m) return;
+    var fr = seanceFraiche();
+    if(!fr || fr.sea.id !== m.seaId || typeof window.__ll_upsertSequence !== 'function'){
+      fermer();
+      try{ if(window.llToast) window.llToast('Impossible de remettre l\u2019activit\u00e9\u00a0: la s\u00e9ance n\u2019est plus ouverte.', 'warn'); }catch(e){}
+      return;
+    }
+    try{
+      var seances = (fr.seq.seances || []).map(function(se){
+        return se.id === m.seaId ? Object.assign({}, se, { activites: m.acts }) : se;
+      });
+      window.__ll_upsertSequence(Object.assign({}, fr.seq, { seances: seances }));
+      fermer();
+      try{ if(window.llToast) window.llToast('\u21a9\ufe0f Activit\u00e9 remise en place.', 'ok'); }catch(e){}
+    }catch(e){
+      fermer();
+      try{ if(window.llToast) window.llToast('La remise en place a \u00e9chou\u00e9.', 'warn'); }catch(_e){}
+    }
+  }
+
+  function afficher(){
+    try{
+      var m = memo;
+      if(!m || !document.body) return;
+
+      var d = document.createElement('div');
+      d.id = '__ll_undoact_bar';
+      d.style.cssText = [
+        'position:fixed', 'left:50%', 'bottom:24px',
+        'transform:translateX(-50%) translateY(8px)',
+        'z-index:10000', 'display:flex', 'align-items:center', 'gap:12px',
+        'padding:10px 14px', 'border-radius:12px',
+        'background:var(--card)', 'border:1px solid var(--border)',
+        'box-shadow:0 6px 24px rgba(0,0,0,.18)',
+        'font-size:13px', 'color:var(--text)',
+        'opacity:0', 'transition:opacity .24s ease, transform .24s cubic-bezier(.25,.1,.25,1)'
+      ].join(';');
+
+      var txt = document.createElement('span');
+      txt.textContent = m.titre
+        ? ('Activit\u00e9 \u00ab\u00a0' + m.titre + '\u00a0\u00bb supprim\u00e9e.')
+        : 'Activit\u00e9 supprim\u00e9e.';
+      d.appendChild(txt);
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = '\u21a9\ufe0f Annuler';
+      btn.style.cssText = [
+        'border:1px solid var(--border)', 'background:transparent',
+        'color:var(--text)', 'border-radius:9px', 'padding:5px 10px',
+        'font-size:12px', 'font-weight:700', 'cursor:pointer',
+        'white-space:nowrap'
+      ].join(';');
+      btn.onclick = function(ev){ try{ ev.preventDefault(); ev.stopPropagation(); }catch(e){} remettre(); };
+      d.appendChild(btn);
+
+      var croix = document.createElement('button');
+      croix.type = 'button';
+      croix.textContent = '\u00d7';
+      croix.title = 'Fermer';
+      croix.style.cssText = [
+        'border:none', 'background:transparent', 'color:var(--text-muted)',
+        'font-size:16px', 'line-height:1', 'cursor:pointer', 'padding:0 2px'
+      ].join(';');
+      croix.onclick = function(ev){ try{ ev.preventDefault(); ev.stopPropagation(); }catch(e){} fermer(); };
+      d.appendChild(croix);
+
+      document.body.appendChild(d);
+      bandeau = d;
+      requestAnimationFrame(function(){
+        try{ d.style.opacity = '1'; d.style.transform = 'translateX(-50%) translateY(0)'; }catch(e){}
+      });
+
+      minuteur = setTimeout(fermer, DUREE);
+    }catch(e){}
+  }
+
+  /* Ecoute en phase de capture : on passe AVANT le traitement de la
+     suppression, donc les activites sont encore la. On ne bloque rien,
+     on ne modifie rien : on regarde et on laisse passer. */
+  document.addEventListener('click', function(ev){
+    try{
+      var cible = (ev.target && ev.target.closest) ? ev.target.closest(CORBEILLE) : null;
+      if(!cible) return;
+      var fr = seanceFraiche();
+      if(!fr) return;
+
+      var avant = fr.sea.activites || [];
+      if(!avant.length) return;
+
+      var titre = '';
+      try{
+        var ligne = cible.parentNode;
+        var inp = ligne ? ligne.querySelector(CHAMP_TITRE) : null;
+        if(inp) titre = String(inp.value || '').trim().slice(0, 60);
+      }catch(e){}
+
+      var prevu = {
+        seqId: fr.seq.id,
+        seaId: fr.sea.id,
+        acts: JSON.parse(JSON.stringify(avant)),
+        titre: titre,
+        n: avant.length
+      };
+
+      /* On ne propose le rattrapage QUE si une activite a reellement
+         disparu : pas de bandeau fantome si le clic n'a rien fait. */
+      setTimeout(function(){
+        try{
+          var apres = seanceFraiche();
+          if(!apres || apres.sea.id !== prevu.seaId) return;
+          if((apres.sea.activites || []).length >= prevu.n) return;
+          fermer();
+          memo = prevu;
+          afficher();
+        }catch(e){}
+      }, 350);
+    }catch(e){}
+  }, true);
+
+  /* Le rattrapage n'a de sens que dans la seance concernee : on referme
+     des qu'on la quitte. Horloge propre au bloc, avec try/catch. */
+  if(!window.__ll_undoact_horloge){
+    window.__ll_undoact_horloge = setInterval(function(){
+      try{
+        if(!memo) return;
+        var sea = window.__ll_activeSeance;
+        if(!document.querySelector('[data-testid="sea-titre"]') || !sea || sea.id !== memo.seaId) fermer();
+      }catch(e){}
+    }, 400);
+  }
+
+  /* Exposes pour le banc d'essai. */
+  window.__ll_undoactMemo = function(){ return memo; };
+  window.__ll_undoactRemettre = remettre;
+
+})();
+</script>
+
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   LOT 60 — LA PASTILLE DE SAUVEGARDE SUR LE BOUTON 💾
+
+   La fenetre 💾 sait depuis longtemps dire quand remonte la derniere
+   sauvegarde, avec un code de couleur : vert jusqu'a 3 jours, orange
+   jusqu'a 7, rouge au-dela. Mais on ne le voyait qu'en OUVRANT cette
+   fenetre — c'est-a-dire au moment ou l'on y pensait deja.
+
+   Ici : le meme renseignement, pose sur le bouton lui-meme, sous la
+   forme d'un petit point de couleur. Rien ne s'ouvre, rien ne
+   s'interrompt, aucun clic supplementaire. L'infobulle du bouton dit
+   en toutes lettres a quand remonte la derniere sauvegarde.
+
+   Memes seuils et memes couleurs que la fenetre : un seul code a
+   retenir. Aucune donnee touchee, aucune retouche du coeur.
+
+   Bloc autonome : le supprimer suffit a revenir en arriere.
+   ═══════════════════════════════════════════════════════════════════ */
+(function(){
+  if (window.__ll_bkdot_ready) return;
+  window.__ll_bkdot_ready = true;
+
+  var CLE = '__ll_last_backup_ts';
+  var JOUR = 86400000;
+  var VERT = '#22c55e', ORANGE = '#f59e0b', ROUGE = '#ef4444';
+
+  /* Exactement le calcul de la fenetre 💾, repris a l'identique. */
+  function etat(){
+    var ts = null;
+    try{ ts = localStorage.getItem(CLE); }catch(e){}
+    if(!ts) return { couleur: ROUGE, texte: 'Jamais' };
+    var ecart = Date.now() - parseInt(ts, 10);
+    if(isNaN(ecart)) return { couleur: ROUGE, texte: 'Jamais' };
+    var jours = Math.floor(ecart / JOUR);
+    return {
+      couleur: ecart > 7 * JOUR ? ROUGE : ecart > 3 * JOUR ? ORANGE : VERT,
+      texte: jours === 0 ? 'Aujourd\u2019hui' : jours === 1 ? 'Hier' : 'Il y a ' + jours + ' jours'
+    };
+  }
+
+  function passage(){
+    var btn = document.querySelector('.__ll_save_btn');
+    if(!btn) return;                       /* le bouton n'est pas encore pose */
+
+    var e = etat();
+
+    /* Empreinte : on ne retouche la page que si quelque chose a change.
+       Sans cela, une horloge qui ecrit sans arret se relance elle-meme. */
+    var empreinte = e.couleur + '|' + e.texte;
+    if(btn.dataset.llbk === empreinte) return;
+    btn.dataset.llbk = empreinte;
+
+    /* Le point doit pouvoir se placer dans le coin du bouton. */
+    try{ if(!btn.style.position) btn.style.position = 'relative'; }catch(_e){}
+
+    var point = btn.querySelector('.__ll_bkdot');
+    if(!point){
+      point = document.createElement('span');
+      point.className = '__ll_bkdot';
+      point.setAttribute('aria-hidden', 'true');
+      point.style.cssText = [
+        'position:absolute', 'top:-3px', 'right:-3px',
+        'width:9px', 'height:9px', 'border-radius:50%',
+        'border:1.5px solid var(--panel)',
+        'pointer-events:none',
+        'transition:background .3s ease'
+      ].join(';');
+      btn.appendChild(point);
+    }
+    point.style.background = e.couleur;
+
+    btn.title = 'Sauvegarde et restauration des donn\u00e9es\u2009\u2014\u2009Derni\u00e8re sauvegarde\u00a0: ' + e.texte;
+  }
+
+  /* Horloge propre au bloc, avec try/catch : elle ne peut rien faire
+     tomber, et n'est accrochee a aucune chaine existante. */
+  if(!window.__ll_bkdot_horloge){
+    window.__ll_bkdot_horloge = setInterval(function(){
+      try{ passage(); }catch(e){}
+    }, 400);
+  }
+  try{ passage(); }catch(e){}
+
+  /* Exposes pour le banc d'essai. */
+  window.__ll_bkdotPassage = passage;
+  window.__ll_bkdotEtat = etat;
+
+})();
+</script>
+
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   LOT 61 — MES CLASSES + IMPORT DE L'EMPLOI DU TEMPS PRONOTE
+
+   Jusqu'ici, une classe n'existait pas dans l'application : il y avait
+   seulement des endroits ou l'on tapait son nom — le libelle d'un
+   creneau de l'emploi du temps d'un cote, une liste d'eleves de
+   l'autre, sans aucun rapport entre les deux.
+
+   Ce bloc cree la notion : une classe a un nom, un niveau, une
+   couleur, ses creneaux et ses demi-groupes. Le niveau servira, au lot
+   suivant, a ne proposer que les sequences qui la concernent.
+
+   Et surtout : l'emploi du temps se remplit tout seul a partir du
+   fichier .ics exporte de Pronote. L'analyse tient compte de deux
+   pieges reperes sur un vrai fichier :
+     — Pronote enregistre les heures en temps universel, donc un cours
+       de 8h30 apparait a 6h30 en septembre et a 7h30 en novembre ;
+       tout est ramene a l'heure francaise.
+     — pres de la moitie des cours d'une annee sont annules ou
+       deplaces ; le rythme (chaque semaine ou une sur deux) est donc
+       mesure par l'ecart habituel entre deux seances, ce qui resiste
+       aux trous. Faute de recul, l'application dit qu'elle ne sait pas
+       plutot que d'affirmer un rythme faux.
+
+   Rien n'est enregistre avant validation a l'ecran. Les listes
+   d'eleves existantes ne sont pas touchees : elles vivent dans leur
+   propre rangement, et ce bloc n'y ecrit jamais.
+
+   Bloc autonome : le supprimer suffit a revenir en arriere.
+   ═══════════════════════════════════════════════════════════════════ */
+/* Analyseur d'emploi du temps Pronote (.ics) — lot 61.
+   Ne lit rien d'autre que le texte du fichier ; n'ecrit nulle part. */
+function llIcsAnalyse(texte){
+  var res = { annee:'', classes:[], cours:0, ecartes:0, erreur:'' };
+  if(!texte || texte.indexOf('BEGIN:VCALENDAR') < 0){
+    res.erreur = 'Ce fichier ne ressemble pas a un emploi du temps.'; return res;
+  }
+
+  /* Les lignes longues sont coupees et reprises avec une espace : on recolle. */
+  var plat = texte.replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '')
+                  .replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+  var blocs = plat.split('BEGIN:VEVENT').slice(1);
+  var JOURS = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+
+  function champ(bloc, nom){
+    var re = new RegExp('^' + nom + '(?:;[^:\\n]*)?:(.*)$', 'm');
+    var m = bloc.match(re);
+    return m ? m[1].trim() : '';
+  }
+  function quandEst(v){
+    if(!v) return null;
+    var m = v.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(Z?)$/);
+    if(!m) return null;
+    if(m[7] === 'Z') return new Date(Date.UTC(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]));
+    return new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]);
+  }
+  function hhmm(d){
+    return ('0'+d.getHours()).slice(-2) + ':' + ('0'+d.getMinutes()).slice(-2);
+  }
+  /* Numero de semaine ISO : sert uniquement a reperer les quinzaines. */
+  function semaineIso(d){
+    var t = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    t.setDate(t.getDate() + 3 - ((t.getDay() + 6) % 7));
+    var j1 = new Date(t.getFullYear(), 0, 4);
+    return 1 + Math.round(((t - j1) / 86400000 - 3 + ((j1.getDay() + 6) % 7)) / 7);
+  }
+
+  var brut = [], annees = {};
+
+  blocs.forEach(function(b){
+    var cat = champ(b, 'CATEGORIES');
+    if(cat.indexOf('Cours') !== 0) return;                 /* fériés, conseils de classe… */
+    /* Ce qui n'a pas eu lieu ne doit pas peser dans la semaine type. */
+    if(/annul|Classe absente|Abs /i.test(cat)){ res.ecartes++; return; }
+
+    var deb = quandEst(champ(b, 'DTSTART'));
+    var fin = quandEst(champ(b, 'DTEND'));
+    if(!deb || !fin) return;
+
+    var titre = champ(b, 'SUMMARY');
+    var libelle = titre.indexOf(' - ') > 0 ? titre.split(' - ').slice(1).join(' - ').trim() : titre.trim();
+    if(!libelle) return;
+
+    /* « ANGLAIS LV1 - [106P.1] - <106> 106P.1 sans latin » : la classe mere
+       est entre chevrons, mais pas forcement au debut du libelle. */
+    var mere = libelle.match(/<\s*([^>]+?)\s*>/);
+    var code = mere ? mere[1].trim() : libelle.replace(/\\,/g, ',').split(',')[0].trim();
+    var groupe = '';
+    if(mere){
+      groupe = libelle.slice(libelle.indexOf('>') + 1).replace(/\\,/g, ',').trim();
+      if(groupe === code) groupe = '';                 /* pas un demi-groupe */
+    }
+
+    annees[deb.getFullYear() + '-' + (deb.getMonth() >= 7 ? deb.getFullYear()+1 : deb.getFullYear())] = 1;
+    res.cours++;
+    brut.push({
+      code: code, groupe: groupe, jour: deb.getDay(),
+      debut: hhmm(deb), fin: hhmm(fin),
+      sem: semaineIso(deb), date: deb.getFullYear()+'-'+deb.getMonth()+'-'+deb.getDate()
+    });
+  });
+
+  if(!res.cours){ res.erreur = 'Aucun cours dans ce fichier\u00a0: votre \u00e9tablissement n\u2019a peut-\u00eatre pas encore publi\u00e9 l\u2019emploi du temps. R\u00e9essayez \u00e0 la rentr\u00e9e.'; return res; }
+
+  /* Annee scolaire : celle du mois de septembre le plus represente. */
+  var mini = null, maxi = null;
+  brut.forEach(function(r){ var y = +r.date.split('-')[0]; if(mini===null||y<mini) mini=y; if(maxi===null||y>maxi) maxi=y; });
+  res.annee = (mini === maxi) ? String(mini) : (mini + '-' + maxi);
+
+  /* Regroupement par classe, puis par creneau (jour + heure de debut). */
+  var parClasse = {};
+  brut.forEach(function(r){
+    var c = parClasse[r.code] || (parClasse[r.code] = { code:r.code, creneaux:{}, groupes:{}, total:0 });
+    c.total++;
+    if(r.groupe) c.groupes[r.groupe] = (c.groupes[r.groupe] || 0) + 1;
+    var cle = (r.groupe ? 'G' + r.groupe : 'C') + '|' + r.jour + '@' + r.debut;
+    var k = c.creneaux[cle] || (c.creneaux[cle] = { jour:r.jour, debut:r.debut, fin:r.fin, groupe:r.groupe, n:0, sems:{}, dates:{} });
+    k.n++; k.sems[r.sem % 2] = 1; k.dates[r.date] = 1;
+    if(r.fin > k.fin) k.fin = r.fin;
+  });
+
+  /* Combien de semaines le fichier couvre-t-il vraiment ? Un emploi du temps
+     telecharge fin aout n'en contient que deux ou trois : il faut alors se
+     montrer beaucoup moins exigeant, sinon on effacerait tout. */
+  var semVues = {};
+  brut.forEach(function(r){ semVues[r.sem] = 1; });
+  res.semaines = Object.keys(semVues).length;
+  var seuil = res.semaines <= 3 ? 1 : (res.semaines <= 6 ? 2 : 3);
+  res.recul = res.semaines >= 8;
+
+  Object.keys(parClasse).forEach(function(code){
+    var c = parClasse[code];
+    var liste = Object.keys(c.creneaux).map(function(k){ return c.creneaux[k]; })
+      .filter(function(k){ return k.n >= seuil; })
+      .sort(function(a,b){ return a.jour - b.jour || (a.debut < b.debut ? -1 : 1); });
+    if(!liste.length) return;                    /* classe vue une fois : ecartee */
+
+    liste.forEach(function(k){
+      /* Une quinzaine se reconnait a l'ecart habituel entre deux seances :
+         environ 7 jours si c'est chaque semaine, environ 14 si c'est une
+         semaine sur deux. Cette mesure resiste aux cours annules, qui sont
+         nombreux dans un fichier d'annee complete. */
+      var jours = Object.keys(k.dates).map(function(s){
+        var p = s.split('-'); return new Date(+p[0], +p[1], +p[2]).getTime() / 86400000;
+      }).sort(function(a, b){ return a - b; });
+      var ecarts = [];
+      for(var i = 1; i < jours.length; i++) ecarts.push(Math.round(jours[i] - jours[i-1]));
+      ecarts.sort(function(a, b){ return a - b; });
+      var median = ecarts.length ? ecarts[Math.floor(ecarts.length / 2)] : 7;
+      /* Sans assez d'occurrences, on ne conclut pas : on dit « a verifier »
+         plutot que d'affirmer un rythme qui serait faux une fois sur deux. */
+      k.rythme = (ecarts.length < 3) ? 'inconnu'
+               : (median >= 12 && median <= 16) ? 'quinzaine'
+               : (median > 16) ? 'irregulier' : 'hebdo';
+      k.quinzaine = (k.rythme === 'quinzaine') ? 'une semaine sur deux' : '';
+      k.irregulier = (k.rythme === 'irregulier');
+      k.ecartTypique = median;
+      k.jourNom = JOURS[k.jour];
+      delete k.sems; delete k.dates;
+    });
+
+    res.classes.push({
+      code: code,
+      creneaux: liste,
+      groupes: Object.keys(c.groupes).filter(function(g){ return c.groupes[g] >= 3; }).sort(),
+      heures: liste.filter(function(k){ return !k.quinzaine; }).length
+              + liste.filter(function(k){ return k.quinzaine; }).length / 2
+    });
+  });
+
+  res.classes.sort(function(a,b){ return a.code < b.code ? -1 : 1; });
+  return res;
+}
+
+
+/* ─── Fenetre 👥 Mes classes + import Pronote — lot 61 ─────────────── */
+(function(){
+  if (window.__ll_cls61_ready) return;
+  window.__ll_cls61_ready = true;
+
+  var CLE = '__ll_classes_edt';
+  var EDT = 'lessonloom-edt';
+  var COULEURS = ['#6c63ff','#10b981','#f59e0b','#ef4444','#06b6d4','#ec4899','#8b5cf6','#f97316','#14b8a6','#64748b'];
+  var NIVEAUX = ['6\u00e8me','5\u00e8me','4\u00e8me','3\u00e8me','Seconde','Premi\u00e8re','Terminale',
+                 'Premi\u00e8re_Techno','Terminale_Techno','Premi\u00e8re_LLCER','Terminale_LLCER',
+                 'Premi\u00e8re_AMC','Terminale_AMC'];
+  var COURT = { '6\u00e8me':'6e','5\u00e8me':'5e','4\u00e8me':'4e','3\u00e8me':'3e',
+                'Seconde':'2nde','Premi\u00e8re':'1\u00e8re','Terminale':'Tle' };
+  var JN = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+
+  /* ── Rangement ────────────────────────────────────────────────────── */
+  function lire(){
+    try{ var r = localStorage.getItem(CLE); var o = r ? JSON.parse(r) : null;
+         return (o && o.classes) ? o : { v:1, classes:[] }; }
+    catch(e){ return { v:1, classes:[] }; }
+  }
+  function ecrire(o){
+    try{ o.updatedAt = Date.now(); localStorage.setItem(CLE, JSON.stringify(o)); return true; }
+    catch(e){ alert('Espace de stockage insuffisant.'); return false; }
+  }
+  window.llGetClassesEdt = lire;
+  window.llSaveClassesEdt = ecrire;
+
+  function edtLire(){
+    try{ return JSON.parse(localStorage.getItem(EDT) || 'null') || { annee:'', slots:[] }; }
+    catch(e){ return { annee:'', slots:[] }; }
+  }
+  function edtEcrire(d){
+    try{ localStorage.setItem(EDT, JSON.stringify(d)); return true; }catch(e){ return false; }
+  }
+
+  function neufId(){ return 'cl_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+  /* Nom lisible propose : deduit du niveau CHOISI PAR LA PROFESSEURE,
+     jamais devine tout seul. « 211 » + Seconde donne « 2nde 11 ». */
+  function nomPropose(code, niveau){
+    var p = COURT[niveau];
+    if(!p) return code;
+    var m = String(code).match(/^\d(\d+)$/);
+    return m ? (p + ' ' + m[1]) : (p + ' ' + code);
+  }
+
+  /* ── Petits outils d'interface ────────────────────────────────────── */
+  function el(t, style, txt){
+    var d = document.createElement(t);
+    if(style) d.style.cssText = style;
+    if(txt != null) d.textContent = txt;
+    return d;
+  }
+  function fermerTout(){
+    var o = document.getElementById('__ll_cls61_ov');
+    if(o) o.remove();
+  }
+  function cadre(titre, sousTitre){
+    fermerTout();
+    var ov = el('div','position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:10050;'
+      + 'display:flex;align-items:center;justify-content:center;padding:16px');
+    ov.id = '__ll_cls61_ov';
+    ov.onclick = function(e){ if(e.target === ov) fermerTout(); };
+    var box = el('div','background:var(--card);border-radius:18px;max-width:720px;width:100%;'
+      + 'max-height:88vh;overflow:auto;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.3)');
+    var head = el('div','display:flex;align-items:flex-start;gap:10px;margin-bottom:14px');
+    var tt = el('div','flex:1');
+    tt.appendChild(el('div','font-size:21px;font-weight:800;color:var(--text)', titre));
+    if(sousTitre) tt.appendChild(el('div','font-size:12px;color:var(--text-muted);margin-top:3px', sousTitre));
+    head.appendChild(tt);
+    var x = el('button','background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-muted);line-height:1','\u00d7');
+    x.onclick = fermerTout;
+    head.appendChild(x);
+    box.appendChild(head);
+    ov.appendChild(box);
+    document.body.appendChild(ov);
+    return box;
+  }
+
+  /* ── Ecran principal ──────────────────────────────────────────────── */
+  function ouvrir(){
+    var st = lire();
+    var box = cadre('\ud83d\udc65 Mes classes',
+      'Chaque classe a son niveau, sa couleur et ses cr\u00e9neaux. Le niveau sert \u00e0 ne vous proposer que les s\u00e9quences qui la concernent.');
+
+    if(!st.classes.length){
+      var vide = el('div','text-align:center;padding:18px;border:1px dashed var(--border);border-radius:12px;margin-bottom:14px');
+      vide.appendChild(el('div','font-size:13px;color:var(--text-muted)',
+        'Aucune classe pour le moment.'));
+      vide.appendChild(el('div','font-size:12px;color:var(--text-muted);margin-top:4px',
+        'Le plus rapide\u00a0: importer votre emploi du temps Pronote.'));
+      box.appendChild(vide);
+    }
+
+    st.classes.forEach(function(c, i){
+      var l = el('div','display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);'
+        + 'border-radius:12px;margin-bottom:8px');
+      l.appendChild(el('div','width:12px;height:12px;border-radius:50%;flex:none;background:' + (c.color || '#6c63ff')));
+      var mid = el('div','flex:1;min-width:0');
+      mid.appendChild(el('div','font-size:14px;font-weight:800;color:var(--text)', c.name));
+      var det = [];
+      if(c.level) det.push(String(c.level).replace(/_/g,' '));
+      var cr = (c.slots || []).length;
+      det.push(cr ? (cr + ' cr\u00e9neau' + (cr>1?'x':'')) : 'aucun cr\u00e9neau');
+      if((c.groupes || []).length) det.push((c.groupes.length) + ' demi-groupes');
+      mid.appendChild(el('div','font-size:11px;color:var(--text-muted);margin-top:2px', det.join(' \u00b7 ')));
+      l.appendChild(mid);
+      var sup = el('button','border:1px solid var(--border);background:transparent;color:var(--text-muted);'
+        + 'border-radius:8px;padding:4px 8px;font-size:12px;cursor:pointer','\ud83d\uddd1');
+      sup.title = 'Retirer cette classe';
+      sup.onclick = function(){
+        if(!window.confirm('Retirer \u00ab\u00a0' + c.name + '\u00a0\u00bb\u00a0?\nSes cr\u00e9neaux seront aussi retir\u00e9s de l\u2019emploi du temps.')) return;
+        var s = lire();
+        var vise = s.classes[i] ? s.classes[i].id : null;
+        s.classes.splice(i,1); ecrire(s);
+        var e = edtLire();
+        e.slots = (e.slots || []).filter(function(sl){ return sl.classId !== vise; });
+        edtEcrire(e);
+        ouvrir();
+      };
+      l.appendChild(sup);
+      box.appendChild(l);
+    });
+
+    var barre = el('div','display:flex;gap:8px;margin-top:14px;flex-wrap:wrap');
+
+    var imp = el('button','flex:1;min-width:200px;border:none;border-radius:10px;padding:11px;cursor:pointer;'
+      + 'font-size:13px;font-weight:800;font-family:inherit;color:#fff;background:linear-gradient(135deg,#6c63ff,#8b5cf6)',
+      '\ud83d\udcc5 Importer mon emploi du temps Pronote');
+    imp.onclick = ouvrirImport;
+    barre.appendChild(imp);
+
+    var add = el('button','border:1px solid var(--border);background:transparent;color:var(--text);'
+      + 'border-radius:10px;padding:11px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer',
+      '+ Ajouter \u00e0 la main');
+    add.onclick = ajoutManuel;
+    barre.appendChild(add);
+    box.appendChild(barre);
+
+    var aide = el('div','font-size:11px;color:var(--text-muted);margin-top:10px;line-height:1.5');
+    aide.textContent = 'Dans Pronote\u00a0: Mes informations \u203a Emploi du temps \u203a exporter au format iCal (.ics). '
+      + 'Vous pouvez r\u00e9importer quand vous voulez\u00a0: un emploi du temps t\u00e9l\u00e9charg\u00e9 plus tard dans l\u2019ann\u00e9e est mieux reconnu.';
+    box.appendChild(aide);
+  }
+
+  /* ── Ajout d'une classe a la main ─────────────────────────────────── */
+  function ajoutManuel(){
+    var box = cadre('+ Ajouter une classe', 'Ses cr\u00e9neaux se posent ensuite dans l\u2019emploi du temps.');
+    var f = el('div','display:flex;flex-direction:column;gap:10px');
+
+    var iNom = el('input','padding:10px;border:1px solid var(--border);border-radius:10px;font-size:14px;'
+      + 'font-family:inherit;background:var(--panel);color:var(--text)');
+    iNom.placeholder = 'Nom de la classe (ex.\u00a0: 2nde 11)';
+    f.appendChild(iNom);
+
+    var sNiv = el('select','padding:10px;border:1px solid var(--border);border-radius:10px;font-size:14px;'
+      + 'font-family:inherit;background:var(--panel);color:var(--text)');
+    sNiv.appendChild(new Option('\u2014 Niveau \u2014',''));
+    NIVEAUX.forEach(function(n){ sNiv.appendChild(new Option(n.replace(/_/g,' '), n)); });
+    f.appendChild(sNiv);
+
+    var coul = el('div','display:flex;gap:6px;flex-wrap:wrap');
+    var choisie = COULEURS[lire().classes.length % COULEURS.length];
+    COULEURS.forEach(function(c){
+      var p = el('button','width:26px;height:26px;border-radius:50%;cursor:pointer;background:' + c
+        + ';border:' + (c === choisie ? '3px solid var(--text)' : '2px solid transparent'));
+      p.onclick = function(){
+        choisie = c;
+        Array.prototype.forEach.call(coul.children, function(o, j){
+          o.style.border = (COULEURS[j] === c) ? '3px solid var(--text)' : '2px solid transparent';
+        });
+      };
+      coul.appendChild(p);
+    });
+    f.appendChild(coul);
+    box.appendChild(f);
+
+    var bar = el('div','display:flex;gap:8px;margin-top:16px');
+    var ret = el('button','border:1px solid var(--border);background:transparent;color:var(--text);border-radius:10px;'
+      + 'padding:10px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer','\u2039 Retour');
+    ret.onclick = ouvrir;
+    bar.appendChild(ret);
+    var ok = el('button','flex:1;border:none;border-radius:10px;padding:10px;cursor:pointer;font-size:13px;'
+      + 'font-weight:800;font-family:inherit;color:#fff;background:#10b981','\u2713 Ajouter');
+    ok.onclick = function(){
+      var n = iNom.value.trim();
+      if(!n){ iNom.focus(); return; }
+      var s = lire();
+      s.classes.push({ id:neufId(), name:n, code:n, level:sNiv.value, color:choisie, groupes:[], slots:[] });
+      if(ecrire(s)) ouvrir();
+    };
+    bar.appendChild(ok);
+    box.appendChild(bar);
+  }
+
+  /* ── Import : depot du fichier ────────────────────────────────────── */
+  function ouvrirImport(){
+    var box = cadre('\ud83d\udcc5 Importer mon emploi du temps',
+      'Rien ne sera enregistr\u00e9 avant que vous ayez v\u00e9rifi\u00e9 ce que l\u2019application a compris.');
+
+    var zone = el('div','border:2px dashed var(--border);border-radius:14px;padding:26px;text-align:center;cursor:pointer');
+    zone.appendChild(el('div','font-size:30px','\ud83d\udcc4'));
+    zone.appendChild(el('div','font-size:14px;font-weight:800;color:var(--text);margin-top:6px',
+      'D\u00e9posez ici votre fichier .ics'));
+    zone.appendChild(el('div','font-size:12px;color:var(--text-muted);margin-top:3px',
+      'ou cliquez pour le choisir'));
+    var inp = el('input','display:none');
+    inp.type = 'file'; inp.accept = '.ics,text/calendar';
+    zone.appendChild(inp);
+    zone.onclick = function(){ inp.click(); };
+    ['dragover','dragenter'].forEach(function(e){
+      zone.addEventListener(e, function(ev){ ev.preventDefault(); zone.style.borderColor = '#6c63ff'; });
+    });
+    ['dragleave','drop'].forEach(function(e){
+      zone.addEventListener(e, function(ev){ ev.preventDefault(); zone.style.borderColor = 'var(--border)'; });
+    });
+    zone.addEventListener('drop', function(ev){
+      var f = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
+      if(f) lit(f);
+    });
+    inp.onchange = function(){ if(inp.files && inp.files[0]) lit(inp.files[0]); };
+    box.appendChild(zone);
+
+    var msg = el('div','font-size:12px;color:#ef4444;margin-top:10px;min-height:16px');
+    box.appendChild(msg);
+
+    var ret = el('button','border:1px solid var(--border);background:transparent;color:var(--text);border-radius:10px;'
+      + 'padding:10px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:12px','\u2039 Retour');
+    ret.onclick = ouvrir;
+    box.appendChild(ret);
+
+    function lit(f){
+      msg.textContent = '';
+      var r = new FileReader();
+      r.onload = function(){
+        var res;
+        try{ res = llIcsAnalyse(String(r.result)); }
+        catch(e){ msg.textContent = 'Ce fichier n\u2019a pas pu \u00eatre lu.'; return; }
+        if(res.erreur){ msg.textContent = res.erreur; return; }
+        if(!res.classes.length){ msg.textContent = 'Aucune classe reconnue dans ce fichier.'; return; }
+        ouvrirVerif(res);
+      };
+      r.onerror = function(){ msg.textContent = 'Ce fichier n\u2019a pas pu \u00eatre lu.'; };
+      r.readAsText(f);
+    }
+  }
+
+  /* ── Import : ecran de verification ───────────────────────────────── */
+  function ouvrirVerif(res){
+    var box = cadre('\u2713 V\u00e9rifiez avant d\u2019enregistrer',
+      res.classes.length + ' classe' + (res.classes.length>1?'s':'') + ' reconnue'
+      + (res.classes.length>1?'s':'') + ' \u00b7 ' + res.cours + ' heures de cours lues \u00b7 '
+      + res.ecartes + ' cours annul\u00e9s ou absences \u00e9cart\u00e9s');
+
+    if(!res.recul){
+      var avert = el('div','background:rgba(245,158,11,.12);border:1px solid #f59e0b;border-radius:12px;'
+        + 'padding:11px 13px;font-size:12px;color:var(--text);margin-bottom:14px;line-height:1.5');
+      avert.textContent = 'Ce fichier ne couvre que ' + res.semaines + ' semaine'
+        + (res.semaines>1?'s':'') + '\u00a0: c\u2019est trop peu pour savoir si un cours revient chaque semaine '
+        + 'ou une semaine sur deux. Les cr\u00e9neaux sont enregistr\u00e9s comme hebdomadaires. '
+        + 'R\u00e9importez le m\u00eame emploi du temps dans quelques semaines\u00a0: la reconnaissance sera juste.';
+      box.appendChild(avert);
+    }
+
+    var etat = res.classes.map(function(c, i){
+      return { garde:true, code:c.code, niveau:'', nom:c.code,
+               couleur:COULEURS[i % COULEURS.length], src:c };
+    });
+
+    var liste = el('div');
+    box.appendChild(liste);
+
+    function dessine(){
+      liste.textContent = '';
+      etat.forEach(function(e){
+        var carte = el('div','border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:10px;'
+          + 'opacity:' + (e.garde ? '1' : '.45'));
+
+        var h = el('div','display:flex;align-items:center;gap:9px;flex-wrap:wrap');
+        var ck = el('input'); ck.type = 'checkbox'; ck.checked = e.garde;
+        ck.style.cssText = 'width:16px;height:16px;cursor:pointer;flex:none';
+        ck.onchange = function(){ e.garde = ck.checked; dessine(); };
+        h.appendChild(ck);
+        h.appendChild(el('div','font-size:14px;font-weight:800;color:var(--text)', e.code));
+
+        var sn = el('select','padding:6px 8px;border:1px solid var(--border);border-radius:9px;font-size:12px;'
+          + 'font-family:inherit;background:var(--panel);color:var(--text)');
+        sn.appendChild(new Option('\u2014 Niveau \u2014',''));
+        NIVEAUX.forEach(function(n){ sn.appendChild(new Option(n.replace(/_/g,' '), n)); });
+        sn.value = e.niveau;
+        sn.onchange = function(){
+          e.niveau = sn.value;
+          if(e.niveau) e.nom = nomPropose(e.code, e.niveau);
+          /* Les classes suivantes qui n'ont pas encore de niveau prennent
+             le meme : les codes se suivent presque toujours par familles. */
+          var vu = false;
+          etat.forEach(function(o){
+            if(o === e){ vu = true; return; }
+            if(vu && !o.niveau){ o.niveau = e.niveau; o.nom = nomPropose(o.code, o.niveau); }
+          });
+          dessine();
+        };
+        h.appendChild(sn);
+
+        var inom = el('input','padding:6px 8px;border:1px solid var(--border);border-radius:9px;font-size:12px;'
+          + 'font-family:inherit;background:var(--panel);color:var(--text);width:120px');
+        inom.value = e.nom;
+        inom.placeholder = 'Nom affich\u00e9';
+        inom.oninput = function(){ e.nom = inom.value; };
+        h.appendChild(inom);
+
+        var pc = el('button','width:24px;height:24px;border-radius:50%;border:2px solid var(--border);cursor:pointer;'
+          + 'flex:none;background:' + e.couleur);
+        pc.title = 'Changer la couleur';
+        pc.onclick = function(){
+          e.couleur = COULEURS[(COULEURS.indexOf(e.couleur) + 1) % COULEURS.length];
+          dessine();
+        };
+        h.appendChild(pc);
+        carte.appendChild(h);
+
+        var ent = e.src.creneaux.filter(function(k){ return !k.groupe; });
+        var grp = e.src.creneaux.filter(function(k){ return k.groupe; });
+
+        var d = el('div','font-size:11px;color:var(--text-muted);margin-top:8px;line-height:1.6');
+        d.textContent = ent.length ? ('Cr\u00e9neaux\u00a0: ' + ent.map(function(k){
+          return JN[(k.jour + 6) % 7] + ' ' + k.debut.replace(':','h')
+               + (k.quinzaine ? ' (1 sem./2)' : '');
+        }).join(' \u00b7 ')) : 'Aucun cr\u00e9neau de classe enti\u00e8re dans ce fichier\u00a0\u2014 seulement des demi-groupes.';
+        carte.appendChild(d);
+
+        if(grp.length){
+          var noms = {};
+          grp.forEach(function(k){ noms[k.groupe] = 1; });
+          var g = el('div','font-size:11px;color:var(--text-muted);margin-top:3px;line-height:1.6');
+          g.textContent = 'Demi-groupes\u00a0: ' + Object.keys(noms).join(' \u00b7 ')
+            + ' \u2014 pos\u00e9s dans l\u2019emploi du temps, compt\u00e9s comme une seule s\u00e9ance';
+          carte.appendChild(g);
+        }
+        liste.appendChild(carte);
+      });
+    }
+    dessine();
+
+    var e0 = edtLire();
+    var dejaLa = (e0.slots || []).length;
+    var mode = { val: dejaLa ? 'remplacer' : 'remplacer' };
+    if(dejaLa){
+      var ch = el('div','background:var(--panel);border-radius:12px;padding:11px 13px;margin:6px 0 12px;font-size:12px;color:var(--text)');
+      ch.appendChild(el('div','font-weight:700;margin-bottom:6px',
+        'Votre emploi du temps contient d\u00e9j\u00e0 ' + dejaLa + ' cr\u00e9neau' + (dejaLa>1?'x':'') + '.'));
+      [['remplacer','Les remplacer par ceux du fichier'],['ajouter','Garder les anciens et ajouter les nouveaux']]
+      .forEach(function(o){
+        var lab = el('label','display:flex;align-items:center;gap:7px;margin-top:4px;cursor:pointer');
+        var r = el('input'); r.type = 'radio'; r.name = '__ll_cls61_mode'; r.value = o[0];
+        r.checked = (o[0] === mode.val);
+        r.onchange = function(){ mode.val = o[0]; };
+        lab.appendChild(r); lab.appendChild(el('span','font-size:12px', o[1]));
+        ch.appendChild(lab);
+      });
+      box.appendChild(ch);
+    }
+
+    var alerte = el('div','font-size:12px;color:#ef4444;min-height:16px;margin-bottom:6px');
+    box.appendChild(alerte);
+
+    var bar = el('div','display:flex;gap:8px');
+    var ret = el('button','border:1px solid var(--border);background:transparent;color:var(--text);border-radius:10px;'
+      + 'padding:10px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer','\u2039 Retour');
+    ret.onclick = ouvrirImport;
+    bar.appendChild(ret);
+
+    var ok = el('button','flex:1;border:none;border-radius:10px;padding:11px;cursor:pointer;font-size:13px;'
+      + 'font-weight:800;font-family:inherit;color:#fff;background:#10b981','\u2713 Enregistrer mes classes');
+    ok.onclick = function(){
+      var gardees = etat.filter(function(e){ return e.garde; });
+      if(!gardees.length){ alerte.textContent = 'Aucune classe s\u00e9lectionn\u00e9e.'; return; }
+      var sans = gardees.filter(function(e){ return !e.niveau; });
+      if(sans.length){
+        alerte.textContent = 'Indiquez le niveau de\u00a0: ' + sans.map(function(e){ return e.code; }).join(', ');
+        return;
+      }
+      enregistrer(gardees, mode.val, res);
+    };
+    bar.appendChild(ok);
+    box.appendChild(bar);
+  }
+
+  /* ── Ecriture ─────────────────────────────────────────────────────── */
+  function enregistrer(gardees, mode, res){
+    var st = lire();
+    var edt = edtLire();
+    if(mode === 'remplacer') edt.slots = [];
+    edt.slots = edt.slots || [];
+    if(!edt.annee) edt.annee = res.annee || '';
+
+    gardees.forEach(function(e){
+      /* Une classe deja connue sous le meme nom est mise a jour, pas doublee. */
+      var ex = st.classes.filter(function(c){
+        return c.name.toLowerCase() === e.nom.toLowerCase() || c.code === e.code;
+      })[0];
+      var id = ex ? ex.id : neufId();
+      var groupes = {};
+      e.src.creneaux.forEach(function(k){ if(k.groupe) groupes[k.groupe] = 1; });
+
+      var slots = [];
+      e.src.creneaux.forEach(function(k){
+        var d = (k.jour + 6) % 7;                    /* dimanche mis a part */
+        if(k.jour === 0 || d > 5) return;
+        slots.push({
+          day: d, start: k.debut, end: k.fin,
+          label: e.nom + (k.groupe ? ' \u00b7 ' + k.groupe : ''),
+          color: e.couleur, classId: id,
+          groupe: k.groupe || '',
+          rythme: k.quinzaine ? 'quinzaine' : 'hebdo'
+        });
+      });
+
+      var fiche = {
+        id: id, name: e.nom, code: e.code, level: e.niveau, color: e.couleur,
+        groupes: Object.keys(groupes), slots: slots, source: 'pronote', importedAt: Date.now()
+      };
+      if(ex){ st.classes[st.classes.indexOf(ex)] = fiche; }
+      else { st.classes.push(fiche); }
+
+      edt.slots = edt.slots.filter(function(s){ return s.classId !== id; }).concat(slots);
+    });
+
+    edt.savedAt = Date.now();
+    if(!ecrire(st)) return;
+    edtEcrire(edt);
+    try{ if(typeof llUpdateEdtBtn === 'function') llUpdateEdtBtn(); }catch(_e){}
+
+    fermerTout();
+    try{
+      if(window.llToast){
+        var t = document.createElement('div');
+        t.textContent = '\u2713 ' + gardees.length + ' classe'
+          + (gardees.length>1?'s':'') + ' enregistr\u00e9e' + (gardees.length>1?'s':'')
+          + ' \u00b7 emploi du temps rempli';
+        window.llToast(t, 'ok');
+      }
+    }catch(_e){}
+    ouvrir();
+  }
+
+  /* L'application affiche l'annee scolaire sur le bouton EDT des qu'une
+     annee est enregistree. L'import en inscrit une, ce qui allongeait le
+     bouton et faisait deborder le bandeau. L'annee reste dans les donnees
+     et s'affiche dans la fenetre ; elle est seulement cachee sur le bouton. */
+  function cacherAnneeSurBouton(){
+    if(document.getElementById('__ll_cls61_css')) return;
+    var s = document.createElement('style');
+    s.id = '__ll_cls61_css';
+    s.textContent = '#__ll_edt_btn span span{display:none !important}';
+    (document.head || document.documentElement).appendChild(s);
+  }
+  try{ cacherAnneeSurBouton(); }catch(e){}
+
+  /* ── Bouton dans le bandeau, juste avant 📅 EDT ───────────────────── */
+  function poser(){
+    if(document.getElementById('__ll_cls61_btn')) return;
+    var hdr = document.querySelector('.hdr-actions');
+    if(!hdr) return;
+    var b = document.createElement('button');
+    b.id = '__ll_cls61_btn';
+    b.style.cssText = [
+      'display:inline-flex;align-items:center;gap:5px;',
+      'padding:6px 9px;border-radius:8px;border:none;cursor:pointer;',
+      'font-size:13px;line-height:1;font-family:inherit;white-space:nowrap;',
+      'background:linear-gradient(135deg,#ede9fe,#ddd6fe);color:#6d28d9;',
+      'box-shadow:0 1px 4px rgba(109,40,217,.18);transition:all .2s'
+    ].join('');
+    b.title = 'Mes classes';
+    b.innerHTML = '\ud83d\udc65';
+    b.onmouseenter = function(){ this.style.transform = 'translateY(-1px)'; };
+    b.onmouseleave = function(){ this.style.transform = ''; };
+    b.onclick = ouvrir;
+    var edtBtn = document.getElementById('__ll_edt_btn');
+    if(edtBtn) hdr.insertBefore(b, edtBtn); else hdr.appendChild(b);
+  }
+
+  if(!window.__ll_cls61_horloge){
+    window.__ll_cls61_horloge = setInterval(function(){ try{ poser(); }catch(e){} }, 500);
+  }
+  try{ poser(); }catch(e){}
+
+  window.__ll_openClasses = ouvrir;
+})();
+</script>
+
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   LOT 62 — L'EMPLOI DU TEMPS CONNAIT MES CLASSES
+
+   Deux choses ici.
+
+   1. Le champ « Nom de la classe » du formulaire recoit une liste
+      deroulante de vos classes. Vous pouvez toujours taper librement :
+      la liste propose, elle n'impose pas.
+
+   2. Une reparation. Le formulaire de l'emploi du temps a ete ecrit
+      bien avant que les classes existent : quand on modifie un
+      creneau, il en refabrique un neuf a partir des seuls champs
+      affiches — jour, heures, nom, couleur. Tout le reste disparaissait
+      au passage : le rattachement a la classe, le demi-groupe, et la
+      mention « une semaine sur deux ». Deplacer un creneau importe le
+      detachait donc silencieusement de sa classe.
+
+      Desormais, apres chaque enregistrement de l'emploi du temps, les
+      creneaux sont recousus a leurs classes : par leur nom d'abord,
+      puis en reprenant ce qu'un creneau de meme nom et de meme duree
+      portait avant. La couleur de la classe est reappliquee, pour que
+      la grille reste lisible.
+
+   Rien n'est reecrit tant que l'emploi du temps ne change pas. Aucune
+   retouche du coeur.
+
+   Bloc autonome : le supprimer suffit a revenir en arriere.
+   ═══════════════════════════════════════════════════════════════════ */
+(function(){
+  if (window.__ll_edtcls_ready) return;
+  window.__ll_edtcls_ready = true;
+
+  var EDT = 'lessonloom-edt';
+  var derniereVue = null;     /* empreinte du dernier emploi du temps examine */
+  var avant = null;           /* creneaux tels qu'ils etaient au coup precedent */
+
+  function lireEdt(){
+    try{ var r = localStorage.getItem(EDT); return r ? JSON.parse(r) : null; }
+    catch(e){ return null; }
+  }
+  function classes(){
+    try{
+      return (typeof window.llGetClassesEdt === 'function')
+        ? (window.llGetClassesEdt().classes || []) : [];
+    }catch(e){ return []; }
+  }
+
+  /* ── 1. La liste deroulante dans le formulaire ────────────────────── */
+  function greffeListe(){
+    var champ = document.getElementById('__ll_edt_label');
+    if(!champ) return;                          /* pas en mode edition */
+    if(champ.parentNode.querySelector('.__ll_edtcls_sel')) return;   /* deja pose */
+    var cls = classes();
+    if(!cls.length) return;                     /* rien a proposer */
+
+    var sel = document.createElement('select');
+    sel.className = 'fi fs __ll_edtcls_sel';
+    sel.style.cssText = 'margin-bottom:5px';
+    sel.appendChild(new Option('\u2014 Choisir une de mes classes \u2014', ''));
+    cls.forEach(function(c){
+      sel.appendChild(new Option(c.name + (c.level ? ' (' + String(c.level).replace(/_/g,' ') + ')' : ''), c.name));
+      (c.groupes || []).forEach(function(g){
+        sel.appendChild(new Option('\u00a0\u00a0\u00a0\u21b3 ' + c.name + ' \u00b7 ' + g, c.name + ' \u00b7 ' + g));
+      });
+    });
+    sel.onchange = function(){
+      if(!sel.value) return;
+      champ.value = sel.value;
+      /* La couleur de la classe est appliquee de toute facon au
+         raccommodage ; on essaie ici de la montrer tout de suite. */
+      try{
+        var nom = sel.value.split(' \u00b7 ')[0];
+        var c = cls.filter(function(x){ return x.name === nom; })[0];
+        if(c && c.color){
+          var pastilles = champ.closest('div').parentNode
+            .querySelectorAll('button[style*="background"]');
+          Array.prototype.forEach.call(pastilles, function(p){
+            if((p.style.background || '').replace(/\s/g,'').indexOf(c.color) >= 0) p.click();
+          });
+        }
+      }catch(e){}
+      sel.value = '';
+    };
+    champ.parentNode.insertBefore(sel, champ);
+  }
+
+  /* ── 2. Le raccommodage ───────────────────────────────────────────── */
+  function recoudre(){
+    var edt = lireEdt();
+    if(!edt || !edt.slots || !edt.slots.length){ avant = edt && edt.slots ? edt.slots.slice() : null; return; }
+
+    var cls = classes();
+    var parNom = {};
+    cls.forEach(function(c){ parNom[String(c.name).toLowerCase()] = c; });
+
+    /* On met d'abord de cote les creneaux qui n'ont pas bouge d'un cheveu.
+       Ce qui reste dans « avant » est donc ce qui a ete deplace ou change :
+       on retrouve ainsi par elimination lequel etait lequel, meme quand
+       une classe a deux creneaux de meme duree. */
+    var restants = avant ? avant.slice() : [];
+    if(restants.length){
+      edt.slots.forEach(function(s){
+        for(var i = 0; i < restants.length; i++){
+          var o = restants[i];
+          if(o.day === s.day && o.start === s.start && o.end === s.end && o.label === s.label){
+            restants.splice(i, 1); return;
+          }
+        }
+      });
+    }
+
+    var change = false;
+    edt.slots.forEach(function(s){
+      var lab = String(s.label || '');
+      var nom = lab.split(' \u00b7 ')[0].trim();
+      var grp = lab.indexOf(' \u00b7 ') > 0 ? lab.split(' \u00b7 ').slice(1).join(' \u00b7 ').trim() : '';
+      var c = parNom[nom.toLowerCase()];
+
+      if(c){
+        if(s.classId !== c.id){ s.classId = c.id; change = true; }
+        if(c.color && s.color !== c.color){ s.color = c.color; change = true; }
+        if(grp && s.groupe !== grp){ s.groupe = grp; change = true; }
+      }
+
+      /* Ce que le formulaire ne sait pas conserver : on le reprend du
+         creneau deplace qui portait le meme nom. */
+      if(!s.rythme && restants.length){
+        var jumeaux = restants.filter(function(o){ return o.label === s.label && o.rythme; });
+        if(jumeaux.length){
+          var r = jumeaux[0].rythme;
+          if(jumeaux.every(function(o){ return o.rythme === r; })){ s.rythme = r; change = true; }
+        }
+      }
+      if(!s.groupe && !grp && restants.length){
+        var j2 = restants.filter(function(o){ return o.label === s.label && o.groupe; });
+        if(j2.length === 1){ s.groupe = j2[0].groupe; change = true; }
+      }
+    });
+
+    if(change){
+      try{ localStorage.setItem(EDT, JSON.stringify(edt)); }catch(e){}
+      derniereVue = JSON.stringify(edt.slots);
+    }
+    avant = edt.slots.slice();
+  }
+
+  /* Une seule horloge : elle regarde si l'emploi du temps a change et,
+     seulement dans ce cas, recoud. Elle repose aussi la liste deroulante,
+     que la fenetre efface a chaque fois qu'elle se redessine. */
+  function passage(){
+    greffeListe();
+    var r = null;
+    try{ r = localStorage.getItem(EDT); }catch(e){ return; }
+    if(r === derniereVue) return;
+    derniereVue = r;
+    if(r) recoudre();
+  }
+
+  if(!window.__ll_edtcls_horloge){
+    window.__ll_edtcls_horloge = setInterval(function(){ try{ passage(); }catch(e){} }, 500);
+  }
+  try{ passage(); }catch(e){}
+
+  window.__ll_edtclsRecoudre = recoudre;
+})();
+</script>
+
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   LOT 63 — PLACER UNE SEQUENCE POUR UNE CLASSE
+
+   Le formulaire « Placer une sequence » proposait toutes vos sequences,
+   tous niveaux confondus, dans une seule liste deroulante. A six niveaux
+   et une quinzaine de sequences chacun, cela faisait beaucoup de lignes
+   a faire defiler pour en trouver une.
+
+   Ici : un menu « Pour quelle classe ? » se pose au-dessus. Des que
+   vous choisissez une classe, la liste ne propose plus que les
+   sequences de son niveau — celles du niveau exact d'abord, puis celles
+   des specialites de la meme famille (une Premiere voit aussi Premiere
+   LLCER, AMC et Techno). Vous pouvez toujours revenir a « toutes les
+   sequences ».
+
+   Et le placement retient desormais la classe. C'est ce qui rendra
+   possibles le calcul des seances et le filtre du calendrier.
+
+   Le bouton « Placer » du coeur ne sait ecrire que cinq renseignements
+   et nous ne pouvons pas lui en faire ecrire un sixieme : la classe est
+   donc rattachee juste apres la creation, par le meme procede qu'au lot
+   62. Aucune retouche du coeur.
+
+   Bloc autonome : le supprimer suffit a revenir en arriere.
+   ═══════════════════════════════════════════════════════════════════ */
+(function(){
+  if (window.__ll_seqcls_ready) return;
+  window.__ll_seqcls_ready = true;
+
+  var choisie = '';        /* identifiant de la classe choisie */
+  var attente = null;      /* { classId, className, avant:[ids] } */
+
+  function classes(){
+    try{
+      return (typeof window.llGetClassesEdt === 'function')
+        ? (window.llGetClassesEdt().classes || []) : [];
+    }catch(e){ return []; }
+  }
+  function donnees(){
+    try{ return (typeof window.__ll_getData === 'function') ? window.__ll_getData() : null; }
+    catch(e){ return null; }
+  }
+
+  /* LOT 63 bis — un niveau masque a l'accueil ne doit pas revenir vous
+     chercher ici. L'application garde la liste des niveaux masques ;
+     on la consulte et on ecarte ces sequences en plus du filtre par
+     classe. La comparaison ignore les tirets bas, car l'accueil affiche
+     « Premiere LLCER » la ou la sequence porte « Premiere_LLCER ». */
+  /* LOT 64 ter — l'accueil affiche des libelles enrichis, du genre
+     « Premiere Techno (STMG, STI2D...) », la ou la sequence porte
+     simplement « Premiere_Techno ». On ecarte donc la parenthese, les
+     tirets bas et les espaces en trop avant de comparer. */
+  function reduire(n){
+    return String(n || '')
+      .replace(/\([^)]*\)/g, ' ')
+      .replace(/_/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim().toLowerCase();
+  }
+  function niveauxMasques(){
+    try{
+      var r = localStorage.getItem('__ll_hidden_niveaux');
+      var l = r ? JSON.parse(r) : [];
+      return (l || []).map(reduire).filter(Boolean);
+    }catch(e){ return []; }
+  }
+  function estMasque(niveau, liste){
+    if(!niveau || !liste.length) return false;
+    return liste.indexOf(reduire(niveau)) >= 0;
+  }
+
+  /* Une Premiere voit aussi Premiere LLCER, AMC et Techno : c'est la
+     meme famille. Une Terminale ne voit jamais les Premieres. */
+  function memeFamille(niveauSeq, niveauClasse){
+    if(!niveauClasse) return true;
+    if(!niveauSeq) return false;
+    if(niveauSeq === niveauClasse) return true;
+    return niveauSeq.indexOf(niveauClasse + '_') === 0;
+  }
+
+  /* ── Le menu « Pour quelle classe ? » ─────────────────────────────── */
+  function greffe(){
+    var sel = document.getElementById('__f_sq');
+    if(!sel) { choisie = ''; return; }                 /* formulaire ferme */
+
+    /* LOT 64 ter — sur Firefox, le menu avait disparu du formulaire alors
+       qu'un menu existait encore ailleurs dans la page : on verifiait sa
+       simple presence, pas sa place. On verifie maintenant qu'il est bien
+       dans le formulaire ouvert, et on le repose sinon. */
+    var forme = sel.closest ? sel.closest('div') : null;
+    var carte = forme && forme.parentNode ? forme.parentNode.parentNode : null;
+    var dejaLa = document.getElementById('__ll_seqcls_sel');
+    if(dejaLa && carte && carte.contains(dejaLa)){ filtre(); return; }
+    if(dejaLa && dejaLa.parentNode) dejaLa.parentNode.remove();
+
+    var cls = classes();
+    if(!cls.length) return;                            /* rien a proposer */
+
+    /* La grille du formulaire tient sur trois colonnes : on se pose
+       au-dessus, sur toute la largeur, pour ne rien deranger. */
+    var grille = sel.parentNode && sel.parentNode.parentNode;
+    if(!grille || !grille.parentNode) return;
+
+    var bloc = document.createElement('div');
+    bloc.style.cssText = 'margin-bottom:8px';
+
+    var lab = document.createElement('label');
+    lab.className = 'fl';
+    lab.textContent = 'Pour quelle classe\u00a0?';
+    bloc.appendChild(lab);
+
+    var s = document.createElement('select');
+    s.id = '__ll_seqcls_sel';
+    s.className = 'fs';
+    s.style.cssText = 'font-size:11px';
+    s.appendChild(new Option('\u2014 Toutes mes s\u00e9quences \u2014', ''));
+    cls.forEach(function(c){
+      s.appendChild(new Option(
+        c.name + (c.level ? '  \u00b7  ' + String(c.level).replace(/_/g,' ') : ''), c.id));
+    });
+    s.value = choisie;
+    s.onchange = function(){ choisie = s.value; filtre(true); };
+    bloc.appendChild(s);
+
+    var note = document.createElement('div');
+    note.id = '__ll_seqcls_note';
+    note.style.cssText = 'font-size:11px;color:var(--text-muted);margin-top:4px;min-height:14px';
+    bloc.appendChild(note);
+
+    grille.parentNode.insertBefore(bloc, grille);
+    filtre();
+  }
+
+  /* ── Le filtrage de la liste des sequences ────────────────────────── */
+  function filtre(force){
+    var sel = document.getElementById('__f_sq');
+    var note = document.getElementById('__ll_seqcls_note');
+    if(!sel) return;
+
+    /* LOT 64 bis — le filtre etait rejoue a chaque tour d'horloge, et il
+       reordonne les lignes de la liste : sur Firefox, cela faisait
+       clignoter le menu en permanence. On ne refait le travail que si
+       quelque chose a reellement change. */
+    var empreinte = choisie + '|' + sel.options.length + '|'
+      + (function(){ try{ return localStorage.getItem('__ll_hidden_niveaux') || ''; }catch(e){ return ''; } })();
+    if(!force && sel.dataset.llfiltre === empreinte) return;
+    sel.dataset.llfiltre = empreinte;
+
+    var c = classes().filter(function(x){ return x.id === choisie; })[0];
+    var niveau = c ? c.level : '';
+
+    var d = donnees();
+    var parId = {};
+    if(d) (d.sequences || []).forEach(function(s){ parId[s.id] = s.niveau || ''; });
+
+    var masques = niveauxMasques();
+    var visibles = 0, exactes = [], voisines = [], caches = 0;
+    Array.prototype.forEach.call(sel.options, function(o){
+      var n = parId[o.value];
+      var garde = (!niveau || memeFamille(n, niveau)) && !estMasque(n, masques);
+      if(garde === false && estMasque(n, masques)) caches++;
+      o.hidden = !garde;
+      o.disabled = !garde;
+      if(garde){
+        visibles++;
+        (n === niveau ? exactes : voisines).push(o);
+      }
+    });
+
+    /* Les sequences du niveau exact passent en tete ; les specialites
+       de la meme famille suivent. */
+    if(niveau){
+      exactes.concat(voisines).forEach(function(o){ sel.appendChild(o); });
+    }
+
+    /* Si la sequence actuellement choisie vient d'etre masquee, on prend
+       la premiere qui reste, pour ne jamais placer une sequence invisible. */
+    var actuel = sel.options[sel.selectedIndex];
+    if(actuel && actuel.hidden){
+      var premier = Array.prototype.filter.call(sel.options, function(o){ return !o.hidden; })[0];
+      sel.value = premier ? premier.value : '';
+    }
+
+    if(note){
+      var suffixe = caches ? ('  \u00b7  ' + caches + ' \u00e9cart\u00e9e'
+                  + (caches>1?'s':'') + ' (niveau masqu\u00e9 \u00e0 l\u2019accueil)') : '';
+      if(!niveau) note.textContent = caches ? suffixe.replace(/^\s*\u00b7\s*/,'') : '';
+      else if(!visibles) note.textContent = 'Aucune s\u00e9quence de ce niveau pour le moment.';
+      else note.textContent = visibles + ' s\u00e9quence' + (visibles>1?'s':'')
+           + ' de niveau ' + String(niveau).replace(/_/g,' ') + (visibles>1?' propos\u00e9es':' propos\u00e9e') + '.' + suffixe;
+    }
+  }
+
+  /* ── Le rattachement, juste apres la creation ─────────────────────── */
+  document.addEventListener('click', function(ev){
+    try{
+      var t = (ev.target && ev.target.closest) ? ev.target.closest('[data-fseq]') : null;
+      if(!t) return;
+      if(!choisie) return;
+      var c = classes().filter(function(x){ return x.id === choisie; })[0];
+      if(!c) return;
+      var d = donnees();
+      if(!d || !d.calendar) return;
+      attente = {
+        classId: c.id, className: c.name,
+        avant: (d.calendar.events || []).map(function(e){ return e.id; })
+      };
+      setTimeout(rattache, 400);
+    }catch(e){}
+  }, true);
+
+  function rattache(){
+    var m = attente; attente = null;
+    if(!m) return;
+    try{
+      var d = donnees();
+      if(!d || !d.calendar || typeof window.__ll_upsertCalEvent !== 'function') return;
+      var neufs = (d.calendar.events || []).filter(function(e){
+        return m.avant.indexOf(e.id) < 0;
+      });
+      if(neufs.length !== 1) return;      /* dans le doute, on ne touche a rien */
+      var ev = neufs[0];
+      if(ev.classId) return;
+      var copie = {};
+      Object.keys(ev).forEach(function(k){ copie[k] = ev[k]; });
+      copie.classId = m.classId;
+      copie.className = m.className;
+      window.__ll_upsertCalEvent(copie);
+    }catch(e){}
+  }
+
+  /* Horloge propre au bloc : le formulaire est refabrique a chaque
+     redessin du calendrier, il faut donc reposer le menu. */
+  if(!window.__ll_seqcls_horloge){
+    window.__ll_seqcls_horloge = setInterval(function(){ try{ greffe(); }catch(e){} }, 400);
+  }
+  try{ greffe(); }catch(e){}
+
+  window.__ll_seqclsFiltre = function(){ filtre(true); };
+  window.__ll_seqclsChoix = function(v){ choisie = v; filtre(true); };
+  window.__ll_seqclsRattache = rattache;
+})();
+</script>
+
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   LOT 64 — LA CLASSE SE VOIT SUR LE CALENDRIER
+
+   Depuis le lot 63, un placement retient la classe pour laquelle il a
+   ete fait. Mais cette information ne se voyait nulle part : la
+   pastille du calendrier n'affiche que le titre de la sequence, sur une
+   ligne, en tres petit. Impossible de savoir d'un coup d'oeil si telle
+   semaine concerne les 106 ou les 211.
+
+   Ici : chaque pastille recoit le nom de la classe en tete, en plus
+   petit, et un liseré de la couleur de la classe sur son bord gauche.
+   L'infobulle donne le detail complet. Les placements sans classe —
+   ceux d'avant, et les seances flash — restent exactement comme avant.
+
+   On complete des pastilles existantes, on ne les refabrique pas : le
+   titre, la couleur de la sequence et la croix de suppression sont
+   laisses intacts. Aucune retouche du coeur.
+
+   Bloc autonome : le supprimer suffit a revenir en arriere.
+   ═══════════════════════════════════════════════════════════════════ */
+(function(){
+  if (window.__ll_calcls_ready) return;
+  window.__ll_calcls_ready = true;
+
+  function classes(){
+    try{
+      return (typeof window.llGetClassesEdt === 'function')
+        ? (window.llGetClassesEdt().classes || []) : [];
+    }catch(e){ return []; }
+  }
+  function evenements(){
+    try{
+      var d = (typeof window.__ll_getData === 'function') ? window.__ll_getData() : null;
+      return (d && d.calendar && d.calendar.events) ? d.calendar.events : [];
+    }catch(e){ return []; }
+  }
+
+  /* LOT 64 bis — la vue Semaine n'utilise pas les memes pastilles que la
+     vue Mois : autre marquage (data-cev), autre habillage, et aucune
+     infobulle prevue. Elle etait donc ignoree. On traite les deux. */
+  function passage(){
+    var pastilles = document.querySelectorAll('.cal-event[data-cedit], [data-cev]');
+    if(!pastilles.length) return;
+
+    var parId = {};
+    evenements().forEach(function(e){ parId[e.id] = e; });
+    if(!Object.keys(parId).length) return;
+
+    var couleurs = {};
+    classes().forEach(function(c){ couleurs[c.id] = c.color || ''; });
+
+    Array.prototype.forEach.call(pastilles, function(p){
+      try{
+        var semaine = !p.getAttribute('data-cedit');
+        var ev = parId[p.getAttribute('data-cedit') || p.getAttribute('data-cev')];
+        if(!ev) return;
+        var nom = ev.className || '';
+
+        /* Empreinte : on ne retouche la pastille que si le nom de la
+           classe a change. Sans cela, une horloge qui ecrit sans arret
+           se relance elle-meme. */
+        if(p.dataset.llcls === (nom || '-')) return;
+        p.dataset.llcls = nom || '-';
+
+        var ancien = p.querySelector('.__ll_calcls_tag');
+        if(ancien) ancien.remove();
+
+        if(!nom){
+          if(!p.getAttribute('data-cev')){
+            p.style.boxShadow = '';
+            p.style.paddingLeft = '';
+          }
+          return;
+        }
+
+        var tag = document.createElement('span');
+        tag.className = '__ll_calcls_tag';
+        tag.textContent = nom + ' \u00b7 ';
+        tag.style.cssText = 'font-weight:800;opacity:.85';
+        p.insertBefore(tag, p.firstChild);
+
+        var c = couleurs[ev.classId];
+        if(c && !semaine){
+          p.style.boxShadow = 'inset 3px 0 0 ' + c;
+          p.style.paddingLeft = '7px';
+        }
+
+        /* La vue Semaine n'a pas d'infobulle d'origine : on la cree. */
+        var t = p.getAttribute('title') || (semaine ? (ev.title || '') : '');
+        if(t.indexOf(nom) !== 0) p.setAttribute('title', nom + '\u00a0\u2014\u00a0' + t);
+      }catch(e){}
+    });
+  }
+
+  /* Horloge propre au bloc : le calendrier est refabrique a chaque
+     changement de mois, de vue ou de donnees. */
+  if(!window.__ll_calcls_horloge){
+    window.__ll_calcls_horloge = setInterval(function(){ try{ passage(); }catch(e){} }, 500);
+  }
+  try{ passage(); }catch(e){}
+
+  window.__ll_calclsPassage = passage;
+})();
+</script>
+
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   LOT 65 — LA SAUVEGARDE EMPORTE TOUT
+
+   La sauvegarde de l'application n'embarque que la reserve principale :
+   sequences, seances, progressions, calendrier. Tout ce qui vit dans un
+   rangement separe en etait absent — les classes, l'emploi du temps, les
+   coches d'objectifs, les listes d'eleves, la corbeille, les grilles
+   favorites, le bloc-notes, les niveaux masques, les preferences
+   d'impression.
+
+   Autrement dit : on pouvait croire avoir tout sauvegarde et perdre ses
+   classes en changeant d'ordinateur. Ce lot ajoute, dans la fenetre 💾,
+   une sauvegarde complete en un seul fichier, et la restauration qui va
+   avec.
+
+   Format : un seul fichier .json. Pas d'archive compressee, qui exigerait
+   une bibliotheque chargee depuis Internet — donc inutilisable derriere le
+   pare-feu d'un etablissement ou hors ligne.
+
+   Les deux boutons existants de la fenetre 💾 ne sont pas touches.
+   La restauration demande confirmation et n'ecrase jamais sans accord.
+   Aucune retouche du coeur.
+
+   Bloc autonome : le supprimer suffit a revenir en arriere.
+   ═══════════════════════════════════════════════════════════════════ */
+(function(){
+  if (window.__ll_full_ready) return;
+  window.__ll_full_ready = true;
+
+  /* Les rangements connus de l'application. Les coches d'objectifs sont
+     eparpillees sur une clé par objectif : elles sont ramassees a part. */
+  var RANGEMENTS = [
+    'le-sequenceur-data-v2', 'le-sequenceur-prefs-v1',
+    '__ll_classes_edt', '__ll_classes', 'lessonloom-edt',
+    'lessonloom-corbeille', 'lessonloom-flash-seances',
+    'lessonloom-cal-events', 'lessonloom-class-dur',
+    'lessonloom-fav-grilles', 'lessonloom-fav-grille-ids',
+    'lessonloom-act-templates', 'lessonloom-notepad',
+    '__ll_hidden_niveaux', '__ll_last_backup_ts',
+    'll-cal-v3', 'll-cal-sy3', 'll_print_prefs',
+    'lessonloom_seq_left_width'
+  ];
+  var PREFIXES = ['ll-tick-', '__ll_pf_', '__ll_sc_det_', 'distrib-'];
+
+  function ramasser(){
+    var out = {};
+    try{
+      RANGEMENTS.forEach(function(k){
+        var v = localStorage.getItem(k);
+        if(v !== null) out[k] = v;
+      });
+      for(var i = 0; i < localStorage.length; i++){
+        var k = localStorage.key(i);
+        if(!k) continue;
+        for(var j = 0; j < PREFIXES.length; j++){
+          if(k.indexOf(PREFIXES[j]) === 0){ out[k] = localStorage.getItem(k); break; }
+        }
+      }
+    }catch(e){}
+    return out;
+  }
+
+  function compter(paquet){
+    var n = { classes:0, creneaux:0, sequences:0, coches:0, cles:0 };
+    try{
+      n.cles = Object.keys(paquet).length;
+      var c = paquet['__ll_classes_edt'];
+      if(c){ try{ n.classes = (JSON.parse(c).classes || []).length; }catch(e){} }
+      var e = paquet['lessonloom-edt'];
+      if(e){ try{ n.creneaux = (JSON.parse(e).slots || []).length; }catch(_e){} }
+      var d = paquet['le-sequenceur-data-v2'];
+      if(d){ try{ n.sequences = (JSON.parse(d).sequences || []).length; }catch(_e){} }
+      Object.keys(paquet).forEach(function(k){ if(k.indexOf('ll-tick-') === 0) n.coches++; });
+    }catch(e){}
+    return n;
+  }
+
+  function resume(n){
+    var p = [];
+    if(n.sequences) p.push(n.sequences + ' s\u00e9quence' + (n.sequences>1?'s':''));
+    if(n.classes)   p.push(n.classes + ' classe' + (n.classes>1?'s':''));
+    if(n.creneaux)  p.push(n.creneaux + ' cr\u00e9neau' + (n.creneaux>1?'x':''));
+    if(n.coches)    p.push(n.coches + ' coche' + (n.coches>1?'s':''));
+    return p.length ? p.join(' \u00b7 ') : 'aucune donn\u00e9e';
+  }
+
+  /* ── Enregistrer ──────────────────────────────────────────────────── */
+  function enregistrer(){
+    try{
+      var paquet = ramasser();
+      var n = compter(paquet);
+      var fichier = {
+        format: 'lesson-loom-complet',
+        version: 1,
+        date: new Date().toISOString(),
+        resume: resume(n),
+        rangements: paquet
+      };
+      var b = new Blob([JSON.stringify(fichier, null, 2)], { type:'application/json' });
+      var u = URL.createObjectURL(b);
+      var a = document.createElement('a');
+      a.href = u;
+      a.download = 'lesson-loom-COMPLET-' + new Date().toISOString().slice(0,10) + '.json';
+      a.click();
+      setTimeout(function(){ try{ URL.revokeObjectURL(u); }catch(e){} }, 1000);
+      try{ localStorage.setItem('__ll_last_backup_ts', String(Date.now())); }catch(e){}
+      dire('\u2713 Sauvegarde compl\u00e8te enregistr\u00e9e \u00b7 ' + resume(n), 'ok');
+    }catch(e){
+      dire('La sauvegarde compl\u00e8te a \u00e9chou\u00e9.', 'warn');
+    }
+  }
+
+  /* ── Restaurer ────────────────────────────────────────────────────── */
+  function restaurer(texte){
+    var f;
+    try{ f = JSON.parse(texte); }
+    catch(e){ dire('Ce fichier n\u2019a pas pu \u00eatre lu.', 'warn'); return; }
+
+    if(!f || f.format !== 'lesson-loom-complet' || !f.rangements){
+      dire('Ce fichier n\u2019est pas une sauvegarde compl\u00e8te Lesson Loom.', 'warn');
+      return;
+    }
+
+    var n = compter(f.rangements);
+    var quand = '';
+    try{ quand = new Date(f.date).toLocaleDateString('fr-FR'); }catch(e){}
+
+    var ok = window.confirm(
+      'Restaurer cette sauvegarde compl\u00e8te\u00a0?\n\n'
+      + (quand ? 'Enregistr\u00e9e le ' + quand + '\n' : '')
+      + resume(n) + '\n\n'
+      + 'Tout ce que contient l\u2019application sera remplac\u00e9 par le contenu de ce fichier.\n'
+      + 'Cette action ne peut pas \u00eatre annul\u00e9e.');
+    if(!ok) return;
+
+    try{
+      Object.keys(f.rangements).forEach(function(k){
+        try{ localStorage.setItem(k, f.rangements[k]); }catch(e){}
+      });
+    }catch(e){
+      dire('La restauration a \u00e9chou\u00e9.', 'warn');
+      return;
+    }
+    window.alert('\u2713 Sauvegarde restaur\u00e9e.\n\n' + resume(n)
+      + '\n\nLa page va se recharger pour tout remettre en place.');
+    try{ location.reload(); }catch(e){}
+  }
+
+  function dire(msg, type){
+    try{
+      if(window.llToast){
+        var t = document.createElement('div');
+        t.textContent = msg;
+        window.llToast(t, type || 'ok');
+      }
+    }catch(e){}
+  }
+
+  /* ── La greffe dans la fenetre 💾 ─────────────────────────────────── */
+  function greffe(){
+    var modale = document.getElementById('__ll_save_modal');
+    if(!modale) return;
+    if(modale.querySelector('#__ll_full_bloc')) return;
+
+    /* On se pose dans la boite, apres tout le contenu existant, sans y
+       toucher. Le repere est le bouton de sauvegarde HTML, qui est le
+       dernier des deux boutons d'origine. */
+    var ancre = modale.querySelector('#__ll_sv_html') || modale.querySelector('#__ll_sv_json');
+    if(!ancre) return;
+    var boite = ancre.closest ? ancre.closest('div[style*="border-radius:18px"]') : null;
+    if(!boite){
+      boite = ancre.parentNode;
+      while(boite && boite.parentNode && boite.parentNode !== modale) boite = boite.parentNode;
+    }
+    if(!boite) return;
+
+    var bloc = document.createElement('div');
+    bloc.id = '__ll_full_bloc';
+    bloc.style.cssText = 'margin-top:14px;padding-top:14px;border-top:1px solid var(--border)';
+
+    var titre = document.createElement('div');
+    titre.style.cssText = 'font-size:13px;font-weight:800;color:var(--text);margin-bottom:2px';
+    titre.textContent = '\ud83d\udce6 Sauvegarde compl\u00e8te';
+    bloc.appendChild(titre);
+
+    var n = compter(ramasser());
+    var sous = document.createElement('div');
+    sous.style.cssText = 'font-size:11px;color:var(--text-muted);margin-bottom:9px;line-height:1.5';
+    sous.textContent = 'Un seul fichier avec TOUT\u00a0: ' + resume(n)
+      + ', vos listes d\u2019\u00e9l\u00e8ves, la corbeille et vos r\u00e9glages. '
+      + 'Les deux sauvegardes ci-dessus ne contiennent pas vos classes ni votre emploi du temps.';
+    bloc.appendChild(sous);
+
+    var barre = document.createElement('div');
+    barre.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap';
+
+    var bSave = document.createElement('button');
+    bSave.type = 'button';
+    bSave.style.cssText = 'flex:1;min-width:170px;border:none;border-radius:10px;padding:10px;'
+      + 'cursor:pointer;font-size:12px;font-weight:800;font-family:inherit;color:#fff;'
+      + 'background:linear-gradient(135deg,#6c63ff,#8b5cf6)';
+    bSave.textContent = '\ud83d\udcbe Tout enregistrer';
+    bSave.onclick = enregistrer;
+    barre.appendChild(bSave);
+
+    var bLoad = document.createElement('button');
+    bLoad.type = 'button';
+    bLoad.style.cssText = 'border:1px solid var(--border);background:transparent;color:var(--text);'
+      + 'border-radius:10px;padding:10px 14px;font-size:12px;font-weight:700;'
+      + 'font-family:inherit;cursor:pointer';
+    bLoad.textContent = '\u21ba Restaurer';
+    var inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = '.json,application/json';
+    inp.style.display = 'none';
+    inp.onchange = function(){
+      var fi = inp.files && inp.files[0];
+      if(!fi) return;
+      var r = new FileReader();
+      r.onload = function(){ restaurer(String(r.result)); };
+      r.onerror = function(){ dire('Ce fichier n\u2019a pas pu \u00eatre lu.', 'warn'); };
+      r.readAsText(fi);
+      inp.value = '';
+    };
+    bLoad.onclick = function(){ inp.click(); };
+    barre.appendChild(bLoad);
+    barre.appendChild(inp);
+
+    bloc.appendChild(barre);
+    boite.appendChild(bloc);
+  }
+
+  if(!window.__ll_full_horloge){
+    window.__ll_full_horloge = setInterval(function(){ try{ greffe(); }catch(e){} }, 400);
+  }
+  try{ greffe(); }catch(e){}
+
+  window.__ll_fullRamasser = ramasser;
+  window.__ll_fullEnregistrer = enregistrer;
+  window.__ll_fullRestaurer = restaurer;
+  window.__ll_fullResume = function(){ return resume(compter(ramasser())); };
+})();
+</script>
+
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   LOT 68 — LA FENETRE 💾 PENSEE POUR UNE COLLEGUE PRESSEE
+
+   La fenetre proposait trois facons de sauvegarder et deux de restaurer,
+   avec des mots techniques sur les boutons — JSON, HTML. Une collegue peu
+   a l'aise avec l'informatique devait CHOISIR, donc pouvait se tromper, et
+   pouvait surtout choisir une sauvegarde incomplete sans le savoir.
+
+   Ici : une action evidente, le reste replie.
+     · Un seul bouton pour sauvegarder tout son travail.
+     · Un seul bouton pour restaurer, qui reconnait tout seul le format du
+       fichier : sauvegarde complete ou sauvegarde ordinaire d'avant.
+     · Les autres formats descendent sous un repli, ferme par defaut, avec
+       un mot disant ce qu'ils ne contiennent pas.
+
+   Rien n'est supprime : les boutons d'origine sont deplaces, pas retires,
+   et continuent de fonctionner exactement comme avant. Le vocabulaire
+   quitte les boutons et passe dans les explications.
+
+   Aucune retouche du coeur.
+
+   Bloc autonome : le supprimer suffit a revenir en arriere.
+   ═══════════════════════════════════════════════════════════════════ */
+(function(){
+  if (window.__ll_svorg_ready) return;
+  window.__ll_svorg_ready = true;
+
+  function resume(){
+    try{ return (typeof window.__ll_fullResume === 'function') ? window.__ll_fullResume() : ''; }
+    catch(e){ return ''; }
+  }
+  function dire(msg, type){
+    try{
+      if(window.llToast){
+        var t = document.createElement('div');
+        t.textContent = msg;
+        window.llToast(t, type || 'ok');
+      }
+    }catch(e){}
+  }
+
+  /* ── Le bouton unique de restauration ─────────────────────────────── */
+  function lire(fichier){
+    var r = new FileReader();
+    r.onerror = function(){ dire('Ce fichier n\u2019a pas pu \u00eatre lu.', 'warn'); };
+    r.onload = function(){
+      var texte = String(r.result), objet = null;
+      try{ objet = JSON.parse(texte); }
+      catch(e){
+        dire('Ce fichier n\u2019est pas une sauvegarde Lesson Loom.', 'warn');
+        return;
+      }
+
+      /* Sauvegarde complete : on passe la main au lot 65. */
+      if(objet && objet.format === 'lesson-loom-complet'){
+        if(typeof window.__ll_fullRestaurer === 'function'){ window.__ll_fullRestaurer(texte); return; }
+        dire('La restauration compl\u00e8te n\u2019est pas disponible.', 'warn');
+        return;
+      }
+
+      /* Sauvegarde ordinaire, comme celles d'avant. */
+      if(objet && (objet.sequences || objet.calendar || objet.library)){
+        var ok = window.confirm(
+          'Restaurer cette sauvegarde\u00a0?\n\n'
+          + 'C\u2019est une sauvegarde d\u2019un ancien format\u00a0: elle contient vos s\u00e9quences,\n'
+          + 'mais PAS vos classes ni votre emploi du temps.\n\n'
+          + 'Vos s\u00e9quences actuelles seront remplac\u00e9es.\n'
+          + 'Cette action ne peut pas \u00eatre annul\u00e9e.');
+        if(!ok) return;
+        try{
+          if(typeof window.__ll_importAll === 'function'){
+            window.__ll_importAll(objet);
+            dire('\u2713 Sauvegarde restaur\u00e9e.', 'ok');
+            return;
+          }
+        }catch(e){}
+        dire('La restauration a \u00e9chou\u00e9.', 'warn');
+        return;
+      }
+
+      dire('Ce fichier n\u2019est pas une sauvegarde Lesson Loom.', 'warn');
+    };
+    r.readAsText(fichier);
+  }
+
+  /* ── Petits outils ────────────────────────────────────────────────── */
+  function el(t, style, txt){
+    var d = document.createElement(t);
+    if(style) d.style.cssText = style;
+    if(txt != null) d.textContent = txt;
+    return d;
+  }
+
+  /* ── La reorganisation ────────────────────────────────────────────── */
+  function greffe(){
+    var modale = document.getElementById('__ll_save_modal');
+    if(!modale) return;
+
+    /* LOT 68 v7 — le bloc du lot 65 reapparaissait en bas de la fenetre :
+       ce lot possede sa propre horloge, qui le reposait des qu'elle le
+       voyait disparaitre. Les deux se disputaient. On arrete son horloge,
+       devenue inutile puisque ses deux actions sont maintenant en haut, et
+       l'on retire son bloc a chaque passage. Ses fonctions, elles, ne sont
+       pas touchees : ce sont celles que nos deux boutons appellent. */
+    try{
+      if(window.__ll_full_horloge){
+        clearInterval(window.__ll_full_horloge);
+        window.__ll_full_horloge = null;
+      }
+    }catch(e){}
+    try{
+      var doublon = modale.querySelector('#__ll_full_bloc');
+      if(doublon) doublon.remove();
+    }catch(e){}
+
+    if(modale.querySelector('#__ll_svorg')) return;
+
+    var bJson = modale.querySelector('#__ll_sv_json');
+    var bHtml = modale.querySelector('#__ll_sv_html');
+    var lbl   = modale.querySelector('#__ll_sv_import_lbl');
+    if(!bJson || !bHtml || !lbl) return;          /* fenetre inattendue : on ne touche a rien */
+
+    /* LOT 68 v5 — la fenetre n'a pas de largeur fixe : elle s'adapte a son
+       contenu, dans la limite de 94 % de l'ecran. Le lot 65 y avait ajoute
+       une longue phrase, dont le navigateur calcule la largeur ideale comme
+       si elle tenait sur une seule ligne : la fenetre s'etirait alors sur
+       presque tout l'ecran. On lui redonne une largeur raisonnable, et les
+       textes se replient au lieu de la pousser. */
+    try{
+      /* On remonte jusqu'a l'enfant direct de la fenetre : le navigateur
+         reecrit les styles (« border-radius: 18px » avec une espace), on ne
+         peut donc pas se fier au texte du style pour reperer la boite. */
+      var boite2 = bJson;
+      while(boite2 && boite2.parentNode && boite2.parentNode !== modale) boite2 = boite2.parentNode;
+      if(boite2 === bJson) boite2 = null;
+      if(boite2 && !boite2.dataset.lllarge){
+        boite2.dataset.lllarge = '1';
+        boite2.style.width = '100%';
+        boite2.style.maxWidth = '620px';
+        boite2.style.maxHeight = '86vh';
+      }
+    }catch(e){}
+
+    var expBloc   = bJson.parentNode;
+    var expTitre  = expBloc.previousElementSibling;
+    var restBloc  = lbl.parentNode;
+    var restTitre = restBloc.previousElementSibling;
+    if(!expBloc || !restBloc) return;
+
+    /* 1. Le bloc principal, pose a la place de l'ancien titre « Exporter » */
+    var principal = el('div', 'margin-bottom:12px');
+    principal.id = '__ll_svorg';
+
+    var b1 = el('button', 'width:100%;display:flex;align-items:center;gap:11px;padding:11px 15px;'
+      + 'border:none;border-radius:12px;cursor:pointer;font-family:inherit;text-align:left;'
+      + 'color:#fff;background:linear-gradient(135deg,#6c63ff,#8b5cf6);margin-bottom:7px;'
+      + 'box-shadow:0 3px 10px rgba(108,99,255,.22)');
+    b1.type = 'button';
+    b1.appendChild(el('span', 'font-size:22px;flex:none', '\ud83d\udce6'));
+    var t1 = el('div');
+    t1.appendChild(el('div', 'font-size:14px;font-weight:800', 'Sauvegarder tout mon travail'));
+    t1.appendChild(el('div', 'font-size:11px;opacity:.9;margin-top:1px;line-height:1.4',
+      'Un fichier avec TOUT\u00a0: s\u00e9quences, classes, emploi du temps, \u00e9l\u00e8ves.'));
+    b1.appendChild(t1);
+    b1.onclick = function(){
+      try{
+        if(typeof window.__ll_fullEnregistrer === 'function'){ window.__ll_fullEnregistrer(); return; }
+      }catch(e){}
+      dire('La sauvegarde compl\u00e8te n\u2019est pas disponible.', 'warn');
+    };
+    principal.appendChild(b1);
+
+    var b2 = el('button', 'width:100%;display:flex;align-items:center;gap:11px;padding:10px 15px;'
+      + 'border:1px solid var(--border);border-radius:12px;cursor:pointer;font-family:inherit;'
+      + 'text-align:left;color:var(--text);background:var(--card)');
+    b2.type = 'button';
+    b2.appendChild(el('span', 'font-size:20px;flex:none', '\u21ba'));
+    var t2 = el('div');
+    t2.appendChild(el('div', 'font-size:13.5px;font-weight:800', 'Restaurer une sauvegarde'));
+    t2.appendChild(el('div', 'font-size:11px;color:var(--text-muted);margin-top:1px;line-height:1.4',
+      'Le format est reconnu tout seul. Vos donn\u00e9es actuelles seront remplac\u00e9es.'));
+    b2.appendChild(t2);
+    var inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = '.json,application/json';
+    inp.style.display = 'none';
+    inp.onchange = function(){
+      var f = inp.files && inp.files[0];
+      inp.value = '';
+      if(f) lire(f);
+    };
+    b2.onclick = function(){ inp.click(); };
+    principal.appendChild(b2);
+    principal.appendChild(inp);
+
+    expTitre && expTitre.parentNode
+      ? expTitre.parentNode.insertBefore(principal, expTitre)
+      : expBloc.parentNode.insertBefore(principal, expBloc);
+
+    /* 2. Le repli « Autres formats », ferme par defaut */
+    var repli = document.createElement('details');
+    repli.id = '__ll_svorg_more';
+    repli.style.cssText = 'margin-bottom:12px;border:1px solid var(--border);border-radius:10px;'
+      + 'padding:7px 12px;background:var(--card)';
+    var som = document.createElement('summary');
+    som.style.cssText = 'cursor:pointer;font-size:12px;font-weight:800;color:var(--text-muted);'
+      + 'list-style:none;user-select:none';
+    som.textContent = 'Autres formats de sauvegarde';
+    repli.appendChild(som);
+
+    var avert = el('div', 'font-size:11px;color:var(--text-muted);margin:10px 0 4px;line-height:1.55',
+      'La sauvegarde JSON ci-dessous ne contient pas vos classes ni votre emploi du temps.');
+    repli.appendChild(avert);
+
+    /* On DEPLACE les elements d'origine, on ne les recree pas : ils gardent
+       leur comportement exact. */
+    if(expTitre) repli.appendChild(expTitre);
+    repli.appendChild(expBloc);
+    if(restTitre) repli.appendChild(restTitre);
+    repli.appendChild(restBloc);
+
+    principal.parentNode.insertBefore(repli, principal.nextSibling);
+
+    /* LOT 68 v6 — les six cartes reviennent a leur disposition d'origine :
+       trois sur une ligne, trois en dessous. Le resserrement sur une seule
+       ligne, essaye au lot 68 quater, ne servait qu'a compenser une fenetre
+       trop large ; la cause etant corrigee, il n'a plus lieu d'etre et la
+       presentation d'origine est plus lisible. On ne touche donc plus du
+       tout a ce tableau. */
+
+    /* Le bloc du lot 65 a deja ete retire en tete de cette fonction. */
+  }
+
+  /* LOT 68 ter — la reorganisation arrivait 400 millisecondes apres
+     l'ouverture : la fenetre s'affichait a sa taille d'origine, puis
+     sautait. On se greffe maintenant des le clic sur le bouton 💾, avant
+     meme que la fenetre soit peinte, et l'horloge de secours passe a un
+     rythme rapide. */
+  document.addEventListener('click', function(ev){
+    try{
+      var b = ev.target && ev.target.closest ? ev.target.closest('.__ll_save_btn') : null;
+      if(!b) return;
+      for(var i = 1; i <= 6; i++) setTimeout(function(){ try{ greffe(); }catch(e){} }, i * 12);
+    }catch(e){}
+  }, true);
+
+  if(!window.__ll_svorg_horloge){
+    window.__ll_svorg_horloge = setInterval(function(){ try{ greffe(); }catch(e){} }, 80);
+  }
+  try{ greffe(); }catch(e){}
+
+  window.__ll_svorgLire = lire;
+})();
+</script>
+
 </body>
 </html>
