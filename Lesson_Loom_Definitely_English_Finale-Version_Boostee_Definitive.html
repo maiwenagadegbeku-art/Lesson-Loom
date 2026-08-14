@@ -87075,10 +87075,24 @@ window.addEventListener('load',function(){
 
   window.__ll_seqnotePassage = passage;
 
+  /* LOT 72 A ter — le bouton n'attend plus son tour d'horloge : il se pose
+     dans le meme souffle que le panneau, comme les autres depuis le 71 ter. */
+  var __nEnCours = false, __nGuetteur = null;
+  function __nReveil() {
+    if (__nEnCours) return;
+    __nEnCours = true;
+    try { passage(); } catch (e) {}
+    __nEnCours = false;
+  }
+  try {
+    __nGuetteur = new MutationObserver(__nReveil);
+    __nGuetteur.observe(document.body, { childList: true, subtree: true });
+  } catch (e) { __nGuetteur = null; }
+
   if (!window.__ll_seqnote_horloge) {
     window.__ll_seqnote_horloge = setInterval(function() {
       try { passage(); } catch (e) {}
-    }, 400);
+    }, 600);
   }
   try { passage(); } catch (e) {}
 
@@ -87549,6 +87563,11 @@ function llIcsAnalyse(texte){
       k.irregulier = (k.rythme === 'irregulier');
       k.ecartTypique = median;
       k.jourNom = JOURS[k.jour];
+      /* LOT 72 A ter — a quelle semaine appartient ce creneau ? Un creneau
+         a la quinzaine tombe toujours sur des semaines de meme parite : on
+         la retient, au lieu de la deviner plus tard. */
+      var __par = Object.keys(k.sems || {});
+      k.parite = (__par.length === 1) ? +__par[0] : null;
       delete k.sems; delete k.dates;
     });
 
@@ -87831,9 +87850,27 @@ function llIcsAnalyse(texte){
       box.appendChild(avert);
     }
 
+    /* LOT 72 A quater — un reimport ne doit rien faire ressaisir. Une classe
+       deja enregistree est reconnue par son code : son niveau, son nom
+       affiche et sa couleur reviennent tels quels. C'est la meme
+       reconnaissance que celle qui evite de dedoubler les classes a
+       l'enregistrement. */
+    var __connues = {};
+    try{
+      (lire().classes || []).forEach(function(c){
+        if(c.code) __connues[String(c.code).toLowerCase()] = c;
+        if(c.name) __connues[String(c.name).toLowerCase()] = c;
+      });
+    }catch(e){}
+
     var etat = res.classes.map(function(c, i){
-      return { garde:true, code:c.code, niveau:'', nom:c.code,
-               couleur:COULEURS[i % COULEURS.length], src:c };
+      var d = __connues[String(c.code).toLowerCase()] || null;
+      return { garde:true, code:c.code,
+               niveau: d ? (d.level || '') : '',
+               nom: d ? (d.name || c.code) : c.code,
+               deja: !!d,
+               couleur: d ? (d.color || COULEURS[i % COULEURS.length]) : COULEURS[i % COULEURS.length],
+               src:c };
     });
 
     var liste = el('div');
@@ -87851,6 +87888,10 @@ function llIcsAnalyse(texte){
         ck.onchange = function(){ e.garde = ck.checked; dessine(); };
         h.appendChild(ck);
         h.appendChild(el('div','font-size:14px;font-weight:800;color:var(--text)', e.code));
+        if(e.deja){
+          h.appendChild(el('div','font-size:10px;font-weight:800;color:#10b981;background:rgba(16,185,129,.12);'
+            + 'border-radius:20px;padding:2px 8px;flex:none', 'd\u00e9j\u00e0 connue'));
+        }
 
         var sn = el('select','padding:6px 8px;border:1px solid var(--border);border-radius:9px;font-size:12px;'
           + 'font-family:inherit;background:var(--panel);color:var(--text)');
@@ -87981,7 +88022,8 @@ function llIcsAnalyse(texte){
           label: e.nom + (k.groupe ? ' \u00b7 ' + k.groupe : ''),
           color: e.couleur, classId: id,
           groupe: k.groupe || '',
-          rythme: k.quinzaine ? 'quinzaine' : 'hebdo'
+          rythme: k.quinzaine ? 'quinzaine' : 'hebdo',
+          parite: (k.parite === 0 || k.parite === 1) ? k.parite : null   /* LOT 72 A ter */
         });
       });
 
@@ -88355,7 +88397,7 @@ function llIcsAnalyse(texte){
 
     var note = document.createElement('div');
     note.id = '__ll_seqcls_note';
-    note.style.cssText = 'font-size:11px;color:var(--text-muted);margin-top:4px;min-height:14px';
+    note.style.cssText = 'font-size:11px;color:var(--text-muted);margin-top:4px;min-height:30px;line-height:15px';   /* LOT 71 quinquies — hauteur reservee : le panneau ne bouge plus quand la phrase change */
     bloc.appendChild(note);
 
     grille.parentNode.insertBefore(bloc, grille);
@@ -88460,12 +88502,87 @@ function llIcsAnalyse(texte){
     }catch(e){}
   }
 
-  /* Horloge propre au bloc : le formulaire est refabrique a chaque
-     redessin du calendrier, il faut donc reposer le menu. */
-  if(!window.__ll_seqcls_horloge){
-    window.__ll_seqcls_horloge = setInterval(function(){ try{ greffe(); }catch(e){} }, 400);
+  /* ── LOT 71 quinquies — les dates s'ouvrent sur le mois affiche ────
+     Un champ de date vide s'ouvre toujours sur le mois en cours : on
+     revenait en aout alors qu'on regardait novembre. On lit la premiere
+     case de jour affichee a l'ecran — le calendrier ecrit sa date sur
+     chacune — et on pre-remplit avec elle. Si le jour d'aujourd'hui
+     tombe dans ce qui est affiche, c'est lui qu'on prend.
+
+     On n'ecrit qu'une seule fois par ouverture du panneau : si vous
+     effacez ou changez une date, elle n'est jamais reecrite. */
+  function jourAffiche(){
+    try{
+      var cases = document.querySelectorAll('.cal-day[data-date], .__ll_week_day[data-date]');
+      if(!cases.length) return '';
+      var prem = cases[0].getAttribute('data-date') || '';
+      var dern = cases[cases.length - 1].getAttribute('data-date') || '';
+      var d = new Date();
+      var auj = d.getFullYear() + '-'
+        + ('0' + (d.getMonth() + 1)).slice(-2) + '-'
+        + ('0' + d.getDate()).slice(-2);
+      if(prem && dern && auj >= prem && auj <= dern) return auj;
+      return prem;
+    }catch(e){ return ''; }
   }
-  try{ greffe(); }catch(e){}
+
+  function preremplir(){
+    try{
+      var deb = document.getElementById('__f_ss');
+      var fin = document.getElementById('__f_se');
+      if(!deb || deb.dataset.llpre) return;
+      deb.dataset.llpre = '1';
+      var j = jourAffiche();
+      if(!j) return;
+      if(!deb.value) deb.value = j;
+      if(fin && !fin.value) fin.value = j;
+    }catch(e){}
+  }
+
+  function passage(){
+    preremplir();
+    greffe();
+  }
+
+  /* Le menu ne se pose plus au tour d'horloge suivant : on surveille la
+     zone du calendrier et on le pose dans le meme souffle que le
+     redessin. C'est ce qui empeche le panneau de grandir sous les yeux
+     apres son ouverture. L'horloge reste, en filet de securite. */
+  var __surveille = null, __guetteur = null, __enCours = false;
+
+  function __zone(){
+    var r = document.querySelector('[data-cv="month"]');
+    var b = r && r.parentElement && r.parentElement.parentElement;
+    return b ? b.parentNode : null;
+  }
+  function __reveil(){
+    if(__enCours) return;
+    __enCours = true;
+    try{ passage(); }catch(e){}
+    __enCours = false;
+  }
+  function __brancher(){
+    var z = __zone();
+    if(!z || z === __surveille) return;
+    if(__guetteur){ try{ __guetteur.disconnect(); }catch(e){} }
+    __surveille = z;
+    try{
+      __guetteur = new MutationObserver(__reveil);
+      __guetteur.observe(z, { childList: true, subtree: true });
+    }catch(e){ __guetteur = null; }
+  }
+
+  document.addEventListener('click', function(ev){
+    try{
+      var t = (ev.target && ev.target.closest) ? ev.target.closest('[data-cseq]') : null;
+      if(t) setTimeout(function(){ try{ passage(); }catch(e){} }, 0);
+    }catch(e){}
+  }, true);
+
+  if(!window.__ll_seqcls_horloge){
+    window.__ll_seqcls_horloge = setInterval(function(){ try{ __brancher(); passage(); }catch(e){} }, 800);
+  }
+  try{ __brancher(); passage(); }catch(e){}
 
   window.__ll_seqclsFiltre = function(){ filtre(true); };
   window.__ll_seqclsChoix = function(v){ choisie = v; filtre(true); };
@@ -88569,12 +88686,40 @@ function llIcsAnalyse(texte){
     });
   }
 
-  /* Horloge propre au bloc : le calendrier est refabrique a chaque
-     changement de mois, de vue ou de donnees. */
-  if(!window.__ll_calcls_horloge){
-    window.__ll_calcls_horloge = setInterval(function(){ try{ passage(); }catch(e){} }, 500);
+  /* LOT 71 ter / quater — le nom de la classe n'attend plus son tour
+     d'horloge, ni meme l'image suivante. On surveille la zone du
+     calendrier et on repose le nom des classes dans le meme souffle que
+     le redessin, avant que l'ecran ne se rafraichisse. L'empreinte posee
+     sur chaque pastille, plus une garde, empechent tout emballement.
+     L'horloge reste, ralentie, en simple filet de securite. */
+  var __surveille = null, __guetteur = null, __enCours = false;
+
+  function __zone(){
+    var r = document.querySelector('[data-cv="month"]');
+    var b = r && r.parentElement && r.parentElement.parentElement;
+    return b ? b.parentNode : null;
   }
-  try{ passage(); }catch(e){}
+  function __reveil(){
+    if(__enCours) return;
+    __enCours = true;
+    try{ passage(); }catch(e){}
+    __enCours = false;
+  }
+  function __brancher(){
+    var z = __zone();
+    if(!z || z === __surveille) return;
+    if(__guetteur){ try{ __guetteur.disconnect(); }catch(e){} }
+    __surveille = z;
+    try{
+      __guetteur = new MutationObserver(__reveil);
+      __guetteur.observe(z, { childList: true, subtree: true });
+    }catch(e){ __guetteur = null; }
+  }
+
+  if(!window.__ll_calcls_horloge){
+    window.__ll_calcls_horloge = setInterval(function(){ try{ __brancher(); passage(); }catch(e){} }, 1000);
+  }
+  try{ __brancher(); passage(); }catch(e){}
 
   window.__ll_calclsPassage = passage;
 })();
@@ -89080,6 +89225,1671 @@ function llIcsAnalyse(texte){
   try{ greffe(); }catch(e){}
 
   window.__ll_svorgLire = lire;
+})();
+</script>
+
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   LOT 71 — LE FILTRE DU CALENDRIER : TOUTES / PAR NIVEAU / PAR CLASSE
+
+   Le calendrier montre tout en meme temps : toutes les classes, tous
+   les niveaux. Depuis le lot 64 le nom de la classe se lit sur la
+   pastille, mais il n'y avait aucun moyen de ne garder qu'une classe
+   sous les yeux.
+
+   Ici : une ligne de pastilles sous la barre d'outils. Un clic, et le
+   calendrier ne montre plus que la classe ou le niveau choisi.
+
+   Trois precautions :
+   - Les pastilles sans classe (placements anciens, seances flash,
+     sorties) ne disparaissent jamais : elles palissent.
+   - Les vacances, les feries et le jour du jour ne sont pas des
+     evenements : ils ne sont jamais touches.
+   - Aucun choix n'est retenu d'une visite a l'autre : le calendrier
+     s'ouvre toujours sur "Toutes".
+
+   La vue Annee n'a pas de pastilles, seulement des petits carres sans
+   marque de classe : le tri ne peut pas y agir, et la ligne le dit.
+
+   LOT 71 bis — deux corrections :
+   1. Le filtre relisait toutes les demi-secondes l'ensemble des
+      evenements et des sequences, meme quand rien n'avait bouge. Sur un
+      mois charge cela se voyait. Il ne relit desormais que si le
+      calendrier a change : le decalage disparait, et il ne reviendra
+      pas quand l'annee se remplira de seances.
+   2. Une pastille "flash" apparaissait parmi les niveaux : elle venait
+      des sequences techniques de l'application (seances flash, grilles
+      sans sequence, sequence de demonstration), qui doivent etre
+      ecartees de tout selecteur. Elle disparait. Les seances flash,
+      elles, restent visibles et palissent comme toute pastille sans
+      classe.
+
+   LOT 71 ter — plus de rebond. Le bloc n'attend plus son tour d'horloge
+   pour se remettre au travail : il surveille le calendrier et se
+   reveille a l'instant ou celui-ci se redessine. Et la ligne de tri
+   n'est plus demontee puis reposee : elle reste en place et ne change
+   que ce qui a change. L'horloge demeure, mais seulement en filet de
+   securite.
+
+   LOT 71 quater — le bloc se remettait bien au travail des que le
+   calendrier se redessinait, mais il attendait l'image suivante pour
+   agir : une image etait donc affichee sans le tri. Il agit desormais
+   dans le meme souffle, avant que l'ecran ne se rafraichisse. Une garde
+   empeche qu'il se rappelle lui-meme sans fin, en plus des empreintes
+   deja posees.
+
+   Rien n'est enregistre, rien n'est supprime : on masque a l'affichage.
+   Bloc autonome : le supprimer suffit a revenir en arriere.
+   ═══════════════════════════════════════════════════════════════════ */
+(function(){
+  if (window.__ll_cfil_ready) return;
+  window.__ll_cfil_ready = true;
+
+  /* Le choix en cours. Une simple variable : elle repart a "toutes"
+     a chaque ouverture de l'application. */
+  var choix = { type: 'all', val: '' };
+
+  function classes(){
+    try{
+      return (typeof window.llGetClassesEdt === 'function')
+        ? (window.llGetClassesEdt().classes || []) : [];
+    }catch(e){ return []; }
+  }
+  function donnees(){
+    try{ return (typeof window.__ll_getData === 'function') ? window.__ll_getData() : null; }
+    catch(e){ return null; }
+  }
+  function evenements(){
+    var d = donnees();
+    return (d && d.calendar && d.calendar.events) ? d.calendar.events : [];
+  }
+  function propre(n){
+    return String(n || '').replace(/_/g, ' ').trim();
+  }
+
+  /* ── Ce qu'un evenement porte comme classe et comme niveau ──────────
+     La classe est ecrite sur l'evenement depuis le lot 63. Le niveau ne
+     l'est jamais : on le retrouve par la classe, et a defaut par la
+     sequence placee — ce qui rend les placements anciens triables par
+     niveau malgre tout. */
+  /* Les sequences techniques de l'application ne sont pas des
+     sequences de cours : elles ne doivent apparaitre dans aucun
+     selecteur, celui-ci compris. */
+  function technique(s){
+    return !s || s.isFlash || s.isEvalLib
+      || s.id === '__ll_tour_demo__'
+      || s.id === '__ll_flash_seances__'
+      || s.id === '__ll_eval_grilles__';
+  }
+
+  /* Le tableau de correspondances est garde de cote et n'est refait que
+     si le calendrier a change. */
+  var cache = null, dernierEtat = '';
+
+  function reperes(){
+    if(cache) return cache;
+    var parClasse = {};
+    classes().forEach(function(c){ parClasse[c.id] = c; });
+    var parSeq = {};
+    var d = donnees();
+    if(d) (d.sequences || []).forEach(function(s){
+      if(technique(s)) return;
+      parSeq[s.id] = s.niveau || '';
+    });
+
+    var infos = {};
+    evenements().forEach(function(e){
+      var c = e.classId ? parClasse[e.classId] : null;
+      var niveau = c ? (c.level || '') : (parSeq[e.sequenceId] || '');
+      infos[e.id] = {
+        classId: e.classId || '',
+        className: e.className || (c ? c.name : ''),
+        niveau: niveau,
+        couleur: c ? (c.color || '') : ''
+      };
+    });
+    cache = { infos: infos, parClasse: parClasse };
+    return cache;
+  }
+
+  /* ── La liste des pastilles a proposer ─────────────────────────────
+     On ne propose que ce qui existe vraiment dans le calendrier : pas de
+     bouton qui ne masquerait rien. */
+  function choix_possibles(rep){
+    var niveaux = [], vusN = {}, cls = [], vusC = {};
+    evenements().forEach(function(e){
+      var i = rep.infos[e.id]; if(!i) return;
+      if(i.niveau && !vusN[i.niveau]){ vusN[i.niveau] = 1; niveaux.push(i.niveau); }
+      if(i.classId && !vusC[i.classId]){
+        vusC[i.classId] = 1;
+        cls.push({ id: i.classId, nom: i.className || '?', couleur: i.couleur });
+      }
+    });
+    niveaux.sort(); 
+    cls.sort(function(a,b){ return String(a.nom).localeCompare(String(b.nom)); });
+    return { niveaux: niveaux, classes: cls };
+  }
+
+  /* ── La barre de tri ───────────────────────────────────────────────
+     Le calendrier est redessine en entier a chaque changement de vue,
+     de mois ou d'annee scolaire : la barre doit etre reposee. Une
+     empreinte evite de la refabriquer quand rien n'a change. */
+  function vueCourante(){
+    var b = document.querySelector('[data-cv].btn-violet');
+    return b ? b.getAttribute('data-cv') : '';
+  }
+
+  function pastille(txt, actif, couleur){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn btn-sm ' + (actif ? 'btn-violet' : 'btn-ghost');
+    b.style.cssText = 'font-size:11px;padding:4px 10px';
+    if(couleur){
+      var d = document.createElement('span');
+      d.style.cssText = 'display:inline-block;width:8px;height:8px;border-radius:50%;'
+        + 'margin-right:5px;vertical-align:middle;background:' + couleur;
+      b.appendChild(d);
+    }
+    b.appendChild(document.createTextNode(txt));
+    return b;
+  }
+
+  function poser(){
+    var vue = vueCourante();
+    var repere = document.querySelector('[data-cv="month"]');
+    if(!repere) return;
+    var barre = repere.parentElement && repere.parentElement.parentElement;
+    if(!barre || !barre.parentNode) return;
+
+    var rep = reperes();
+    var poss = choix_possibles(rep);
+
+    var sig = vue + '|' + choix.type + ':' + choix.val + '|'
+            + poss.niveaux.join(',') + '|'
+            + poss.classes.map(function(c){ return c.id + c.nom; }).join(',');
+
+    /* La barre n'est plus retiree puis reposee : si elle est deja la et
+       bien placee, on la garde et on ne refait que son contenu. C'est ce
+       qui supprime le saut quand la derniere pastille d'une classe
+       disparait. */
+    var bar = document.getElementById('__ll_cfil_bar');
+    var neuve = false;
+    if(bar && bar.dataset.sig === sig && bar.previousElementSibling === barre) return;
+    if(!bar){
+      bar = document.createElement('div');
+      bar.id = '__ll_cfil_bar';
+      neuve = true;
+    }
+    bar.dataset.sig = sig;
+    bar.style.cssText = 'display:flex;gap:6px;align-items:center;flex-wrap:wrap;'
+      + 'padding:8px 12px;margin:-6px 0 14px;background:var(--card);border:1px solid var(--border);'
+      + 'border-radius:10px;min-height:38px';
+    while(bar.firstChild) bar.removeChild(bar.firstChild);
+
+    var titre = document.createElement('span');
+    titre.textContent = 'Afficher\u00a0:';
+    titre.style.cssText = 'font-size:10px;font-weight:800;text-transform:uppercase;'
+      + 'letter-spacing:1px;color:var(--text-muted);margin-right:2px';
+    bar.appendChild(titre);
+
+    var t = pastille('Toutes', choix.type === 'all', '');
+    t.onclick = function(){ choix = { type: 'all', val: '' }; dernierEtat = ''; passage(); };
+    bar.appendChild(t);
+
+    poss.niveaux.forEach(function(n){
+      var b = pastille(propre(n), choix.type === 'niveau' && choix.val === n, '');
+      b.onclick = function(){ choix = { type: 'niveau', val: n }; dernierEtat = ''; passage(); };
+      bar.appendChild(b);
+    });
+
+    poss.classes.forEach(function(c){
+      var b = pastille(c.nom, choix.type === 'classe' && choix.val === c.id, c.couleur);
+      b.onclick = function(){ choix = { type: 'classe', val: c.id }; dernierEtat = ''; passage(); };
+      bar.appendChild(b);
+    });
+
+    if(!poss.niveaux.length && !poss.classes.length){
+      var vide = document.createElement('span');
+      vide.textContent = 'Aucune s\u00e9quence plac\u00e9e pour le moment.';
+      vide.style.cssText = 'font-size:11px;color:var(--text-muted);font-style:italic';
+      bar.appendChild(vide);
+    }
+
+    var note = document.createElement('span');
+    note.id = '__ll_cfil_note';
+    note.style.cssText = 'font-size:11px;color:var(--text-muted);margin-left:auto';
+    if(vue === 'year' && choix.type !== 'all'){
+      note.textContent = 'Le tri agit sur les vues Mois et Semaine.';
+    }
+    bar.appendChild(note);
+
+    if(neuve || bar.previousElementSibling !== barre){
+      barre.parentNode.insertBefore(bar, barre.nextSibling);
+    }
+  }
+
+  /* ── Le tri lui-meme ───────────────────────────────────────────────
+     On ne touche qu'aux pastilles d'evenements : ni les vacances, ni les
+     feries, ni le jour du jour, qui sont des fonds de case. */
+  function appliquer(){
+    var vue = vueCourante();
+    var pastilles = document.querySelectorAll('.cal-event[data-cedit], [data-cev]');
+    var rep = reperes();
+    var masquees = 0, palies = 0;
+
+    Array.prototype.forEach.call(pastilles, function(p){
+      try{
+        var id = p.getAttribute('data-cedit') || p.getAttribute('data-cev');
+        var i = rep.infos[id];
+
+        var etat = 'plein';
+        if(choix.type !== 'all'){
+          if(!i || (!i.classId && !i.niveau)) etat = 'pale';
+          else if(choix.type === 'classe') etat = (i.classId === choix.val) ? 'plein'
+                : (i.classId ? 'masque' : 'pale');
+          else etat = (i.niveau === choix.val) ? 'plein'
+                : (i.niveau ? 'masque' : 'pale');
+        }
+
+        /* Empreinte : on ne retouche la pastille que si son sort a
+           change, sans quoi l'horloge se relancerait sans fin. */
+        if(p.dataset.llfil === etat){
+          if(etat === 'masque') masquees++;
+          if(etat === 'pale') palies++;
+          return;
+        }
+        p.dataset.llfil = etat;
+
+        if(etat === 'masque'){ p.style.display = 'none'; masquees++; }
+        else if(etat === 'pale'){ p.style.display = ''; p.style.opacity = '0.28'; palies++; }
+        else { p.style.display = ''; p.style.opacity = ''; }
+      }catch(e){}
+    });
+
+    var note = document.getElementById('__ll_cfil_note');
+    if(note){
+      if(vue === 'year' && choix.type !== 'all'){
+        note.textContent = 'Le tri agit sur les vues Mois et Semaine.';
+      } else if(choix.type === 'all'){
+        note.textContent = '';
+      } else {
+        var txt = [];
+        if(masquees) txt.push(masquees + ' masqu\u00e9e' + (masquees>1?'s':''));
+        if(palies) txt.push(palies + ' sans classe, en p\u00e2le');
+        note.textContent = txt.length ? txt.join('\u00a0\u00b7\u00a0') : 'Tout correspond \u00e0 ce choix.';
+      }
+    }
+  }
+
+  /* ── Le passage de l'horloge ───────────────────────────────────────
+     Trois questions tres rapides avant tout travail : le nombre
+     d'evenements, de sequences et de classes a-t-il change ? la barre de
+     tri est-elle toujours en place ? les pastilles portent-elles encore
+     la marque du tri ? Si tout est identique, on ne fait rien. */
+  function passage(){
+    var d = donnees();
+    var nbE = (d && d.calendar && d.calendar.events) ? d.calendar.events.length : 0;
+    var nbS = (d && d.sequences) ? d.sequences.length : 0;
+    var nbC = classes().length;
+    var etat = nbE + '/' + nbS + '/' + nbC + '/' + vueCourante()
+             + '/' + choix.type + ':' + choix.val;
+
+    var repere = document.querySelector('[data-cv="month"]');
+    var barre = repere && repere.parentElement && repere.parentElement.parentElement;
+    var bar = document.getElementById('__ll_cfil_bar');
+    var enPlace = !!(bar && barre && bar.previousElementSibling === barre);
+    var premiere = document.querySelector('.cal-event[data-cedit], [data-cev]');
+    var marquee = !premiere || !!premiere.dataset.llfil;
+
+    if(etat === dernierEtat && enPlace && marquee) return;
+    if(etat !== dernierEtat) cache = null;
+    dernierEtat = etat;
+
+    poser();
+    appliquer();
+  }
+
+  /* ── Se reveiller quand le calendrier se redessine ─────────────────
+     Attendre le tour d'horloge faisait voir le calendrier nu pendant un
+     battement de cil, puis la ligne de tri se reposait : c'etait le
+     rebond. On surveille desormais la zone du calendrier, et on repasse
+     dans la foulee du redessin. Les trois questions rapides du passage
+     empechent tout emballement : ce que le bloc ecrit lui-meme ne lui
+     donne plus rien a faire au reveil suivant. */
+  var surveille = null, guetteur = null, enCours = false;
+
+  function zone(){
+    var r = document.querySelector('[data-cv="month"]');
+    var b = r && r.parentElement && r.parentElement.parentElement;
+    return b ? b.parentNode : null;
+  }
+  /* On agit tout de suite, pas a l'image suivante : c'est ce qui
+     supprime le decalage et le saut. La garde evite que les ecritures
+     du bloc le rappellent en boucle. */
+  function reveil(){
+    if(enCours) return;
+    enCours = true;
+    try{ passage(); }catch(e){}
+    enCours = false;
+  }
+  function brancher(){
+    var z = zone();
+    if(!z || z === surveille) return;
+    if(guetteur){ try{ guetteur.disconnect(); }catch(e){} }
+    surveille = z;
+    try{
+      guetteur = new MutationObserver(reveil);
+      guetteur.observe(z, { childList: true, subtree: true });
+    }catch(e){ guetteur = null; }
+  }
+
+  /* L'horloge reste, en filet de securite seulement. */
+  if(!window.__ll_cfil_horloge){
+    window.__ll_cfil_horloge = setInterval(function(){
+      try{ brancher(); passage(); }catch(e){}
+    }, 1000);
+  }
+  try{ brancher(); passage(); }catch(e){}
+
+  window.__ll_cfilPassage = passage;
+  window.__ll_cfilPoser = poser;
+  window.__ll_cfilAppliquer = appliquer;
+})();
+</script>
+
+
+<script>
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+   LOT 72 A \u2014 LE PLACEMENT CALCULE : LA FENETRE ET LE CALCUL
+
+   Jusqu'ici, placer une sequence demandait de choisir soi-meme une date
+   de debut et une date de fin, sans savoir combien de creneaux la classe
+   avait reellement d'ici la, ni ou tombaient les vacances.
+
+   Ici : on choisit une classe, un jour de depart, et les seances se
+   posent toutes seules sur les creneaux reels de cette classe, vacances
+   et jours feries sautes, chacune marquee S1, S2, S3...
+
+   Deux portes d'entree :
+   - dans le calendrier, a cote du bouton \u00ab Placer \u00bb ;
+   - dans l'editeur de sequence, a cote du bouton \ud83d\udccc Notes.
+
+   LOT 72 A bis \u2014 LA REGLE DES DEMI-GROUPES. Une seance est un contenu,
+   pas un creneau. Quand une classe est coupee en deux (P.1 / P.2), la
+   meme seance est faite deux fois, une fois avec chaque demi-groupe, et
+   ne compte que pour une. Un creneau qui reunit la classe entiere porte
+   le numero du groupe le moins avance, et l'autre groupe la revoit.
+   Sans cette regle, le calcul deroulait deux fois trop vite et annoncait
+   une fin trop precoce.
+
+   LOT 72 A ter \u2014 LES VRAIES SEMAINES A ET B. Un creneau a la quinzaine
+   n'est pas \u00ab une fois sur deux a partir du depart \u00bb : il appartient
+   franchement a la semaine A ou a la semaine B, et cela se lit dans le
+   fichier Pronote. L'import retient desormais cette semaine, et le
+   calcul deroule sur les vraies semaines de l'annee. Un creneau importe
+   avant ce lot n'a pas cette information : on le signale au lieu de
+   deviner.
+
+   LOT 72 B \u2014 VALIDER ECRIT, RETIRER EFFACE. Le calcul ayant ete verifie
+   sur de vraies classes, la fenetre pose desormais une pastille par
+   seance sur le calendrier, a sa date, avec son numero, son titre et sa
+   classe. Chaque pastille retient a quoi elle se rattache : renommer une
+   seance met le calendrier a jour tout seul. \u00ab Retirer du calendrier \u00bb
+   enleve tout un placement d'un geste, sans jamais toucher a la
+   sequence. Revalider un placement deja pose le remplace, il ne s'empile
+   pas.
+
+   Bloc autonome : le supprimer suffit a revenir en arriere.
+   \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
+(function(){
+  if (window.__ll_calc72_ready) return;
+  window.__ll_calc72_ready = true;
+
+  var JOURS = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  var MOIS  = ['janvier','f\u00e9vrier','mars','avril','mai','juin','juillet',
+               'ao\u00fbt','septembre','octobre','novembre','d\u00e9cembre'];
+  var JLONG = ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+
+  /* \u2500\u2500 Les sources de donnees \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+     On ne fabrique rien : on relit ce que l'application connait deja. */
+
+  function classes(){
+    try{
+      return (typeof window.llGetClassesEdt === 'function')
+        ? (window.llGetClassesEdt().classes || []) : [];
+    }catch(e){ return []; }
+  }
+  function donnees(){
+    try{ return (typeof window.__ll_getData === 'function') ? window.__ll_getData() : null; }
+    catch(e){ return null; }
+  }
+  function sequences(){
+    var d = donnees();
+    return (d && d.sequences) ? d.sequences : [];
+  }
+  function technique(s){
+    return !s || s.isFlash || s.isEvalLib
+      || s.id === '__ll_tour_demo__'
+      || s.id === '__ll_flash_seances__'
+      || s.id === '__ll_eval_grilles__';
+  }
+  function anneeScolaire(){
+    try{
+      var v = localStorage.getItem('ll-cal-sy3');
+      if(v && /^\d{4}-\d{4}$/.test(v)) return v;
+    }catch(e){}
+    var n = new Date(), y = n.getFullYear();
+    var s = n.getMonth() >= 8 ? y : y - 1;
+    return s + '-' + (s + 1);
+  }
+  function vacances(){
+    try{ return JSON.parse(localStorage.getItem('ll-cal-vac-v3') || '[]') || []; }
+    catch(e){ return []; }
+  }
+
+  /* Les jours feries, calcules comme le fait deja le calendrier :
+     les fixes, plus ceux qui suivent Paques. */
+  function paques(yr){
+    var a=yr%19,b=Math.floor(yr/100),c=yr%100,d=Math.floor(b/4),e=b%4,
+        f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,
+        i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),
+        mo=Math.floor((h+l-7*m+114)/31),dy=((h+l-7*m+114)%31)+1;
+    return new Date(yr,mo-1,dy);
+  }
+  function feries(yr){
+    var p = paques(yr);
+    function ap(n){ var r = new Date(p); r.setDate(r.getDate()+n); return r; }
+    return [new Date(yr,0,1), new Date(yr,4,1), new Date(yr,4,8), new Date(yr,6,14),
+            new Date(yr,7,15), new Date(yr,10,1), new Date(yr,10,11), new Date(yr,11,25),
+            ap(1), ap(39), ap(50)].map(iso);
+  }
+  /* Numero de semaine ISO, calcule comme a l'import : c'est lui qui dit
+     si une date tombe en semaine A ou en semaine B. */
+  function semaineIso(d){
+    var t = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    t.setDate(t.getDate() + 3 - ((t.getDay() + 6) % 7));
+    var j1 = new Date(t.getFullYear(), 0, 4);
+    return 1 + Math.round(((t - j1) / 86400000 - 3 + ((j1.getDay() + 6) % 7)) / 7);
+  }
+  /* La semaine A est, par convention, celle de la rentree de septembre. */
+  function pariteA(y1){ return semaineIso(new Date(y1, 8, 1)) % 2; }
+  function lettre(d, y1){ return (semaineIso(d) % 2 === pariteA(y1)) ? 'A' : 'B'; }
+
+  function p2(n){ return n<10 ? '0'+n : ''+n; }
+  function iso(d){ return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate()); }
+  function lisible(s){
+    if(!s) return '';
+    var p = s.split('-');
+    var d = new Date(+p[0], +p[1]-1, +p[2]);
+    return JLONG[(d.getDay()+6)%7] + ' ' + d.getDate() + ' ' + MOIS[d.getMonth()];
+  }
+
+  /* \u2500\u2500 Ce qui a deja ete pose par le placement calcule \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+     Chaque pastille porte une marque : a quelle sequence, a quelle
+     classe, a quel numero de seance elle se rattache. C'est elle qui
+     permet de retrouver, de remplacer et de retirer un placement entier
+     sans jamais toucher au reste du calendrier. */
+  function evenements(){
+    var d = donnees();
+    return (d && d.calendar && d.calendar.events) ? d.calendar.events : [];
+  }
+  function posees(seqId, clsId){
+    return evenements().filter(function(e){
+      return e && e.c72 && e.c72.seq === seqId && e.c72.cls === clsId;
+    });
+  }
+  function titrePastille(p, sq){
+    var se = (sq && sq.seances) ? sq.seances[p.rang - 1] : null;
+    var t = p.reserve ? 'R\u00e9serve' : (se ? (se.titre || ('S\u00e9ance ' + p.rang)) : ('S\u00e9ance ' + p.rang));
+    return (p.reserve ? 'R' : 'S') + p.rang + '\u00a0\u00b7\u00a0' + t;
+  }
+
+  /* \u2500\u2500 L'etat de la fenetre \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  var etat = { seqId:'', classId:'', depart:'', reserve:0, mois:null };
+
+  /* \u2500\u2500 Le calcul \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+     On avance jour apres jour a partir du depart. Un jour de vacances ou
+     un jour ferie est saute, il ne consomme pas de seance. Un creneau a
+     la quinzaine n'est retenu qu'une semaine sur deux, comptee a partir
+     du depart. Deux heures d'affilee font deux seances. */
+  function calculer(){
+    var cl = classes().filter(function(c){ return c.id === etat.classId; })[0];
+    var sq = sequences().filter(function(s){ return s.id === etat.seqId; })[0];
+    if(!cl || !sq || !etat.depart) return null;
+
+    var creneaux = (cl.slots || []).slice().sort(function(a,b){
+      return (a.day - b.day) || String(a.start).localeCompare(String(b.start));
+    });
+    if(!creneaux.length) return { erreur:'Cette classe n\u2019a aucun cr\u00e9neau enregistr\u00e9.' };
+
+    var seances = (sq.seances || []);
+    var nb = Math.max(1, seances.length);
+    var total = nb + etat.reserve;
+
+    var vac = vacances();
+    var an = anneeScolaire().split('-');
+    var y1 = +an[0], y2 = +an[1];
+    var jf = {}; feries(y1).concat(feries(y2)).forEach(function(d){ jf[d] = 1; });
+    function enVacances(j){
+      for(var i=0;i<vac.length;i++){
+        var v = vac[i];
+        if(j >= v.start && j <= (v.end || v.start)) return v.label || 'vacances';
+      }
+      return '';
+    }
+
+    var p = etat.depart.split('-');
+    var cur = new Date(+p[0], +p[1]-1, +p[2]);
+    var fin = new Date(y2, 6, 15);                 /* mi-juillet : garde-fou */
+    if(cur > fin) fin = new Date(cur.getFullYear(), cur.getMonth()+10, 1);
+
+    /* Les demi-groupes, lus sur les creneaux importes (106P.1, 106P.2...).
+       Un creneau sans demi-groupe reunit la classe entiere. */
+    var groupes = [];
+    creneaux.forEach(function(k){
+      if(k.groupe && groupes.indexOf(k.groupe) < 0) groupes.push(k.groupe);
+    });
+    var demi = groupes.length > 1;
+    var avance = {};                       /* seances deja faites, par groupe */
+    groupes.forEach(function(g){ avance[g] = 0; });
+    function moinsAvance(){
+      var m = null;
+      groupes.forEach(function(g){ if(m === null || avance[g] < m) m = avance[g]; });
+      return m === null ? 0 : m;
+    }
+    function faites(){ return demi ? moinsAvance() : poses.length; }
+
+    var poses = [], quinz = {}, coupures = {}, manque = false;
+    var derniereVac = '', ferieSaute = false, aVerifier = false;
+
+    while(cur <= fin && faites() < total){
+      var j = iso(cur);
+      var jour = (cur.getDay()+6)%7;
+      var v = enVacances(j);
+      if(v || jf[j]){
+        if(poses.length){
+          if(v) derniereVac = v;
+          else ferieSaute = true;
+        }
+        cur.setDate(cur.getDate()+1);
+        continue;
+      }
+      for(var i=0;i<creneaux.length && faites()<total;i++){
+        var k = creneaux[i];
+        if(k.day !== jour) continue;
+        if(k.rythme === 'quinzaine'){
+          if(k.parite === 0 || k.parite === 1){
+            /* La vraie semaine du creneau, telle qu'elle a ete lue dans
+               Pronote. Aucune supposition. */
+            if(semaineIso(cur) % 2 !== k.parite) continue;
+          } else {
+            /* Creneau importe avant ce lot : on ne connait pas sa semaine.
+               On alterne a partir du depart, et on le signale. */
+            aVerifier = true;
+            var cle = k.day + '@' + k.start;
+            quinz[cle] = (quinz[cle] === undefined) ? 0 : quinz[cle] + 1;
+            if(quinz[cle] % 2 !== 0) continue;
+          }
+        }
+
+        /* Quel numero de seance pour ce creneau ? */
+        var rang, g = k.groupe || '';
+        if(!demi){
+          rang = poses.length + 1;
+        } else if(g){
+          rang = avance[g] + 1;
+          if(rang > total) continue;              /* ce groupe a fini */
+          avance[g] = rang;
+        } else {
+          rang = moinsAvance() + 1;               /* classe entiere : le retardataire */
+          if(rang > total) continue;
+          groupes.forEach(function(x){ if(avance[x] < rang) avance[x] = rang; });
+        }
+
+        var se = seances[rang - 1];
+        poses.push({
+          date: j,
+          rang: rang,
+          groupe: g,
+          reserve: rang > nb,
+          titre: se ? (se.titre || ('S\u00e9ance ' + rang)) : '',
+          heure: k.start || '',
+          apresVacances: !!derniereVac,
+          vac: derniereVac
+        });
+        if(derniereVac){ coupures[derniereVac] = 1; derniereVac = ''; }
+      }
+      cur.setDate(cur.getDate()+1);
+    }
+    if(faites() < total) manque = total - faites();
+
+    return {
+      classe: cl, sequence: sq, nb: nb, reserve: etat.reserve,
+      demi: demi, groupes: groupes, faites: faites(), aVerifier: aVerifier, y1: y1,
+      poses: poses, manque: manque, ferie: ferieSaute,
+      coupures: Object.keys(coupures),
+      quinzaine: creneaux.some(function(k){ return k.rythme === 'quinzaine'; })
+    };
+  }
+
+  /* \u2500\u2500 L'habillage \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function css(){
+    if(document.getElementById('__ll_calc72_css')) return;
+    var s = document.createElement('style');
+    s.id = '__ll_calc72_css';
+    s.textContent = [
+      '#__ll_calc72_ov{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px}',
+      '#__ll_calc72_box{background:var(--panel);border-radius:18px;padding:22px 24px 18px;width:560px;max-width:96vw;max-height:92vh;overflow:auto;box-shadow:0 24px 70px rgba(0,0,0,.4);position:relative}',
+      '#__ll_calc72_box h2{font-family:Playfair Display,serif;font-size:19px;font-weight:800;margin:0 0 4px;padding-right:30px;display:flex;align-items:center;gap:8px}',
+      '.__ll_c72_sub{font-size:12px;color:var(--text-muted);margin-bottom:10px}',
+      '.__ll_c72_x{position:absolute;top:12px;right:14px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-muted);line-height:1}',
+      '.__ll_c72_nav{display:flex;align-items:center;justify-content:space-between;margin:10px 0 6px}',
+      '.__ll_c72_nav b{font-size:14px}',
+      '.__ll_c72_grid{display:grid;grid-template-columns:20px repeat(7,1fr);gap:4px}',
+      '.__ll_c72_sem{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--text-muted);opacity:.65}',
+      '.__ll_c72_hd{text-align:center;font-size:10px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;padding:2px 0}',
+      '.__ll_c72_d{min-height:40px;border-radius:9px;border:1px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--text-muted);background:transparent;font-family:inherit;padding:2px}',
+      '.__ll_c72_d.hors{opacity:.30}',
+      '.__ll_c72_d.creneau{background:rgba(108,99,255,.10);color:var(--text);cursor:pointer;border-color:rgba(108,99,255,.22)}',
+      '.__ll_c72_d.creneau:hover{border-color:var(--accent2)}',
+      '.__ll_c72_d.pose{background:rgba(108,99,255,.20);color:var(--accent2)}',
+      '.__ll_c72_d.depart{background:var(--accent2);color:#fff}',
+      '.__ll_c72_d.vac{background:rgba(251,191,36,.16);color:#92400e}',
+      '.__ll_c72_d.ferie{background:rgba(239,68,68,.14);color:#b91c1c}',
+      '.__ll_c72_s{font-size:8.5px;font-weight:800;letter-spacing:.5px;opacity:.9;margin-top:1px}',
+      '.__ll_c72_bil{background:rgba(108,99,255,.09);border:1px solid rgba(108,99,255,.20);border-radius:12px;padding:12px 14px;margin:12px 0 10px;text-align:center;font-size:13px;color:var(--accent2);font-weight:700;line-height:1.5}',
+      '.__ll_c72_alerte{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);color:#92400e;border-radius:10px;padding:8px 12px;font-size:11.5px;margin-bottom:10px;line-height:1.45}',
+      '.__ll_c72_res{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:12px}',
+      '.__ll_c72_res .t{flex:1}',
+      '.__ll_c72_res .t b{font-size:12.5px;display:block}',
+      '.__ll_c72_res .t span{font-size:10.5px;color:var(--text-muted)}',
+      '.__ll_c72_pm{width:30px;height:30px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:16px;font-weight:800;cursor:pointer;font-family:inherit}',
+      '.__ll_c72_pm:hover{border-color:var(--accent2);color:var(--accent2)}',
+      '.__ll_c72_nbr{min-width:26px;text-align:center;font-weight:800;color:var(--accent2)}',
+      '.__ll_c72_pied{display:flex;gap:8px;align-items:center}',
+      '.__ll_c72_pied .btn{flex:1;justify-content:center}',
+      '.__ll_c72_note{font-size:10.5px;color:var(--text-muted);font-style:italic;margin-top:8px;text-align:center}',
+      '.__ll_c72_btn{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 9px;border:1px solid var(--border);border-radius:5px;background:var(--card);color:var(--text-muted);font-family:inherit;cursor:pointer;flex-shrink:0;transition:color .15s,border-color .15s,background .15s}',
+      '.__ll_c72_btn:hover{color:var(--accent2);border-color:var(--accent2)}',
+      '@media print{#__ll_calc72_ov,.__ll_c72_btn{display:none !important}}'
+    ].join('\n');
+    document.head.appendChild(s);
+  }
+
+  function el(t, cls, txt){
+    var e = document.createElement(t);
+    if(cls) e.className = cls;
+    if(txt !== undefined) e.textContent = txt;
+    return e;
+  }
+
+  /* \u2500\u2500 La fenetre \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function fermer(){
+    var o = document.getElementById('__ll_calc72_ov');
+    if(o) o.remove();
+  }
+
+  function ouvrir(seqId, classId){
+    css();
+    fermer();
+    etat.seqId = seqId || '';
+    etat.classId = classId || '';
+    etat.depart = '';
+    etat.reserve = 0;
+    etat.mois = moisAffiche();
+    relire();
+
+    var ov = el('div'); ov.id = '__ll_calc72_ov';
+    ov.addEventListener('click', function(e){ if(e.target === ov) fermer(); });
+    var box = el('div'); box.id = '__ll_calc72_box';
+    ov.appendChild(box);
+    document.body.appendChild(ov);
+    document.addEventListener('keydown', function onK(e){
+      if(e.key === 'Escape'){ fermer(); document.removeEventListener('keydown', onK); }
+    });
+    dessiner();
+  }
+
+  /* Si un placement existe deja pour cette sequence et cette classe, on
+     le retrouve : meme jour de depart, meme nombre de seances de reserve.
+     La fenetre montre alors ce qui est en place. */
+  function relire(){
+    if(!etat.seqId || !etat.classId) return;
+    var l = posees(etat.seqId, etat.classId);
+    if(!l.length) return;
+    var dates = l.map(function(e){ return e.startDate; }).sort();
+    etat.depart = dates[0];
+    var rangs = {};
+    l.forEach(function(e){ if(e.c72.reserve) rangs[e.c72.rang] = 1; });
+    etat.reserve = Object.keys(rangs).length;
+    var p = etat.depart.split('-');
+    etat.mois = new Date(+p[0], +p[1]-1, 1);
+  }
+
+  /* Le mois propose au depart est celui que le calendrier affiche ;
+     a defaut, le mois en cours. */
+  function moisAffiche(){
+    try{
+      var c = document.querySelector('.cal-day[data-date], .__ll_week_day[data-date]');
+      if(c){
+        var p = (c.getAttribute('data-date') || '').split('-');
+        if(p.length === 3) return new Date(+p[0], +p[1]-1, 1);
+      }
+    }catch(e){}
+    var n = new Date();
+    return new Date(n.getFullYear(), n.getMonth(), 1);
+  }
+
+  function dessiner(){
+    var box = document.getElementById('__ll_calc72_box');
+    if(!box) return;
+    /* On refabrique le contenu : sans cela la fenetre remonterait en haut
+       a chaque clic sur - ou +. On lui rend sa position exacte. */
+    var haut = box.scrollTop;
+    while(box.firstChild) box.removeChild(box.firstChild);
+
+    var sq = sequences().filter(function(s){ return s.id === etat.seqId; })[0];
+    var cls = classes();
+    var cl = cls.filter(function(c){ return c.id === etat.classId; })[0];
+
+    var x = el('button', '__ll_c72_x', '\u00d7');
+    x.type = 'button';
+    x.onclick = fermer;
+    box.appendChild(x);
+
+    var h = el('h2');
+    h.appendChild(document.createTextNode('\uD83D\uDCC5 Placer la s\u00e9quence sur l\u2019ann\u00e9e'));
+    box.appendChild(h);
+
+    var sub = el('div', '__ll_c72_sub');
+    sub.textContent = (sq ? (sq.titre || 'Sans titre') : '\u2014')
+      + ' (' + (sq ? String(sq.niveau||'').replace(/_/g,' ') : '') + ' \u00b7 ' + anneeScolaire() + ')';
+    box.appendChild(sub);
+
+    /* Le menu de classe : seules les classes du bon niveau, le niveau
+       exact en tete, comme au lot 63. */
+    var ligne = el('div');
+    ligne.style.cssText = 'margin-bottom:6px';
+    var lab = el('label', 'fl', 'Pour quelle classe\u00a0?');
+    ligne.appendChild(lab);
+    var sel = document.createElement('select');
+    sel.className = 'fs';
+    sel.style.cssText = 'font-size:12px';
+    var niv = sq ? (sq.niveau || '') : '';
+    var bonnes = cls.filter(function(c){
+      if(!niv || !c.level) return true;
+      return c.level === niv || String(niv).indexOf(c.level + '_') === 0 || String(c.level).indexOf(niv + '_') === 0;
+    });
+    if(!bonnes.length) bonnes = cls;
+    bonnes.sort(function(a,b){
+      var ea = (a.level === niv) ? 0 : 1, eb = (b.level === niv) ? 0 : 1;
+      return ea - eb || String(a.name).localeCompare(String(b.name));
+    });
+    sel.appendChild(new Option('\u2014 Choisir une classe \u2014', ''));
+    bonnes.forEach(function(c){
+      sel.appendChild(new Option(
+        c.name + (c.level ? '  \u00b7  ' + String(c.level).replace(/_/g,' ') : ''), c.id));
+    });
+    sel.value = etat.classId;
+    sel.onchange = function(){
+      etat.classId = sel.value; etat.depart = ''; etat.reserve = 0;
+      relire();
+      dessiner();
+    };
+    ligne.appendChild(sel);
+    box.appendChild(ligne);
+
+    if(!cl){
+      var vide = el('div', '__ll_c72_note',
+        'Choisissez une classe pour voir ses cr\u00e9neaux.');
+      box.appendChild(vide);
+      return;
+    }
+
+    /* Rappel des creneaux de la classe. */
+    var cr = (cl.slots || []).slice().sort(function(a,b){
+      return (a.day - b.day) || String(a.start).localeCompare(String(b.start));
+    });
+    var rap = el('div', '__ll_c72_note',
+      cr.length
+        ? ('Cr\u00e9neaux\u00a0: ' + cr.map(function(k){
+            var an0 = +anneeScolaire().split('-')[0];
+            var sem = '';
+            if(k.rythme === 'quinzaine'){
+              sem = (k.parite === 0 || k.parite === 1)
+                ? ' (semaine ' + ((k.parite === pariteA(an0)) ? 'A' : 'B') + ')'
+                : ' (quinzaine, semaine \u00e0 v\u00e9rifier)';
+            }
+            return JLONG[k.day] + ' ' + String(k.start||'').replace(':','h')
+              + (k.groupe ? ' \u00b7 ' + k.groupe : '')
+              + sem;
+          }).join('  \u00b7  '))
+        : 'Cette classe n\u2019a aucun cr\u00e9neau enregistr\u00e9.');
+    rap.style.textAlign = 'left';
+    box.appendChild(rap);
+
+    /* Navigation de mois. */
+    var nav = el('div', '__ll_c72_nav');
+    var g = el('button', 'btn btn-ghost btn-sm', '\u2039');
+    g.type = 'button';
+    g.onclick = function(){ etat.mois = new Date(etat.mois.getFullYear(), etat.mois.getMonth()-1, 1); dessiner(); };
+    var t = el('b', '', MOIS[etat.mois.getMonth()] + ' ' + etat.mois.getFullYear());
+    var d = el('button', 'btn btn-ghost btn-sm', '\u203a');
+    d.type = 'button';
+    d.onclick = function(){ etat.mois = new Date(etat.mois.getFullYear(), etat.mois.getMonth()+1, 1); dessiner(); };
+    nav.appendChild(g); nav.appendChild(t); nav.appendChild(d);
+    box.appendChild(nav);
+
+    var res = calculer();
+    var parJour = {};
+    if(res && res.poses) res.poses.forEach(function(s){
+      (parJour[s.date] = parJour[s.date] || []).push(s);
+    });
+
+    var vac = vacances();
+    var an = anneeScolaire().split('-');
+    var jf = {}; feries(+an[0]).concat(feries(+an[1])).forEach(function(j){ jf[j]=1; });
+    function enVac(j){
+      for(var i=0;i<vac.length;i++){ var v=vac[i]; if(j>=v.start && j<=(v.end||v.start)) return v.label||'Vacances'; }
+      return '';
+    }
+
+    var grille = el('div', '__ll_c72_grid');
+    var an1 = +anneeScolaire().split('-')[0];
+    grille.appendChild(el('div', '__ll_c72_hd', ''));      /* colonne des semaines */
+    JOURS.forEach(function(j){ grille.appendChild(el('div', '__ll_c72_hd', j)); });
+
+    var y = etat.mois.getFullYear(), m = etat.mois.getMonth();
+    var premier = (new Date(y, m, 1).getDay()+6)%7;
+    grille.appendChild(el('div', '__ll_c72_sem', lettre(new Date(y, m, 1), an1)));
+    for(var i=0;i<premier;i++) grille.appendChild(el('div'));
+    var dans = new Date(y, m+1, 0).getDate();
+    var jours = {};
+    cr.forEach(function(k){ jours[k.day] = 1; });
+
+    for(var jj=1; jj<=dans; jj++){
+      var date = y+'-'+p2(m+1)+'-'+p2(jj);
+      var sem = (new Date(y,m,jj).getDay()+6)%7;
+      var b = el('button', '__ll_c72_d');
+      b.type = 'button';
+      b.appendChild(el('span','', String(jj)));
+
+      var v = enVac(date), f = jf[date];
+      var dansCase = parJour[date];   /* jamais \u00ab posees \u00bb : c'est le nom de la fonction */
+
+      if(dansCase && dansCase.length){
+        b.className += (date === etat.depart) ? ' depart' : ' pose';
+        b.appendChild(el('span','__ll_c72_s',
+          dansCase.map(function(s){
+            return (s.reserve?'R':'S') + s.rang
+              + (s.groupe ? '\u00b7' + String(s.groupe).replace(/[^0-9A-Za-z]/g,'') : '');
+          }).join(' ')));
+      } else if(v){
+        b.className += ' vac';
+      } else if(f){
+        b.className += ' ferie';
+      } else if(jours[sem]){
+        b.className += ' creneau';
+      } else {
+        b.className += ' hors';
+      }
+
+      if(jours[sem] && !v && !f){
+        (function(dd){
+          b.onclick = function(){ etat.depart = dd; dessiner(); };
+        })(date);
+        b.title = 'Commencer la s\u00e9quence ce jour-l\u00e0';
+      }
+      grille.appendChild(b);
+      /* Fin de semaine : on ouvre la ligne suivante par sa lettre. */
+      if(sem === 6 && jj < dans){
+        grille.appendChild(el('div', '__ll_c72_sem', lettre(new Date(y, m, jj+1), an1)));
+      }
+    }
+    box.appendChild(grille);
+
+    /* Le bilan. */
+    var bil = el('div', '__ll_c72_bil');
+    if(!etat.depart){
+      bil.textContent = 'Cliquez sur un jour en violet clair pour choisir le d\u00e9part.';
+    } else if(res && res.erreur){
+      bil.textContent = res.erreur;
+    } else if(res){
+      var n = res.demi ? res.faites : res.poses.length;
+      var lignes = document.createElement('div');
+      lignes.appendChild(document.createTextNode(
+        n + ' s\u00e9ance' + (n>1?'s':'')
+        + ' (' + res.nb + (res.reserve ? ' + ' + res.reserve + ' de r\u00e9serve' : '') + ')'
+        + (res.demi ? '  \u00b7  ' + res.poses.length + ' cr\u00e9neaux' : '')));
+      if(res.poses.length){
+        lignes.appendChild(document.createElement('br'));
+        lignes.appendChild(document.createTextNode(
+          'du ' + lisible(res.poses[0].date)
+          + ' au ' + lisible(res.poses[res.poses.length-1].date)));
+      }
+      bil.appendChild(lignes);
+    }
+    box.appendChild(bil);
+
+    /* Les signalements. */
+    if(res && etat.depart){
+      var messages = [];
+      if(res.coupures && res.coupures.length){
+        messages.push('La s\u00e9quence d\u00e9borde apr\u00e8s les vacances\u00a0: '
+          + res.coupures.join(', ') + '. Les s\u00e9ances reprennent au retour.');
+      }
+      if(res.ferie){
+        messages.push('Un jour f\u00e9ri\u00e9 a \u00e9t\u00e9 saut\u00e9\u00a0: il ne consomme pas de s\u00e9ance.');
+      }
+      if(res.manque){
+        messages.push('Il manque ' + res.manque + ' cr\u00e9neau'
+          + (res.manque>1?'x':'') + ' d\u2019ici la fin de l\u2019ann\u00e9e scolaire\u00a0: '
+          + 'la s\u00e9quence ne rentre pas enti\u00e8rement.');
+      }
+      if(res.demi){
+        messages.push('Classe en demi-groupes\u00a0: chaque s\u00e9ance est faite deux fois, '
+          + 'une fois par groupe, et ne compte que pour une.');
+      }
+      if(res.quinzaine && res.aVerifier){
+        messages.push('Des cr\u00e9neaux \u00e0 la quinzaine n\u2019ont pas de semaine connue\u00a0: '
+          + 'r\u00e9importez votre fichier Pronote pour que les semaines A et B soient exactes. '
+          + 'En attendant, ils alternent \u00e0 partir de votre jour de d\u00e9part.');
+      } else if(res.quinzaine){
+        messages.push('Cr\u00e9neaux \u00e0 la quinzaine\u00a0: chacun tombe sur sa vraie semaine, '
+          + 'A ou B, telle qu\u2019elle a \u00e9t\u00e9 lue dans Pronote.');
+      }
+      if(messages.length){
+        var al = el('div', '__ll_c72_alerte');
+        messages.forEach(function(t, i){
+          if(i) al.appendChild(document.createElement('br'));
+          al.appendChild(document.createTextNode('\u26A0\uFE0F ' + t));
+        });
+        box.appendChild(al);
+      }
+    }
+
+    /* Les seances de reserve. */
+    var zr = el('div', '__ll_c72_res');
+    var txt = el('div', 't');
+    txt.appendChild(el('b','', '\u2795 S\u00e9ances de r\u00e9serve'));
+    txt.appendChild(el('span','', 'Rallonge la s\u00e9quence sans cr\u00e9er de s\u00e9ance attitr\u00e9e.'));
+    zr.appendChild(txt);
+    var moins = el('button', '__ll_c72_pm', '\u2013');
+    moins.type = 'button';
+    moins.onclick = function(){ if(etat.reserve>0){ etat.reserve--; dessiner(); } };
+    var nbr = el('span', '__ll_c72_nbr', String(etat.reserve));
+    var plus = el('button', '__ll_c72_pm', '+');
+    plus.type = 'button';
+    plus.onclick = function(){ if(etat.reserve<12){ etat.reserve++; dessiner(); } };
+    zr.appendChild(moins); zr.appendChild(nbr); zr.appendChild(plus);
+    box.appendChild(zr);
+
+    /* Le pied. */
+    var pied = el('div', '__ll_c72_pied');
+    var raz = el('button', 'btn btn-ghost btn-sm', '\u21ba R\u00e9initialiser');
+    raz.type = 'button';
+    raz.onclick = function(){ etat.depart = ''; etat.reserve = 0; dessiner(); };
+    var dejaPose = posees(etat.seqId, etat.classId).length;
+
+    var ret = el('button', 'btn btn-sm', '\uD83D\uDDD1\uFE0F Retirer du calendrier');
+    ret.type = 'button';
+    ret.style.cssText = 'background:rgba(239,68,68,.08);color:#b91c1c;border:1px solid rgba(239,68,68,.18)'
+      + (dejaPose ? '' : ';opacity:.45;cursor:not-allowed');
+    ret.disabled = !dejaPose;
+    ret.onclick = function(){ retirer(); };
+
+    var val = el('button', 'btn btn-green btn-sm',
+      (dejaPose ? '\u2713 Remplacer' : '\u2713 Valider'));
+    val.type = 'button';
+    var pret = !!(etat.depart && res && !res.erreur && res.poses && res.poses.length);
+    val.disabled = !pret;
+    if(!pret) val.style.cssText = 'opacity:.45;cursor:not-allowed';
+    val.onclick = function(){ valider(); };
+
+    pied.appendChild(raz); pied.appendChild(ret); pied.appendChild(val);
+    box.appendChild(pied);
+
+    var note = el('div', '__ll_c72_note', dejaPose
+      ? (dejaPose + ' s\u00e9ance' + (dejaPose>1?'s':'') + ' d\u00e9j\u00e0 pos\u00e9e'
+         + (dejaPose>1?'s':'') + ' pour cette classe\u00a0: valider les remplacera.')
+      : 'Les s\u00e9ances seront pos\u00e9es sur le calendrier, une par cr\u00e9neau.');
+    box.appendChild(note);
+
+    box.scrollTop = haut;
+  }
+
+  /* \u2500\u2500 Poser, remplacer, retirer \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+     On n'ecrit qu'ici, et seulement sur un geste explicite. Les
+     placements manuels et les seances flash ne sont jamais touches : on
+     ne retire que ce qui porte la marque de ce placement. */
+  function effacerPlacement(seqId, clsId){
+    if(typeof window.__ll_deleteCalEvent !== 'function') return 0;
+    var l = posees(seqId, clsId);
+    l.forEach(function(e){ try{ window.__ll_deleteCalEvent(e.id); }catch(x){} });
+    return l.length;
+  }
+
+  function valider(){
+    var res = calculer();
+    if(!res || res.erreur || !res.poses || !res.poses.length) return;
+    if(typeof window.__ll_upsertCalEvent !== 'function'){
+      alert('L\u2019\u00e9criture dans le calendrier n\u2019est pas disponible.');
+      return;
+    }
+    var sq = res.sequence, cl = res.classe;
+    var avant = effacerPlacement(etat.seqId, etat.classId);
+    var base = 'c72_' + Date.now() + '_';
+    res.poses.forEach(function(p, i){
+      try{
+        window.__ll_upsertCalEvent({
+          id: base + i,
+          title: titrePastille(p, sq),
+          color: sq.couleur || '#6c63ff',
+          sequenceId: sq.id,
+          startDate: p.date,
+          endDate: p.date,
+          classId: cl.id,
+          className: cl.name,
+          c72: { seq: sq.id, cls: cl.id, rang: p.rang, groupe: p.groupe || '', reserve: !!p.reserve }
+        });
+      }catch(x){}
+    });
+    if(typeof window.llToast === 'function'){
+      window.llToast(res.poses.length + ' s\u00e9ance' + (res.poses.length>1?'s':'')
+        + (avant ? ' replac\u00e9es' : ' pos\u00e9es') + ' sur le calendrier.', 'ok');
+    }
+    fermer();
+  }
+
+  function retirer(){
+    var n = posees(etat.seqId, etat.classId).length;
+    if(!n) return;
+    if(!window.confirm('Retirer du calendrier les ' + n + ' s\u00e9ances de ce placement\u00a0?\n'
+      + 'La s\u00e9quence elle-m\u00eame n\u2019est pas touch\u00e9e.')) return;
+    effacerPlacement(etat.seqId, etat.classId);
+    if(typeof window.llToast === 'function') window.llToast('Placement retir\u00e9 du calendrier.', 'ok');
+    fermer();
+  }
+
+  /* \u2500\u2500 Les titres suivent les s\u00e9ances \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+     Une pastille ne garde pas une copie figee : si vous renommez une
+     seance, son titre est remis a jour ici. On ne touche qu'aux pastilles
+     posees par le placement calcule, et seulement quand le texte differe
+     vraiment. */
+  var dernierTitres = 0;
+  function rafraichirTitres(){
+    var t = Date.now();
+    if(t - dernierTitres < 5000) return;
+    dernierTitres = t;
+    if(typeof window.__ll_upsertCalEvent !== 'function') return;
+    var seqs = {};
+    sequences().forEach(function(s){ seqs[s.id] = s; });
+    evenements().forEach(function(e){
+      if(!e || !e.c72) return;
+      var sq = seqs[e.c72.seq];
+      if(!sq) return;
+      var attendu = titrePastille({ rang: e.c72.rang, reserve: e.c72.reserve }, sq);
+      if(e.title === attendu) return;
+      var copie = {};
+      Object.keys(e).forEach(function(k){ copie[k] = e[k]; });
+      copie.title = attendu;
+      try{ window.__ll_upsertCalEvent(copie); }catch(x){}
+    });
+  }
+
+  /* \u2500\u2500 Porte d'entree n\u00b01 : le panneau \u00ab Placer une s\u00e9quence \u00bb \u2500\u2500\u2500\u2500\u2500 */
+  function greffeCalendrier(){
+    var placer = document.querySelector('[data-fseq]');
+    if(!placer || !placer.parentNode) return;
+    if(placer.parentNode.querySelector('.__ll_c72_cal')) return;
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn btn-sm __ll_c72_cal';
+    b.textContent = '\uD83D\uDCC5 Placement calcul\u00e9';
+    b.title = 'D\u00e9rouler les s\u00e9ances sur les cr\u00e9neaux r\u00e9els de la classe';
+    b.style.cssText = 'background:rgba(108,99,255,.12);color:var(--accent2);border:1px solid rgba(108,99,255,.30)';
+    b.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      var sq = document.getElementById('__f_sq');
+      var cl = document.getElementById('__ll_seqcls_sel');
+      ouvrir(sq ? sq.value : '', cl ? cl.value : '');
+    };
+    placer.parentNode.insertBefore(b, placer);
+  }
+
+  /* \u2500\u2500 Porte d'entree n\u00b02 : a cote du bouton \ud83d\udccc Notes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function greffeSequence(){
+    var ligne = document.getElementById('__ll_color_picker_row');
+    if(!ligne){
+      var vus = document.querySelectorAll('.__ll_c72_seq');
+      for(var i=0;i<vus.length;i++) vus[i].remove();
+      return;
+    }
+    var rangee = ligne.lastElementChild;
+    if(!rangee || rangee.id === '__ll_note_zone') rangee = ligne.children[1];
+    if(!rangee) return;
+    if(ligne.querySelector('.__ll_c72_seq')) return;
+    css();
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = '__ll_c72_btn __ll_c72_seq';
+    b.textContent = '\uD83D\uDCC5 Placer sur l\u2019ann\u00e9e';
+    b.title = 'D\u00e9rouler les s\u00e9ances sur les cr\u00e9neaux r\u00e9els d\u2019une classe';
+    b.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      var c = window.__ll_editingSeq || window.__ll_activeSeq || window.__ll_curSeq;
+      if(c && c.id) ouvrir(c.id, '');
+    });
+    rangee.appendChild(b);
+  }
+
+  function passage(){
+    try{ greffeCalendrier(); }catch(e){}
+    try{ greffeSequence(); }catch(e){}
+    try{ rafraichirTitres(); }catch(e){}
+  }
+
+  /* On se reveille quand la page se redessine, sans attendre le tour
+     d'horloge suivant. La garde et les controles de presence empechent
+     tout emballement. L'horloge reste, en filet de securite. */
+  var enCours = false, guetteur = null;
+  function reveil(){
+    if(enCours) return;
+    enCours = true;
+    try{ passage(); }catch(e){}
+    enCours = false;
+  }
+  try{
+    guetteur = new MutationObserver(reveil);
+    guetteur.observe(document.body, { childList:true, subtree:true });
+  }catch(e){ guetteur = null; }
+
+  if(!window.__ll_calc72_horloge){
+    window.__ll_calc72_horloge = setInterval(function(){ try{ passage(); }catch(e){} }, 900);
+  }
+  try{ passage(); }catch(e){}
+
+  window.__ll_calc72Ouvrir = ouvrir;
+  window.__ll_calc72Calculer = calculer;
+})();
+</script>
+
+
+<script>
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+   LOT 73 \u2014 IMPRIMER MON CALENDRIER PAR CLASSE
+
+   Une page A4 propre, filtree sur une classe, a glisser dans le cahier
+   de textes ou a donner a un remplacant.
+
+   Deux formes :
+   - la grille, par defaut : A4 paysage, les cinq jours en colonnes, les
+     semaines en lignes, chaque seance sur son jour ;
+   - la liste : A4 portrait, une ligne par seance, dans l'ordre des
+     dates, plus facile a annoter a la main.
+
+   Lisible en noir et blanc : aucun aplat de couleur, aucun fond sombre.
+   La distinction se fait par le gras, les traits et les gris.
+
+   La page est fabriquee a part, dans une autre fenetre : le calendrier
+   de l'ecran n'est jamais touche.
+
+   LOT 73 bis \u2014 deux corrections :
+   1. La page se mesure avant de se dessiner. Un mois charge, toutes
+      classes comprises, resserre ses cases et son texte juste ce qu'il
+      faut pour tenir sur une A4. Un plancher de lisibilite est fixe :
+      en dessous, on prefere deborder proprement, avec l'en-tete repete
+      en haut de la seconde page, plutot que de cacher des seances.
+   2. Dans la liste, la date ne se repete plus a chaque ligne : elle
+      s'ecrit une fois, et les seances se rangent dessous. Et une
+      sequence posee a la main sur toute une periode n'apparait plus
+      cinquante fois : une seule ligne, avec sa duree.
+
+   Bloc autonome : le supprimer suffit a revenir en arriere.
+   \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
+(function(){
+  if (window.__ll_print73_ready) return;
+  window.__ll_print73_ready = true;
+
+  var JC = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
+  var JLONG = ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+  var MOIS = ['janvier','f\u00e9vrier','mars','avril','mai','juin','juillet',
+              'ao\u00fbt','septembre','octobre','novembre','d\u00e9cembre'];
+
+  function classes(){
+    try{
+      return (typeof window.llGetClassesEdt === 'function')
+        ? (window.llGetClassesEdt().classes || []) : [];
+    }catch(e){ return []; }
+  }
+  function donnees(){
+    try{ return (typeof window.__ll_getData === 'function') ? window.__ll_getData() : null; }
+    catch(e){ return null; }
+  }
+  function evenements(){
+    var d = donnees();
+    return (d && d.calendar && d.calendar.events) ? d.calendar.events : [];
+  }
+  function nomProf(){
+    try{
+      var p = JSON.parse(localStorage.getItem('le-sequenceur-prefs-v1') || '{}') || {};
+      return p.profName || '';
+    }catch(e){ return ''; }
+  }
+  function anneeScolaire(){
+    try{
+      var v = localStorage.getItem('ll-cal-sy3');
+      if(v && /^\d{4}-\d{4}$/.test(v)) return v;
+    }catch(e){}
+    var n = new Date(), y = n.getFullYear();
+    var s = n.getMonth() >= 8 ? y : y - 1;
+    return s + '-' + (s + 1);
+  }
+  function vacances(){
+    try{ return JSON.parse(localStorage.getItem('ll-cal-vac-v3') || '[]') || []; }
+    catch(e){ return []; }
+  }
+  function paques(yr){
+    var a=yr%19,b=Math.floor(yr/100),c=yr%100,d=Math.floor(b/4),e=b%4,
+        f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,
+        i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),
+        mo=Math.floor((h+l-7*m+114)/31),dy=((h+l-7*m+114)%31)+1;
+    return new Date(yr,mo-1,dy);
+  }
+  function p2(n){ return n<10 ? '0'+n : ''+n; }
+  function iso(d){ return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate()); }
+  function feries(yr){
+    var p = paques(yr);
+    function ap(n){ var r = new Date(p); r.setDate(r.getDate()+n); return r; }
+    return [new Date(yr,0,1), new Date(yr,4,1), new Date(yr,4,8), new Date(yr,6,14),
+            new Date(yr,7,15), new Date(yr,10,1), new Date(yr,10,11), new Date(yr,11,25),
+            ap(1), ap(39), ap(50)].map(iso);
+  }
+  function esc(s){
+    return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* \u2500\u2500 Ce que le calendrier affiche en ce moment \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+     Chaque case du calendrier porte sa date : c'est la source la plus
+     sure pour savoir quel mois ou quelle semaine on regarde. */
+  function jourAffiche(){
+    try{
+      var c = document.querySelector('.cal-day[data-date], .__ll_week_day[data-date]');
+      if(c){
+        var p = (c.getAttribute('data-date')||'').split('-');
+        if(p.length === 3) return new Date(+p[0], +p[1]-1, +p[2]);
+      }
+    }catch(e){}
+    return new Date();
+  }
+  function lundiDe(d){
+    var r = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    r.setDate(r.getDate() - ((r.getDay()+6)%7));
+    return r;
+  }
+
+  /* \u2500\u2500 La page imprimee \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function construire(opt){
+    var cl = classes().filter(function(c){ return c.id === opt.classId; })[0];
+    var vac = vacances();
+    var an = anneeScolaire().split('-');
+    var jf = {}; feries(+an[0]).concat(feries(+an[1])).forEach(function(j){ jf[j]=1; });
+    function enVac(j){
+      for(var i=0;i<vac.length;i++){ var v=vac[i]; if(j>=v.start && j<=(v.end||v.start)) return v.label||'Vacances'; }
+      return '';
+    }
+
+    /* Les jours a montrer. */
+    var jours = [], debut, fin;
+    if(opt.periode === 'semaine'){
+      debut = lundiDe(opt.repere);
+      fin = new Date(debut); fin.setDate(fin.getDate()+4);
+    } else {
+      debut = new Date(opt.repere.getFullYear(), opt.repere.getMonth(), 1);
+      fin = new Date(opt.repere.getFullYear(), opt.repere.getMonth()+1, 0);
+    }
+    var cur = new Date(debut);
+    while(cur <= fin){
+      if((cur.getDay()+6)%7 < 5) jours.push(iso(cur));
+      cur.setDate(cur.getDate()+1);
+    }
+
+    /* Les seances a montrer. */
+    var parJour = {}, liste = [], etalees = [];
+    evenements().forEach(function(e){
+      if(!e) return;
+      if(opt.classId && e.classId !== opt.classId) return;
+      var d0 = (e.startDate||'').slice(0,10);
+      var d1 = (e.endDate||e.startDate||'').slice(0,10);
+      var touche = false;
+      jours.forEach(function(j){
+        if(j >= d0 && j <= d1){
+          touche = true;
+          var item = {
+            date: j,
+            titre: e.title || '',
+            classe: e.className || '',
+            groupe: (e.c72 && e.c72.groupe) ? e.c72.groupe : ''
+          };
+          (parJour[j] = parJour[j] || []).push(item);
+          /* Dans la liste, une seance tient sur un jour ; une sequence
+             posee a la main court sur toute une periode et ne doit
+             apparaitre qu'une fois. */
+          if(d0 === d1) liste.push(item);
+        }
+      });
+      if(touche && d0 !== d1){
+        etalees.push({ debut: d0, fin: d1, titre: e.title || '', classe: e.className || '' });
+      }
+    });
+    liste.sort(function(a,b){ return a.date < b.date ? -1 : (a.date > b.date ? 1 : 0); });
+    etalees.sort(function(a,b){ return a.debut < b.debut ? -1 : (a.debut > b.debut ? 1 : 0); });
+
+    var titrePeriode = (opt.periode === 'semaine')
+      ? ('Semaine du ' + debut.getDate() + ' ' + MOIS[debut.getMonth()]
+         + ' au ' + fin.getDate() + ' ' + MOIS[fin.getMonth()] + ' ' + fin.getFullYear())
+      : (MOIS[debut.getMonth()].charAt(0).toUpperCase() + MOIS[debut.getMonth()].slice(1)
+         + ' ' + debut.getFullYear());
+
+    var gauche = cl
+      ? (esc(cl.name) + (cl.level ? ' <span class="lg">' + esc(String(cl.level).replace(/_/g,' ')) + '</span>' : ''))
+      : 'Toutes mes classes';
+    var droite = (nomProf() ? esc(nomProf()) + '<br>' : '') + esc(anneeScolaire());
+
+    var h = '';
+    h += '<div class="tete">';
+    h += '<div class="tg">' + gauche + '</div>';
+    h += '<div class="tc">' + esc(titrePeriode) + '</div>';
+    h += '<div class="td">' + droite + '</div>';
+    h += '</div>';
+
+    function enLettres(j){
+      var p = j.split('-');
+      var d = new Date(+p[0], +p[1]-1, +p[2]);
+      return JLONG[(d.getDay()+6)%7] + ' ' + d.getDate() + ' ' + MOIS[d.getMonth()];
+    }
+
+    if(opt.forme === 'liste'){
+      /* Ce qui court sur toute une periode se dit une fois, en tete. */
+      if(etalees.length){
+        h += '<div class="cours"><div class="ct">Sur toute la p\u00e9riode</div>';
+        etalees.forEach(function(p){
+          h += '<div class="cl"><b>' + esc(p.titre) + '</b> \u00b7 du '
+            + esc(enLettres(p.debut)) + ' au ' + esc(enLettres(p.fin))
+            + (opt.classId || !p.classe ? '' : ' <span class="gr">' + esc(p.classe) + '</span>')
+            + '</div>';
+        });
+        h += '</div>';
+      }
+
+      h += '<table class="lst"><tbody>';
+      if(!liste.length && !etalees.length){
+        h += '<tr><td class="vide">Aucune s\u00e9ance sur cette p\u00e9riode.</td></tr>';
+      }
+      var dernier = '';
+      liste.forEach(function(it){
+        if(it.date !== dernier){
+          dernier = it.date;
+          h += '<tr class="jr"><td class="c1" colspan="2">' + esc(enLettres(it.date)) + '</td></tr>';
+        }
+        h += '<tr><td class="c2">' + esc(it.titre)
+          + (it.groupe ? ' <span class="gr">' + esc(it.groupe) + '</span>' : '') + '</td>';
+        h += '<td class="c3">' + (opt.classId ? '' : esc(it.classe)) + '</td></tr>';
+      });
+      h += '</tbody></table>';
+    } else {
+      /* On mesure avant de dessiner : combien de semaines, et combien de
+         seances au maximum dans une journee. La hauteur des cases et la
+         taille du texte en decoulent, avec un plancher de lisibilite. */
+      var nbSem = Math.ceil((jours.length + ((function(){
+            var p0 = jours[0].split('-');
+            return (new Date(+p0[0],+p0[1]-1,+p0[2]).getDay()+6)%7;
+          })())) / 5);
+      var pointe = 0;
+      Object.keys(parJour).forEach(function(j){
+        if(parJour[j].length > pointe) pointe = parJour[j].length;
+      });
+      /* Hauteur disponible sur une A4 paysage, en-tete, titres de colonnes
+         et pied deduits. Une case doit contenir son numero et ses lignes ;
+         on cherche donc la plus grande taille de texte qui tienne. */
+      /* LOT 73 ter \u2014 mesure reprise sur une vraie impression : la feuille
+         A4 paysage fait 21 cm de haut, dont 2,4 de marges ; l'en-tete, la
+         ligne des jours et le pied en prennent encore pres de 3. Il reste
+         donc environ 15,4 cm pour les semaines, et non 16,2 : c'est ce
+         demi-centimetre de trop qui faisait basculer la derniere semaine
+         sur une seconde page. */
+      var dispo = 15.4;                                  /* centimetres */
+      var parSemaine = dispo / Math.max(nbSem, 1);
+      var CM = 28.35;                                    /* points par centimetre */
+      /* Place restante pour les lignes, une fois le numero du jour pose. */
+      var pourLignes = parSemaine - 0.5;
+      /* Taille de texte qui fait tenir la journee la plus chargee. */
+      var tailleSea = pointe
+        ? (pourLignes * CM) / (1.42 * pointe)
+        : 8.5;
+      if(tailleSea > 8.5) tailleSea = 8.5;               /* jamais plus gros que le confort */
+      var serre = tailleSea < 8.5;
+      if(tailleSea < 6) tailleSea = 6;                   /* plancher de lisibilite :
+                                                            en dessous, on prefere deborder */
+      tailleSea = Math.round(tailleSea * 10) / 10;
+      /* Les semaines se partagent exactement la place disponible : aucune
+         case plus haute que sa part, sinon le total deborde. */
+      var hauteur = Math.min(2.9, parSemaine);
+      var tailleNum = serre ? (tailleSea < 7 ? 8 : 9) : 11;
+
+      h += '<style>.gri td{height:' + hauteur.toFixed(2) + 'cm}'
+         + '.gri .sea{font-size:' + tailleSea + 'pt}'
+         + '.gri .num{font-size:' + tailleNum + 'pt}</style>';
+      h += '<table class="gri"><thead><tr>';
+      JC.forEach(function(j){ h += '<th>' + j + '</th>'; });
+      h += '</tr></thead><tbody>';
+        var premier = (function(){ var p = jours[0].split('-'); return (new Date(+p[0],+p[1]-1,+p[2]).getDay()+6)%7; })();
+      h += '<tr>';
+      for(var v=0; v<premier; v++) h += '<td class="hors"></td>';
+      var col = premier;
+      jours.forEach(function(j){
+        if(col === 5){ h += '</tr><tr>'; col = 0; }
+        var p = j.split('-');
+        var vv = enVac(j), ff = jf[j];
+        var cls = 'jour' + (vv ? ' vac' : '') + (ff ? ' fer' : '');
+        h += '<td class="' + cls + '">';
+        h += '<div class="num">' + (+p[2]) + '</div>';
+        if(ff) h += '<div class="mnt">F\u00e9ri\u00e9</div>';
+        else if(vv) h += '<div class="mnt">' + esc(vv) + '</div>';
+        (parJour[j] || []).forEach(function(it){
+          h += '<div class="sea">' + esc(it.titre)
+            + (it.groupe ? ' <span class="gr">' + esc(it.groupe) + '</span>' : '')
+            + (opt.classId ? '' : (it.classe ? ' <span class="gr">' + esc(it.classe) + '</span>' : ''))
+            + '</div>';
+        });
+        h += '</td>';
+        col++;
+      });
+      while(col < 5 && col > 0){ h += '<td class="hors"></td>'; col++; }
+      h += '</tr></tbody></table>';
+      if(!liste.length) h += '<div class="vide">Aucune s\u00e9ance sur cette p\u00e9riode.</div>';
+    }
+
+    h += '<div class="pied">\uD83E\uDE84 Lesson Loom' + (nomProf() ? ' \u00b7 ' + esc(nomProf()) : '') + '</div>';
+    return { html: h, titre: titrePeriode + (cl ? ' \u2014 ' + cl.name : '') };
+  }
+
+  function imprimer(opt){
+    var r = construire(opt);
+    var paysage = (opt.forme !== 'liste');
+    var win = window.open('', '_blank', 'width=1100,height=760');
+    if(!win){
+      if(typeof window.llToast === 'function')
+        window.llToast('Autorisez les fen\u00eatres surgissantes pour imprimer.', 'warn');
+      return;
+    }
+    var style = [
+      '*{box-sizing:border-box}',
+      'body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:1.4cm;font-size:10pt}',
+      '.tete{display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1.5pt solid #111;padding-bottom:6pt;margin-bottom:10pt}',
+      '.tg{font-size:14pt;font-weight:700}',
+      '.tg .lg{font-size:9pt;font-weight:400;color:#555}',
+      '.tc{font-size:12pt;font-weight:700;text-align:center;flex:1}',
+      '.td{font-size:9pt;text-align:right;color:#333;line-height:1.4}',
+      'table{width:100%;border-collapse:collapse;table-layout:fixed}',
+      'th,td{border:0.7pt solid #999;vertical-align:top}',
+      'thead th{font-size:9pt;font-weight:700;padding:4pt;text-transform:uppercase;letter-spacing:.5pt}',
+      'thead{display:table-header-group}',
+      'tr{break-inside:avoid}',
+      '.gri td{height:2.9cm;padding:3pt 4pt}',
+      '.gri .num{font-size:11pt;font-weight:700;margin-bottom:2pt}',
+      '.gri .hors{border:none}',
+      '.gri .vac .num,.gri .fer .num{color:#666}',
+      '.gri .mnt{font-size:8pt;font-style:italic;color:#555;margin-bottom:2pt}',
+      '.gri .vac{background:#f2f2f2}',
+      '.gri .fer{background:repeating-linear-gradient(45deg,#fff,#fff 4pt,#eee 4pt,#eee 8pt)}',
+      '.sea{font-size:8.5pt;line-height:1.3;padding:1.5pt 0;border-top:0.5pt dotted #bbb}',
+      '.sea:first-of-type{border-top:none}',
+      '.gr{font-size:7.5pt;color:#555}',
+      '.lst td{padding:3.5pt 6pt;font-size:9.5pt}',
+      '.lst .jr td{background:#f2f2f2;font-weight:700;font-size:10pt;border-top:1pt solid #666}',
+      '.lst .c2{padding-left:14pt}',
+      '.lst .c3{width:3.5cm;color:#444}',
+      '.cours{border:0.7pt solid #999;padding:6pt 8pt;margin-bottom:9pt}',
+      '.cours .ct{font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:.5pt;color:#555;margin-bottom:3pt}',
+      '.cours .cl{font-size:9.5pt;padding:1pt 0}',
+      '.vide{font-style:italic;color:#666;text-align:center;padding:10pt}',
+      '.pied{margin-top:8pt;font-size:8pt;font-style:italic;color:#777;text-align:right}',
+      '@media print{body{margin:1cm}@page{margin:1.2cm;size:A4 ' + (paysage ? 'landscape' : 'portrait') + '}}'
+    ].join('');
+    win.document.write(
+      '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>'
+      + esc(r.titre) + '</title><style>' + style + '</style></head><body>'
+      + r.html
+      + '<scr' + 'ipt>window.onload=function(){setTimeout(function(){window.print()},400)}</scr' + 'ipt>'
+      + '</body></html>'
+    );
+    win.document.close();
+  }
+
+  /* \u2500\u2500 La petite fenetre de choix \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function dialogue(){
+    var vieux = document.getElementById('__ll_p73_dlg');
+    if(vieux) vieux.remove();
+
+    var repere = jourAffiche();
+    var ov = document.createElement('div');
+    ov.id = '__ll_p73_dlg';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(15,23,42,.45);'
+      + 'display:flex;align-items:center;justify-content:center;padding:20px';
+    ov.onclick = function(e){ if(e.target === ov) ov.remove(); };
+
+    var box = document.createElement('div');
+    box.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:16px;'
+      + 'box-shadow:0 20px 50px rgba(15,23,42,.28);padding:22px 24px;max-width:420px;width:100%';
+
+    function bloc(txt){
+      var l = document.createElement('label');
+      l.className = 'fl';
+      l.textContent = txt;
+      l.style.marginTop = '12px';
+      return l;
+    }
+
+    var h = document.createElement('h2');
+    h.style.cssText = 'font-family:Playfair Display,Georgia,serif;font-size:19px;font-weight:800;margin:0 0 3px;color:var(--text)';
+    h.textContent = '\uD83D\uDDA8\uFE0F Imprimer mon calendrier';
+    box.appendChild(h);
+    var sub = document.createElement('div');
+    sub.style.cssText = 'font-size:12px;color:var(--text-muted);margin-bottom:6px';
+    sub.textContent = 'Une page A4, lisible en noir et blanc.';
+    box.appendChild(sub);
+
+    box.appendChild(bloc('Quelle classe\u00a0?'));
+    var sc = document.createElement('select');
+    sc.className = 'fs';
+    sc.appendChild(new Option('\u2014 Toutes mes classes \u2014', ''));
+    classes().forEach(function(c){
+      sc.appendChild(new Option(c.name + (c.level ? '  \u00b7  ' + String(c.level).replace(/_/g,' ') : ''), c.id));
+    });
+    box.appendChild(sc);
+
+    box.appendChild(bloc('Quelle p\u00e9riode\u00a0?'));
+    var sp = document.createElement('select');
+    sp.className = 'fs';
+    var lundi = lundiDe(repere), vend = new Date(lundi); vend.setDate(vend.getDate()+4);
+    sp.appendChild(new Option('Le mois affich\u00e9  \u00b7  '
+      + MOIS[repere.getMonth()] + ' ' + repere.getFullYear(), 'mois'));
+    sp.appendChild(new Option('La semaine affich\u00e9e  \u00b7  du ' + lundi.getDate() + ' '
+      + MOIS[lundi.getMonth()] + ' au ' + vend.getDate() + ' ' + MOIS[vend.getMonth()], 'semaine'));
+    box.appendChild(sp);
+
+    box.appendChild(bloc('Quelle forme\u00a0?'));
+    var sf = document.createElement('select');
+    sf.className = 'fs';
+    sf.appendChild(new Option('Grille  \u00b7  le mois sous les yeux (paysage)', 'grille'));
+    sf.appendChild(new Option('Liste  \u00b7  une ligne par s\u00e9ance (portrait)', 'liste'));
+    box.appendChild(sf);
+
+    var bar = document.createElement('div');
+    bar.style.cssText = 'display:flex;gap:8px;margin-top:18px';
+    var annu = document.createElement('button');
+    annu.type = 'button';
+    annu.className = 'btn btn-ghost btn-sm';
+    annu.style.flex = '1';
+    annu.textContent = 'Annuler';
+    annu.onclick = function(){ ov.remove(); };
+    var ok = document.createElement('button');
+    ok.type = 'button';
+    ok.className = 'btn btn-green btn-sm';
+    ok.style.flex = '1';
+    ok.textContent = '\uD83D\uDDA8\uFE0F Imprimer';
+    ok.onclick = function(){
+      var opt = { classId: sc.value, periode: sp.value, forme: sf.value, repere: repere };
+      ov.remove();
+      try{ imprimer(opt); }catch(e){
+        if(typeof window.llToast === 'function') window.llToast('L\u2019impression n\u2019a pas pu \u00eatre pr\u00e9par\u00e9e.', 'warn');
+      }
+    };
+    bar.appendChild(annu); bar.appendChild(ok);
+    box.appendChild(bar);
+
+    ov.appendChild(box);
+    document.body.appendChild(ov);
+    document.addEventListener('keydown', function onK(e){
+      if(e.key === 'Escape'){ ov.remove(); document.removeEventListener('keydown', onK); }
+    });
+  }
+
+  /* \u2500\u2500 Le bouton dans la barre du calendrier \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function greffe(){
+    var repere = document.querySelector('[data-csortie]');
+    if(!repere || !repere.parentNode) return;
+    if(repere.parentNode.querySelector('.__ll_p73_btn')) return;
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn btn-sm __ll_p73_btn';
+    b.textContent = '\uD83D\uDDA8\uFE0F Imprimer';
+    b.title = 'Imprimer mon calendrier, filtr\u00e9 sur une classe';
+    b.style.cssText = 'background:var(--card);color:var(--text-muted);border:1px solid var(--border)';
+    b.onclick = function(e){ e.preventDefault(); e.stopPropagation(); dialogue(); };
+    repere.parentNode.insertBefore(b, repere.nextSibling);
+  }
+
+  var enCours = false;
+  function reveil(){
+    if(enCours) return;
+    enCours = true;
+    try{ greffe(); }catch(e){}
+    enCours = false;
+  }
+  try{ new MutationObserver(reveil).observe(document.body, { childList:true, subtree:true }); }catch(e){}
+  if(!window.__ll_print73_horloge){
+    window.__ll_print73_horloge = setInterval(function(){ try{ greffe(); }catch(e){} }, 900);
+  }
+  try{ greffe(); }catch(e){}
+
+  window.__ll_print73Dialogue = dialogue;
+  window.__ll_print73Construire = construire;
 })();
 </script>
 

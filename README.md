@@ -166,6 +166,33 @@ au survol : les colonnes gardent leur largeur quoi qu'il arrive.
 
 Chaque séquence placée affiche alors **le nom de la classe** sur sa pastille, avec un liseré de sa couleur — en vue Mois comme en vue Semaine.
 
+**🔎 Afficher : toutes · par niveau · par classe** — une ligne de pastilles sous la barre d'outils. Un clic, et le calendrier ne montre plus que la classe choisie. Les pastilles sans classe — anciens placements, séances flash, sorties — **pâlissent au lieu de disparaître** : rien n'est jamais perdu de vue, et un compte indique ce qui est masqué. Le tri agit en vue Mois et en vue Semaine ; le calendrier s'ouvre toujours sur « Toutes ».
+
+**📅 Placement calculé** — depuis le panneau « Placer une séquence », ou depuis le bouton **📅 Placer sur l'année** dans l'éditeur de séquence.
+
+Choisissez une classe, cliquez un jour où vous l'avez, et **les séances se déroulent toutes seules sur ses créneaux réels** : S1, S2, S3… vacances et jours fériés sautés. La fenêtre affiche le récapitulatif — *« 6 séances (5 + 1 de réserve) · du lundi 7 septembre au jeudi 8 octobre »* — et signale ce qui mérite votre attention : débordement après les vacances, séquence qui ne rentre pas d'ici la fin de l'année.
+
+Trois règles, tirées de votre emploi du temps réel :
+
+| Situation | Ce que fait le calcul |
+|---|---|
+| **Toutes les heures chaque semaine** | Une séance par créneau |
+| **Demi-groupes** | La même séance posée **deux fois**, une par groupe, comptée pour une. Un créneau de classe entière porte le numéro du groupe le moins avancé |
+| **Semaine A / semaine B** | Chaque créneau tombe sur sa vraie semaine, telle qu'elle a été lue dans Pronote |
+
+**➕ Séances de réserve** — rallongent la séquence sans créer de séance attitrée.
+
+**Valider** pose les séances sur le calendrier, avec leur numéro et leur titre. Si un placement existe déjà pour cette séquence et cette classe, le bouton devient **Remplacer** : rien ne s'empile. **🗑️ Retirer du calendrier** enlève tout le placement d'un geste — la séquence, elle, n'est jamais touchée. Et si vous renommez une séance, **le calendrier suit tout seul**.
+
+**🖨️ Imprimer mon calendrier** — une page A4, filtrée sur une classe ou toutes, sur le mois ou la semaine affichés, en deux formes :
+
+| Forme | Usage |
+|---|---|
+| **Grille** (par défaut) | A4 paysage, les cinq jours en colonnes — le mois d'un coup d'œil |
+| **Liste** | A4 portrait, une ligne par séance, plus facile à annoter |
+
+La page est **lisible en noir et blanc** : aucun aplat de couleur, vacances en gris, fériés hachurés. Elle s'ajuste pour tenir sur une seule feuille, avec votre nom et l'année scolaire en en-tête.
+
 ---
 
 ### 📚 Bibliothèque
@@ -229,11 +256,19 @@ Les **demi-groupes** sont rattachés à leur classe : une séance faite deux foi
 
 ---
 
+**Réimporter** — à la rentrée, ou dès que votre emploi du temps change en cours d'année. Une classe déjà enregistrée est reconnue par son code : elle revient avec **son niveau, son nom affiché et sa couleur**, marquée d'une pastille verte « déjà connue ». Choisissez « Les remplacer par ceux du fichier » pour rafraîchir les créneaux.
+
+---
+
 ### 📅 EDT (Emploi du Temps)
 
 Grille hebdomadaire personnalisable, créneaux libres 8h–18h, nom de classe et couleur par créneau.
 
 Le formulaire propose vos classes dans une liste déroulante — vous pouvez toujours taper librement. Un créneau importé garde son rattachement, son demi-groupe et son rythme même après avoir été déplacé ou modifié.
+
+Depuis août 2026, un créneau importé retient aussi **sa semaine** — A ou B — lorsqu'il n'a lieu qu'une semaine sur deux. C'est cette information qui permet au placement calculé de dérouler les séances sur votre emploi du temps réel.
+
+> **Vous avez importé votre emploi du temps avant août 2026 ?** Réimportez-le une fois : vos classes sont reconnues et arrivent avec leur niveau, leur nom et leur couleur déjà remplis — vous n'avez qu'à valider.
 
 ---
 
