@@ -62,18 +62,23 @@ moment depuis le bouton d'aide du bandeau.
 
 ## Comment l'utiliser
 
-1. Téléchargez le fichier HTML.
+1. Téléchargez le fichier HTML depuis la page **Obtenir** de
+   [lessonloom.fr](https://lessonloom.fr).
 2. Ouvrez-le dans votre navigateur — Chrome ou Firefox de préférence.
 3. Enregistrez régulièrement vos données avec le bouton de sauvegarde.
 
-> ⏳ **À compléter à la publication** — lien de téléchargement direct
-> depuis [lessonloom.fr](https://lessonloom.fr).
+La zone de téléchargement est protégée par un mot de passe. Écrivez à
+[contact@lessonloom.fr](mailto:contact@lessonloom.fr) pour l'obtenir.
 
 ## Vos données
 
 Elles sont enregistrées **dans votre navigateur**, sur votre ordinateur. Rien
-n'est envoyé nulle part, aucun compte n'est nécessaire, aucune connexion n'est
-requise après le téléchargement.
+n'est envoyé nulle part, aucun compte n'est nécessaire, aucune mesure d'audience
+n'est effectuée.
+
+L'application fonctionne sans connexion. Seuls les dessins des caractères de la
+police sont chargés à l'ouverture : hors connexion, l'apparence est légèrement
+différente, et tout le reste fonctionne à l'identique.
 
 Cela implique une contrepartie : **pensez à faire des sauvegardes.** Le bouton
 de sauvegarde produit un fichier que vous conservez où vous voulez, et qui se
@@ -94,22 +99,29 @@ Le texte complet de la licence figure dans le fichier [LICENSE](LICENSE).
 publié sous AGPLv3, dont elle conserve le noyau. Cette mention figure également
 dans le pied de page de l'application.
 
-> ⏳ **À compléter à la publication** — adresse du dépôt public, à indiquer
-> ici et dans le pied de page de l'application.
+**Dépôt public :**
+[github.com/maiwenagadegbeku-art/Lesson-Loom](https://github.com/maiwenagadegbeku-art/Lesson-Loom)
+— l'adresse figure également dans le pied de page de l'application.
 
 ## Code source
 
 Le fichier HTML livré contient un cœur React **compilé**. Conformément à
-l'AGPLv3, le code source correspondant est mis à disposition sur ce dépôt.
+l'AGPLv3, le code source correspondant est mis à disposition sur ce dépôt, dans
+le dossier [`source/`](source/).
 
-> ⏳ **À compléter à la publication** — déposer le code source de juin 2026
-> dans un dossier `source/`, avec la mention : *« état de juin 2026, conservé
-> à titre de référence ; le fichier HTML fait foi »*.
+Ce dossier conserve l'état du code de juin 2026, à titre de référence. Le
+développement s'est poursuivi ensuite directement dans le fichier HTML unique :
+**c'est ce fichier qui fait foi.**
+
+> ⏳ **Reste à faire avant l'ouverture du dépôt** — créer le dossier `source/`
+> et y déposer le code de juin 2026.
 
 ## État du projet
 
-**Version de référence :** volet 8 (17 août 2026).
-Fichier unique de 5 172 319 octets. Cœur compilé React : 32 retouches, dont
+**Version de référence :** volet 8 (17 août 2026), suivi de la campagne de
+publication (21 août 2026).
+
+Fichier unique de 5 157 071 octets. Cœur compilé React : 32 retouches, dont
 deux portant uniquement sur des données. 24 blocs autonomes.
 
 Le développement suit une méthode stricte : un lot à la fois, diagnostic avant
@@ -120,22 +132,28 @@ pourquoi.
 
 ## Autres outils
 
-Lesson Loom fait partie de la **Lesson Loom Suite** :
+Lesson Loom fait partie de la **Lesson Loom Suite**. Tous les outils se
+téléchargent depuis la page **Obtenir** de
+[lessonloom.fr](https://lessonloom.fr).
 
-- **QuizLoom** — générateur de QCM, export Pronote
-- **CorrectForme Loom** — correction assistée des devoirs
-- **The Loom Arcade** — salle de jeux de vocabulaire pour les élèves
-- **WordSmith Profs** — générateur d'appréciations de bulletins
+| Outil | Ce qu'il fait | Licence |
+|---|---|---|
+| **Lesson Loom** | Planification des séquences et des séances | AGPLv3 |
+| **QuizLoom** | Générateur de QCM, export Pronote | AGPLv3 |
+| **CorrectForme Loom** | Correction assistée des devoirs | AGPLv3 |
+| **The Loom Arcade** | Salle de jeux de vocabulaire pour les élèves | AGPLv3 |
+| **WordSmith Profs** | Générateur d'appréciations de bulletins | Tous droits réservés |
 
-> ⏳ **À compléter à la publication** — liens vers chaque outil, et précision
-> des licences respectives. Attention : **WordSmith Profs n'est pas sous
-> AGPLv3** — création originale, tous droits réservés. La licence déposée sur
-> ce dépôt ne couvre que Lesson Loom.
+**Important.** La licence déposée sur ce dépôt ne couvre que **Lesson Loom**.
+**WordSmith Profs n'est pas sous AGPLv3** : c'est une création originale, tous
+droits réservés.
 
 ## Contact
 
-> ⏳ **À compléter à la publication** — adresse de contact. Vérifier qu'aucune
-> adresse académique ne figure dans le fichier livré ni dans le dépôt.
+[contact@lessonloom.fr](mailto:contact@lessonloom.fr)
+
+Pour obtenir le mot de passe de téléchargement, signaler un défaut, proposer une
+amélioration, ou simplement dire que l'outil vous sert.
 
 ---
 
