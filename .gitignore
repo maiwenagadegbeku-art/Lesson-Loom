@@ -1,0 +1,83 @@
+# ═══════════════════════════════════════════════════════════════
+#  Lesson Loom — fichiers que le dépôt ne doit jamais avaler
+#  Ce fichier n'a aucun effet sur l'application. Il ne parle qu'à
+#  GitHub Desktop, au moment où l'on range.
+# ═══════════════════════════════════════════════════════════════
+
+
+# ── 1. DONNÉES NOMINATIVES — la raison d'être de ce fichier ────
+# Emplois du temps Pronote : ils contiennent des noms de classes,
+# de collègues et parfois d'élèves.
+*.ics
+*.ICS
+*.ifb
+
+# Listes d'élèves et exports de notes, sous toutes leurs formes.
+*eleves*.csv
+*élèves*.csv
+*eleves*.txt
+*élèves*.txt
+*classe*.csv
+*classes*.csv
+liste*.csv
+*.xls
+*.xlsx
+*.ods
+
+# Fichiers de distribution produits pour une classe réelle.
+Distribution_*.html
+grilles_eleves*.zip
+
+
+# ── 2. VOS SAUVEGARDES D'APPLICATION ───────────────────────────
+# Le fichier que produit le bouton de sauvegarde : il contient
+# toutes vos séquences, vos classes et votre emploi du temps.
+lesson-loom-*.json
+lessonloom-*.json
+sauvegarde*.json
+backup*.json
+*.backup
+
+
+# ── 3. VOS DOSSIERS DE TRAVAIL ─────────────────────────────────
+# Tout ce que vous placez dans ces dossiers reste chez vous.
+# Créez-les si vous en voulez ; sinon ces lignes ne servent à rien.
+_travail/
+_essais/
+_prive/
+_bancs/
+
+
+# ── 4. RESTES DE WINDOWS ET DES ÉDITEURS ───────────────────────
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~
+
+
+# ── 5. RESTES DE FABRICATION ───────────────────────────────────
+node_modules/
+package-lock.json
+npm-debug.log*
+.env
+.env.*
+
+
+# ── 6. FICHIERS TEMPORAIRES ────────────────────────────────────
+*.tmp
+*.temp
+*.log
+*.orig
+*.rej
+
+
+# ═══════════════════════════════════════════════════════════════
+#  CE QUI DOIT RESTER DANS LE DÉPÔT — ne rien ajouter ici qui
+#  ressemble à Lesson_Loom_*.html : c'est le fichier à publier.
+# ═══════════════════════════════════════════════════════════════

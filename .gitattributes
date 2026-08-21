@@ -1,2 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Le fichier de l'application est rangé et ressorti tel quel,
+# sans aucune retouche des fins de ligne.
+*.html -text
