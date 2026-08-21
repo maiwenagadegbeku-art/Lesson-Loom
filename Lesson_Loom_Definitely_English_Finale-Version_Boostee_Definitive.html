@@ -82011,11 +82011,18 @@ function llPatchFooter(){
   charlieLink.style.cssText='color:var(--primary);font-weight:700;text-decoration:none';
   charlieLink.textContent='Charlie Rollo';
 
+  var srcLink=document.createElement('a');
+  srcLink.href='https://github.com/maiwenagadegbeku-art/Lesson-Loom';
+  srcLink.target='_blank';srcLink.rel='noopener noreferrer';
+  srcLink.style.cssText='color:var(--primary);font-weight:700;text-decoration:none';
+  srcLink.textContent='Code source de Lesson Loom';
+
   line2.appendChild(document.createTextNode('Bas\u00E9e sur '));
   line2.appendChild(seqLink);
   line2.appendChild(document.createTextNode(' de '));
   line2.appendChild(charlieLink);
-  line2.appendChild(document.createTextNode(' (AGPLv3)'));
+  line2.appendChild(document.createTextNode(' (AGPLv3) \u00B7 '));
+  line2.appendChild(srcLink);
 
   footer.appendChild(line1);
   footer.appendChild(line2);
