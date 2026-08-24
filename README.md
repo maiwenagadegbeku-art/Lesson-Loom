@@ -57,8 +57,9 @@ remplies. Tout est pensé pour tenir sur une page et rester lisible en noir et
 blanc.
 
 **Guide**
-Un guide en diapositives et un tour guidé de l'application, accessibles à tout
-moment depuis le bouton d'aide du bandeau.
+Un guide en dix diapositives et un tour guidé de vingt-deux étapes, qui
+parcourt l'application elle-même. Tous deux accessibles à tout moment depuis
+le bouton d'aide du bandeau.
 
 ## Comment l'utiliser
 
@@ -113,15 +114,12 @@ Ce dossier conserve l'état du code de juin 2026, à titre de référence. Le
 développement s'est poursuivi ensuite directement dans le fichier HTML unique :
 **c'est ce fichier qui fait foi.**
 
-> ⏳ **Reste à faire avant l'ouverture du dépôt** — créer le dossier `source/`
-> et y déposer le code de juin 2026.
-
 ## État du projet
 
-**Version de référence :** volet 8 (17 août 2026), suivi de la campagne de
-publication (21 août 2026).
+**Version de référence :** volet 8 (17 août 2026), campagne de publication
+(21 août 2026), revue finale avant mise en ligne (24 août 2026).
 
-Fichier unique de 5 157 071 octets. Cœur compilé React : 32 retouches, dont
+Fichier unique de 5 157 088 octets. Cœur compilé React : 32 retouches, dont
 deux portant uniquement sur des données. 24 blocs autonomes.
 
 Le développement suit une méthode stricte : un lot à la fois, diagnostic avant
