@@ -1,4 +1,34 @@
-                    GNU AFFERO GENERAL PUBLIC LICENSE
+Lesson Loom — Lesson Loom Suite
+Copyright (C) 2026 Maïwena Gadegbeku — lessonloom.fr
+Lesson Loom is a redesign and extension of Le Séquenceur LV
+by Charlie Rollo (AGPLv3).
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+ADDITIONAL TERM under section 7(b) of the GNU AGPLv3
+
+Any modified version of this Software that is publicly distributed or
+deployed must include a visible credit to both authors in the user
+interface or in the documentation, in the following form or equivalent:
+
+    "Based on Le Séquenceur LV by Charlie Rollo,
+     redesigned and extended as Lesson Loom by Maïwena Gadegbeku"
+
+This credit may not be removed or hidden from end users.
+
+
+GNU AFFERO GENERAL PUBLIC LICENSE
                        Version 3, 19 November 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
