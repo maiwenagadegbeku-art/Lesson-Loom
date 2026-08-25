@@ -4,7 +4,7 @@
 d'anglais LV1 du secondaire français.**
 
 Lesson Loom est une refonte et une extension du Séquenceur LV de Charlie Rollo (AGPLv3), 
-dont elle conserve le noyau. Le détail de ce qui a été ajouté figure dans EXTENSIONS.md.
+dont elle conserve le noyau. Le détail de ce qui a été ajouté figure dans [EXTENSIONS.md](EXTENSIONS.md).
 
 © Juin 2026 Maïwena Gadegbeku
 
