@@ -94,6 +94,12 @@ Vous êtes libre de l'utiliser, de l'étudier, de la modifier et de la
 redistribuer, à condition de conserver cette licence et de publier vos
 modifications sous les mêmes termes.
 
+**Crédit obligatoire.** Le fichier [LICENSE](LICENSE) porte une condition
+supplémentaire, au titre de l'article 7(b) de l'AGPLv3 : toute version modifiée
+diffusée publiquement ou mise à disposition sur un serveur doit créditer
+visiblement les deux auteurs, dans son interface ou dans sa documentation. Ce
+crédit ne peut être ni retiré, ni dissimulé aux utilisateurs.
+
 Le texte complet de la licence figure dans le fichier [LICENSE](LICENSE).
 
 **Attribution.** Lesson Loom est née du *Séquenceur LV* de Charlie Rollo,
