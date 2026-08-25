@@ -98,14 +98,24 @@ Lesson Loom se télécharge : le fichier se garde sur son ordinateur ou sur une 
 et s'ouvre sans passer par une adresse. Il fonctionne dans un établissement au
 réseau filtré, et il reste disponible même si le site qui l'a distribué disparaît.
 
-### La fiche de séquence
+### Les documents produits
 
-Le document produit a été restructuré en tableaux organisés par **composantes du
-CECRL** — linguistique, pragmatique, sociolinguistique, culturelle —, les étapes
-du projet en cartes distinguant tâche intermédiaire et tâche finale, et une ligne
-de synthèse qui récapitule séances, tâches et compétences travaillées. Sur la
-fiche de séance, les activités deviennent des cartes numérotées et la durée totale
-est annoncée en en-tête.
+La fiche de séquence est organisée en tableaux par **composantes du CECRL** —
+linguistique, pragmatique, sociolinguistique, culturelle —, avec les étapes du
+projet en cartes distinguant tâche intermédiaire et tâche finale, et une ligne de
+synthèse en pied de page.
+
+La fiche de séance porte les activités en cartes numérotées, avec leur durée et le
+total en en-tête.
+
+La progression annuelle s'ouvre sur un tableau de synthèse — axe, compétences et
+leur palier, tâches, nombre de séances —, suivi de la **couverture annuelle
+chiffrée** par catégorie d'objectifs, du détail de chaque séquence, et du **bilan
+de réemploi** : chaque objectif, son nombre de réemplois, et les séances où il est
+prévu ou effectivement traité.
+
+Les impressions PDF, ainsi que les exports Word et RTF, reprennent cette
+organisation plutôt qu'un texte au fil.
 
 ---
 
