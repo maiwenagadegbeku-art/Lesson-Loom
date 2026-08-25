@@ -54,7 +54,8 @@ d'avancement, corbeille et archivage par année scolaire.
 **Impressions**
 Fiches de séquence et de séance, progressions, calendriers, grilles vierges ou
 remplies. Tout est pensé pour tenir sur une page et rester lisible en noir et
-blanc.
+blanc. Les fiches sont organisées par composantes du CECRL, ce qui les rend directement
+présentables en inspection.
 
 **Guide**
 Un guide en dix diapositives et un tour guidé de vingt-deux étapes, qui
