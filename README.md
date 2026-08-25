@@ -3,8 +3,8 @@
 **Lesson Loom — Conçue et développée par Maïwena Gadegbeku pour les enseignants
 d'anglais LV1 du secondaire français.**
 
-Née d'une idée du *Séquenceur LV* de Charlie Rollo (AGPLv3), dont elle conserve
-le noyau, Lesson Loom en est une refonte et une extension complète.
+Lesson Loom est une refonte et une extension du Séquenceur LV de Charlie Rollo (AGPLv3), 
+dont elle conserve le noyau. Le détail de ce qui a été ajouté figure dans EXTENSIONS.md.
 
 © Juin 2026 Maïwena Gadegbeku
 
