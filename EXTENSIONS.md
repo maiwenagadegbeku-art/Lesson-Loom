@@ -30,7 +30,7 @@ Tout ce qui suit a été ajouté.
 
 ## Les grands ensembles
 
-Avant le détail volet par volet, les huit ensembles principaux.
+Avant le détail volet par volet, les neuf ensembles principaux.
 
 ### Les classes et l'emploi du temps
 
@@ -97,6 +97,15 @@ de secours, au lieu d'échouer en silence.
 Lesson Loom se télécharge : le fichier se garde sur son ordinateur ou sur une clé,
 et s'ouvre sans passer par une adresse. Il fonctionne dans un établissement au
 réseau filtré, et il reste disponible même si le site qui l'a distribué disparaît.
+
+### La fiche de séquence
+
+Le document produit a été restructuré en tableaux organisés par **composantes du
+CECRL** — linguistique, pragmatique, sociolinguistique, culturelle —, les étapes
+du projet en cartes distinguant tâche intermédiaire et tâche finale, et une ligne
+de synthèse qui récapitule séances, tâches et compétences travaillées. Sur la
+fiche de séance, les activités deviennent des cartes numérotées et la durée totale
+est annoncée en en-tête.
 
 ---
 
