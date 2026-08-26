@@ -69,6 +69,9 @@ le bouton d'aide du bandeau.
 2. Ouvrez-le dans votre navigateur — Chrome ou Firefox de préférence.
 3. Enregistrez régulièrement vos données avec le bouton de sauvegarde.
 
+Un mode d'emploi détaillé — où trouver quoi, et dans quel ordre s'y prendre —
+figure dans [GUIDE.md](GUIDE.md).
+
 La zone de téléchargement est protégée par un mot de passe. Écrivez à
 [contact@lessonloom.fr](mailto:contact@lessonloom.fr) pour l'obtenir.
 
