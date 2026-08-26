@@ -26,6 +26,20 @@ faut ouvrir.
 | `frontend/public/` | Le modèle de page et les icônes |
 | `backend/` | Un serveur qui existait en juin et **qui n'est plus utilisé** — l'application actuelle fonctionne sans serveur |
 
+## Ce qui n'a jamais servi
+
+Le dossier a été fabriqué à partir d'un modèle générique, qui pose d'office
+quelques éléments dont Lesson Loom n'a jamais eu l'usage. Ils sont conservés en
+l'état plutôt que supprimés, pour ne pas altérer le code de juin 2026 :
+
+- **`backend/`** — un serveur et une base de données. Lesson Loom fonctionne
+  entièrement dans le navigateur, sans serveur, sans compte et sans envoi de
+  données. Ce dossier n'a jamais été utilisé.
+- **`frontend/src/constants/testIds/auth.js`** — des repères d'essai pour une
+  page de connexion. Il n'y a pas de compte dans Lesson Loom.
+- **`frontend/README.md`** — le mode d'emploi générique de l'outil de
+  fabrication, en anglais.
+
 ## Ce qui a été retiré avant le dépôt
 
 Par respect de la vie privée et par souci de propreté, quelques éléments ont été
