@@ -47482,6 +47482,58 @@ const IdentiteSection = ({
             lineNumber: 200,
             columnNumber: 15
           }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxDEV)("option", {
+            value: "6\xE8me",
+            "x-file-name": "SequenceEditor",
+            "x-line-number": "2001",
+            "x-column": "14",
+            "x-component": "option",
+            "x-id": "SequenceEditor_2001_14",
+            "x-dynamic": "false",
+            children: "6\xE8me"
+          }, void 0, false, {
+            fileName: _jsxFileName,
+            lineNumber: 2001,
+            columnNumber: 15
+          }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxDEV)("option", {
+            value: "5\xE8me",
+            "x-file-name": "SequenceEditor",
+            "x-line-number": "2002",
+            "x-column": "14",
+            "x-component": "option",
+            "x-id": "SequenceEditor_2002_14",
+            "x-dynamic": "false",
+            children: "5\xE8me"
+          }, void 0, false, {
+            fileName: _jsxFileName,
+            lineNumber: 2002,
+            columnNumber: 15
+          }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxDEV)("option", {
+            value: "4\xE8me",
+            "x-file-name": "SequenceEditor",
+            "x-line-number": "2003",
+            "x-column": "14",
+            "x-component": "option",
+            "x-id": "SequenceEditor_2003_14",
+            "x-dynamic": "false",
+            children: "4\xE8me"
+          }, void 0, false, {
+            fileName: _jsxFileName,
+            lineNumber: 2003,
+            columnNumber: 15
+          }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxDEV)("option", {
+            value: "3\xE8me",
+            "x-file-name": "SequenceEditor",
+            "x-line-number": "2004",
+            "x-column": "14",
+            "x-component": "option",
+            "x-id": "SequenceEditor_2004_14",
+            "x-dynamic": "false",
+            children: "3\xE8me"
+          }, void 0, false, {
+            fileName: _jsxFileName,
+            lineNumber: 2004,
+            columnNumber: 15
+          }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxDEV)("option", {
             value: "Seconde",
             "x-file-name": "SequenceEditor",
             "x-line-number": "201",
@@ -47519,6 +47571,32 @@ const IdentiteSection = ({
           }, void 0, false, {
             fileName: _jsxFileName,
             lineNumber: 203,
+            columnNumber: 15
+          }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxDEV)("option", {
+            value: "BTS 1",
+            "x-file-name": "SequenceEditor",
+            "x-line-number": "2031",
+            "x-column": "14",
+            "x-component": "option",
+            "x-id": "SequenceEditor_2031_14",
+            "x-dynamic": "false",
+            children: "BTS 1"
+          }, void 0, false, {
+            fileName: _jsxFileName,
+            lineNumber: 2031,
+            columnNumber: 15
+          }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_24__.jsxDEV)("option", {
+            value: "BTS 2",
+            "x-file-name": "SequenceEditor",
+            "x-line-number": "2032",
+            "x-column": "14",
+            "x-component": "option",
+            "x-id": "SequenceEditor_2032_14",
+            "x-dynamic": "false",
+            children: "BTS 2"
+          }, void 0, false, {
+            fileName: _jsxFileName,
+            lineNumber: 2032,
             columnNumber: 15
           }, undefined)]
         }, void 0, true, {
@@ -47882,7 +47960,7 @@ const IdentiteSection = ({
         "x-component": "label",
         "x-id": "SequenceEditor_242_8",
         "x-dynamic": "false",
-        children: "Sous-titre / Th\xE8me de la s\xE9quence"
+        children: "Sous-titre / Th\xE8me / Pr\xE9requis"
       }, void 0, false, {
         fileName: _jsxFileName,
         lineNumber: 242,
@@ -47893,7 +47971,7 @@ const IdentiteSection = ({
         onChange: e => update({
           sousTitre: e.target.value
         }),
-        placeholder: "Ex : R\xE9crire un conte avec contraintes",
+        placeholder: "Ex : R\xE9crire un conte avec contraintes \u2014 ou : pr\xE9requis, pr\xE9t\xE9rit et prise de notes",
         "x-file-name": "SequenceEditor",
         "x-line-number": "243",
         "x-column": "8",
@@ -58902,6 +58980,52 @@ const generateDistributionHtml = (grille, students, sequenceTitle = '', profName
     setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
   };
 
+  // --- Lot D1a : rendre les points lisibles dans le PDF ------------------
+  // Avant la photo, chaque case de saisie est doublee par son contenu en
+  // texte simple ; apres la photo, tout revient a l identique.
+  // Bloc autonome : supprimer d1aTexte / d1aFlatten / d1aRestore et leurs
+  // deux appels suffit a revenir au comportement precedent.
+  function d1aTexte(el) {
+    if (el.tagName === 'SELECT') {
+      var o = el.options[el.selectedIndex];
+      return o ? (o.textContent || '').trim() : '';
+    }
+    return (el.value || '').trim();
+  }
+  function d1aFlatten(card) {
+    var subs = [];
+    var els = card.querySelectorAll('input, select');
+    for (var k = 0; k < els.length; k++) {
+      var el = els[k];
+      var isPts = (el.className || '').indexOf('cell-pts') >= 0;
+      var txt = d1aTexte(el);
+      if (isPts) { txt = txt !== '' ? txt + ' pt(s)' : '—'; }
+      var span = document.createElement('span');
+      span.textContent = txt;
+      span.setAttribute('data-d1a', '1');
+      span.style.display = 'inline-block';
+      span.style.padding = '2px 4px';
+      span.style.fontSize = isPts ? '13px' : '12px';
+      span.style.fontWeight = isPts ? '700' : '400';
+      span.style.color = isPts ? (txt === '—' ? '#94a3b8' : '#16a34a') : '#1e293b';
+      el.parentNode.insertBefore(span, el);
+      subs.push({ el: el, span: span, disp: el.style.display });
+      el.style.display = 'none';
+    }
+    return subs;
+  }
+  function d1aRestore(subs) {
+    for (var k = 0; k < subs.length; k++) {
+      var s = subs[k];
+      if (s.span && s.span.parentNode) s.span.parentNode.removeChild(s.span);
+      if (s.disp) { s.el.style.display = s.disp; }
+      else {
+        s.el.style.removeProperty('display');
+        if (s.el.getAttribute('style') === '') s.el.removeAttribute('style');
+      }
+    }
+  }
+
   window.downloadAllPdfZip = async function() {
     if (typeof window.jspdf === 'undefined' || typeof window.html2canvas === 'undefined' || typeof window.JSZip === 'undefined') {
       alert("⚠️ Les librairies PDF n'ont pas pu être chargées.\\nVérifie ta connexion internet, puis recharge cette page une fois.");
@@ -58925,6 +59049,7 @@ const generateDistributionHtml = (grille, students, sequenceTitle = '', profName
         var actionsDisplay = actions ? actions.style.display : null;
         if (actions) actions.style.display = 'none';
         headerBtns.forEach(function(b){ b.style.visibility = 'hidden'; });
+        var d1aSubs = d1aFlatten(card);
         try {
           var canvas = await html2canvas(card, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
           var pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -58947,6 +59072,7 @@ const generateDistributionHtml = (grille, students, sequenceTitle = '', profName
           var safeName = (student.name || ('eleve_' + i)).replace(/[^a-zA-Z0-9-_]+/g, '_');
           profFolder.file(safeName + '.pdf', blob);
         } finally {
+          d1aRestore(d1aSubs);
           if (actions) actions.style.display = actionsDisplay || '';
           headerBtns.forEach(function(b){ b.style.visibility = ''; });
         }
@@ -84374,9 +84500,19 @@ llHookAll = function() {
     ta.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
+  // --- Lot C1 : la zone de saisie peut etre remplacee par React apres
+  // l'ouverture de la fenetre. Le panneau se fiait a celle retenue a sa
+  // construction : le premier clic ecrivait alors hors ecran.
+  // On retrouve desormais la zone au moment du clic, et le panneau se
+  // reconstruit si elle a change.
+  function llClsZone(secours) {
+    return document.querySelector('[data-testid="csv-textarea"]') || secours;
+  }
+
   function build(ta) {
     var box = document.createElement('div');
     box.id = '__ll_cls';
+    box.__llTa = ta;
 
     var lbl = document.createElement('div');
     lbl.className = 'cl-lbl';
@@ -84403,7 +84539,7 @@ llHookAll = function() {
         btn.title = 'Charger cette liste';
         btn.addEventListener('click', function(e) {
           e.preventDefault(); e.stopPropagation();
-          setTextarea(ta, cl.raw || '');
+          setTextarea(llClsZone(ta), cl.raw || '');
         });
 
         var n = document.createElement('span');
@@ -84420,7 +84556,7 @@ llHookAll = function() {
           var l2 = load();
           l2.splice(idx, 1);
           save(l2);
-          refresh(ta);
+          refresh(llClsZone(ta));
         });
 
         chip.appendChild(btn);
@@ -84438,7 +84574,8 @@ llHookAll = function() {
     sv.disabled = !(ta.value || '').trim();
     sv.addEventListener('click', function(e) {
       e.preventDefault(); e.stopPropagation();
-      var raw = (ta.value || '').trim();
+      var zone = llClsZone(ta);
+      var raw = (zone.value || '').trim();
       if (!raw) return;
       var nb = countStudents(raw);
       var nom = window.prompt('Nom de cette classe :\n(ex : 2nde 4, 1ere LLCER\u2026)', '');
@@ -84454,7 +84591,7 @@ llHookAll = function() {
         if (l2.length >= 40) { window.llToast('Maximum 40 classes enregistr\u00E9es.','warn'); return; }
         l2.push({ name: nom, raw: raw, count: nb, savedAt: Date.now() });
       }
-      if (save(l2)) refresh(ta);
+      if (save(l2)) refresh(zone);
     });
     box.appendChild(sv);
 
@@ -84481,11 +84618,12 @@ llHookAll = function() {
       return;
     }
     var existing = document.getElementById('__ll_cls');
-    if (existing) {
+    if (existing && existing.__llTa === ta) {
       var sv = document.getElementById('__ll_cls_save');
       if (sv) sv.disabled = !(ta.value || '').trim();
       return;
     }
+    if (existing) existing.remove();
     var fg = ta.closest('.fg') || ta.parentElement;
     if (!fg) return;
     fg.parentNode.insertBefore(build(ta), fg.nextSibling);
@@ -86247,6 +86385,10 @@ window.addEventListener('load',function(){
     '  transition: opacity .34s ease;',
     '}',
     '#__lesson_loom_offline_banner:hover { opacity: 1; }',
+
+    /* LOT P5 : le bandeau renseigne a l'ecran, il n'a rien a faire sur une
+       fiche imprimee ni dans un PDF. Meme reflexe que les autres blocs. */
+    '@media print { #__lesson_loom_offline_banner { display: none !important; } }',
 
     /* — Barres de défilement verticales : 5 px partout. Les deux dernières
          étaient à 4 px. La barre horizontale des onglets reste à 4 px : une
@@ -89289,6 +89431,17 @@ function llIcsAnalyse(texte){
 
   /* ── Le bouton unique de restauration ─────────────────────────────── */
   function lire(fichier){
+    /* LOT S1 -- un fichier .html n'est pas une sauvegarde a restaurer :
+       c'est l'application a emporter. On l'explique au lieu de refuser. */
+    var __nom = (fichier && fichier.name) ? String(fichier.name).toLowerCase() : '';
+    if(/\.html?$/.test(__nom)){
+      window.alert(
+        'Ce fichier .html n\u2019est pas \u00e0 restaurer \u2014 c\u2019est votre application \u00e0 emporter.\n\n'
+        + 'Ouvrez-le simplement par double-clic\u00a0: il contient d\u00e9j\u00e0 vos donn\u00e9es.\n\n'
+        + 'Pour restaurer ici, choisissez le fichier .json produit par '
+        + '\u00ab\u00a0Sauvegarder tout mon travail\u00a0\u00bb.');
+      return;
+    }
     var r = new FileReader();
     r.onerror = function(){ dire('Ce fichier n\u2019a pas pu \u00eatre lu.', 'warn'); };
     r.onload = function(){
@@ -89408,7 +89561,8 @@ function llIcsAnalyse(texte){
     var t1 = el('div');
     t1.appendChild(el('div', 'font-size:14px;font-weight:800', 'Sauvegarder tout mon travail'));
     t1.appendChild(el('div', 'font-size:11px;opacity:.9;margin-top:1px;line-height:1.4',
-      'Un fichier avec TOUT\u00a0: s\u00e9quences, classes, emploi du temps, \u00e9l\u00e8ves.'));
+      'Produit un fichier .json avec TOUT\u00a0: s\u00e9quences, s\u00e9ances, grilles, '
+      + 'progressions, classes et EDT. C\u2019est ce fichier qu\u2019il faut conserver.'));
     b1.appendChild(t1);
     b1.onclick = function(){
       try{
@@ -89418,6 +89572,28 @@ function llIcsAnalyse(texte){
     };
     principal.appendChild(b1);
 
+    /* LOT S1 -- la sauvegarde HTML remonte du repli : c'est une application
+       complete et transportable, la meilleure reponse pour une cle USB.
+       Elle ne fait qu'appeler le bouton d'origine, reste en place, cache. */
+    var bH = el('button', 'width:100%;display:flex;align-items:center;gap:11px;padding:10px 15px;'
+      + 'border:1px solid var(--border);border-radius:12px;cursor:pointer;font-family:inherit;'
+      + 'text-align:left;color:var(--text);background:var(--card);margin-bottom:7px');
+    bH.type = 'button';
+    bH.appendChild(el('span', 'font-size:20px;flex:none', '\ud83c\udf10'));
+    var tH = el('div');
+    tH.appendChild(el('div', 'font-size:13.5px;font-weight:800',
+      'Emporter l\u2019application avec mes donn\u00e9es'));
+    tH.appendChild(el('div', 'font-size:11px;color:var(--text-muted);margin-top:1px;line-height:1.4',
+      'Produit un fichier .html\u00a0: l\u2019application enti\u00e8re + vos donn\u00e9es, '
+      + '\u00e0 ouvrir sur un autre ordinateur \u2014 id\u00e9al pour une cl\u00e9 USB.'));
+    bH.appendChild(tH);
+    bH.onclick = function(){
+      var o = modale.querySelector('#__ll_sv_html');
+      if(o){ o.click(); return; }
+      dire('La sauvegarde HTML n\u2019est pas disponible.', 'warn');
+    };
+    principal.appendChild(bH);
+
     var b2 = el('button', 'width:100%;display:flex;align-items:center;gap:11px;padding:10px 15px;'
       + 'border:1px solid var(--border);border-radius:12px;cursor:pointer;font-family:inherit;'
       + 'text-align:left;color:var(--text);background:var(--card)');
@@ -89426,7 +89602,7 @@ function llIcsAnalyse(texte){
     var t2 = el('div');
     t2.appendChild(el('div', 'font-size:13.5px;font-weight:800', 'Restaurer une sauvegarde'));
     t2.appendChild(el('div', 'font-size:11px;color:var(--text-muted);margin-top:1px;line-height:1.4',
-      'Le format est reconnu tout seul. Vos donn\u00e9es actuelles seront remplac\u00e9es.'));
+      'Rendez-lui le fichier .json du premier bouton. Vos donn\u00e9es actuelles seront remplac\u00e9es.'));
     b2.appendChild(t2);
     var inp = document.createElement('input');
     inp.type = 'file';
@@ -89468,6 +89644,11 @@ function llIcsAnalyse(texte){
     repli.appendChild(restBloc);
 
     principal.parentNode.insertBefore(repli, principal.nextSibling);
+
+    /* LOT S1 -- le repli disparait de l'ecran mais reste dans la page : ses
+       boutons d'origine continuent de fonctionner, appeles par les notres.
+       Rien n'est supprime, donc rien ne peut casser. */
+    repli.style.display = 'none';
 
     /* LOT 68 v6 — les six cartes reviennent a leur disposition d'origine :
        trois sur une ligne, trois en dessous. Le resserrement sur une seule
