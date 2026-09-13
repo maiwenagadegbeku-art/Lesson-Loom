@@ -63628,8 +63628,8 @@ const ProgressionEditor = ({
   const availSequences = data.sequences.filter(s => s.niveau === p.niveau && !p.sequenceIds.includes(s.id));
   const includedSequences = p.sequenceIds.map(id => data.sequences.find(s => s.id === id)).filter(Boolean);
   try { window.__ll_curProg = p; window.__ll_curProgSeqIds = includedSequences.map(s => s.id); } catch (e) {}
-  const grammarTotal = _data_sequenceurData__WEBPACK_IMPORTED_MODULE_2__.GRAMMAR[grammarKey(p.niveau, p.lv)] || [];
-  const phonoTotal = _data_sequenceurData__WEBPACK_IMPORTED_MODULE_2__.PHONO[grammarKey(p.niveau, p.lv)] || [];
+  const grammarTotal = (0,_data_sequenceurData__WEBPACK_IMPORTED_MODULE_2__.getGrammarFor)(p.niveau, p.lv) || [];
+  const phonoTotal = (0,_data_sequenceurData__WEBPACK_IMPORTED_MODULE_2__.getPhonoFor)(p.niveau, p.lv) || [];
   // Axes officiels selon le niveau (Seconde/Première/Terminale, AXES BO).
   // Pour les filières spé (LLCER), on tombe sur Première/Terminale.
   const axesNiveau = _data_sequenceurData__WEBPACK_IMPORTED_MODULE_2__.AXES[p.niveau] || _data_sequenceurData__WEBPACK_IMPORTED_MODULE_2__.AXES[(_p$niveau = p.niveau) === null || _p$niveau === void 0 ? void 0 : _p$niveau.split('_')[0]] || {};
