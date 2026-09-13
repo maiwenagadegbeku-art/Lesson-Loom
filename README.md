@@ -126,11 +126,12 @@ développement s'est poursuivi ensuite directement dans le fichier HTML unique :
 
 ## État du projet
 
-**Version de référence :** volet 8 (17 août 2026), campagne de publication
-(21 août 2026), revue finale avant mise en ligne (24 août 2026).
+**Version de référence :** volet 9 (13 septembre 2026), couverture du programme au collège et en voie technologique.
 
-Fichier unique de 5 157 088 octets. Cœur compilé React : 32 retouches, dont
-deux portant uniquement sur des données. 24 blocs autonomes.
+**Versions précédentes :** volet 8 (17 août 2026) · campagne de publication (21 août 2026) · revue finale avant mise en ligne (24 août 2026).
+
+Fichier unique de 5 165 317 octets. Cœur compilé React : 33 retouches,
+dont deux portant uniquement sur des données. 24 blocs autonomes.
 
 Le développement suit une méthode stricte : un lot à la fois, diagnostic avant
 tout code, banc d'essai passé sur la version défectueuse avant d'être cru sur
