@@ -41,12 +41,19 @@ la main.
 Les créneaux acceptent les cas réels : **semaine A / semaine B**, demi-groupes,
 et le rythme de chaque cours.
 
+Exportez de Pronote **l'année entière** si possible : l'import reconnaît alors seul
+la semaine A ou B de vos cours à la quinzaine. Une DNL, une section ou une option
+réunissant plusieurs classes devient une classe à part, sous le nom de son groupe.
+
 > Si vous sautez cette étape, tout le reste marche — mais vous placerez vos
 > séances à la main sur le calendrier au lieu de laisser l'application le faire.
 
 ### 2 · Votre première séquence
 
 Onglet **📝 Séquences**. Choisissez un niveau, ouvrez-le, créez une séquence.
+
+Les niveaux que vous n'enseignez pas se masquent : passez la souris sur leur carte,
+une croix apparaît.
 
 L'éditeur a six onglets, dans l'ordre où l'on travaille :
 
@@ -68,6 +75,9 @@ attendue et ses devoirs. Les objectifs de la séquence mère apparaissent en
 étiquettes cliquables : **un clic les inscrit dans la séance**, un second les
 retire — et ce que vous ajoutez depuis une séance remonte dans la fiche de sa
 séquence.
+
+Une séance se copie vers une autre séquence, ou vers vos séances flash, par la
+petite icône à gauche de « Dupliquer » sur sa carte.
 
 ---
 
@@ -94,6 +104,12 @@ du baccalauréat, grille LLCER.
 selon le type de grille, elle se trouve sur les colonnes ou sur les lignes. C'est
 là que se met le nombre de points de chaque critère.
 
+Une grille porte en fait **deux séries de points** : l'une sur les lignes, l'autre
+sur les colonnes. **Celle que signale la vague violette fait le total.** L'autre ne
+compte pas : si elle est remplie, elle s'affiche seulement comme un repère, par
+exemple le maximum par case. Les modèles la remplissent parfois. Mettez-y la
+valeur qui vous aide, plutôt que 0, qui s'afficherait « /0 ».
+
 **Le total commande tout.** Le champ **Total sur**, en haut, alimente la conversion
 affichée en bas de l'éditeur — score brut et note finale. Vérifiez-le avant de
 distribuer.
@@ -104,8 +120,9 @@ niveaux CECRL voulus et arrivent pré-remplies : vous pouvez ensuite modifier le
 textes, affiner les descripteurs et ajuster les points.
 
 **Ajuster la grille.** Les boutons **+** ajoutent une colonne ou une ligne, les
-petites croix rouges les retirent. Et **Descripteurs CECRL** va chercher les
-descripteurs officiels pour les insérer dans les cases.
+petites croix rouges les retirent. Et **✨ Descripteurs CECRL** présente les
+descripteurs officiels phrase par phrase : vous copiez celles qui vous servent,
+puis vous les collez dans les cases.
 
 ### L'onglet 📊 Évaluations les rassemble toutes
 
@@ -158,8 +175,37 @@ respectant les semaines A et B et les demi-groupes.
 Pour que cela fonctionne, il faut avoir renseigné **les classes et leurs créneaux**
 (étape 1) **et les vacances scolaires** (bouton **+ Vacances**).
 
+**Absences, grèves, sorties** : bouton **🚌 Sortie / Voyage**, en choisissant si
+elle concerne toutes vos classes ou une seule, case **Pas de cours ce jour-là**
+cochée. Le placement saute ces jours. Saisissez-les **avant** de placer ; une
+absence ajoutée, déplacée ou supprimée après coup vous signale les séances
+touchées et propose de recalculer, en montrant ce qui change.
+
+**Séances flash** : bouton **⚡ Flash**. Rattachée à une classe, une flash peut
+**remplacer une séance** : cochez la case, puis le ou les cours qu'elle remplace
+ce jour-là. La séquence de cette classe se décale d'autant. Sans la case, la
+flash s'ajoute à un cours normal et rien ne bouge. Comme pour une absence,
+Lesson Loom propose de recalculer quand vous ajoutez, modifiez ou supprimez une
+flash qui remplace un cours.
+
 Le menu **Afficher** permet de ne voir qu'une classe à la fois. Et **🖨️ Imprimer**
 sort le calendrier d'une classe, en grille ou en liste.
+
+---
+
+## Suivre votre progression
+
+Onglet **Progression**. Il rassemble vos séquences d'un niveau sur l'année.
+
+Deux blocs vous évitent de tout garder en tête :
+
+- la **Couverture du programme**, qui coche ce que vos séquences ont traité dans
+  le programme officiel du niveau ;
+- le **Bilan de réemploi des objectifs**, qui montre ce que vous avez annoncé, où
+  vous l'avez retravaillé, et ce que vous n'avez jamais repris.
+
+Pour alimenter le bilan, cochez en fin de séance le panneau **Cocher les objectifs
+traités**.
 
 ---
 
@@ -184,6 +230,10 @@ Onglet **📚 Bibliothèque**. Tout ce qui se garde d'une année sur l'autre.
 **Plusieurs de ces éléments se réimportent directement dans une séquence** —
 activités favorites, grilles, supports, stratégies. C'est tout l'intérêt : ce qui a
 marché une fois ressert.
+
+**Une séquence se partage avec une collègue** : **Exporter → Partager (HTML)**. Elle
+l'importe par **📥 Importer une séquence partagée**, et la séquence s'ajoute aux
+siennes. Ouvert seul, le fichier se lit et s'imprime comme une fiche.
 
 ---
 
@@ -215,6 +265,10 @@ leur palier, les étapes du projet, et une ligne de synthèse en pied de page.
 **La fiche de séance** porte son objectif en tête, puis les objectifs par
 catégorie, les activités en cartes avec leur durée, la trace écrite et les devoirs.
 
+**La séquence complète** — fiche, sommaire et toutes les séances — s'exporte en
+compact ou en aéré, avec un pied de page sur chaque page. Le PDF d'une séance
+porte le nom de sa séquence et son numéro.
+
 Les progressions, les calendriers et les grilles s'impriment également.
 
 ---
@@ -242,8 +296,9 @@ classes du niveau de la séquence. Vérifiez le niveau de la classe dans **👥*
 Bibliothèque. Puis votre dernier fichier de sauvegarde, par **💾 → Restaurer**.
 
 **L'apparence est différente d'hier** — vous êtes probablement hors connexion.
-Seuls les dessins des caractères viennent d'Internet ; tout le reste fonctionne à
-l'identique.
+Seuls les dessins des caractères et le **téléchargement des notes en PDF**
+demandent Internet ; tout le reste fonctionne à l'identique. Sans connexion,
+**Tout imprimer** prend le relais.
 
 **Autre chose** — écrivez à contact@lessonloom.fr.
 

@@ -58418,7 +58418,7 @@ const generateDistributionHtml = (grille, students, sequenceTitle = '', profName
 (function(){
   var GRILLE = ${grilleJsonForJs};
   var STUDENTS = ${studentsJsonForJs};
-  var STORAGE_KEY = 'distrib-' + (GRILLE.id || GRILLE.name || 'grille') + '-' + STUDENTS.length;
+  var STORAGE_KEY = 'distrib-' + (GRILLE.id || GRILLE.name || 'grille') + '-L-' + STUDENTS.map(function (s) { return (s && s.name) || ''; }).join('|');
 
   // Charge l'état (notes saisies, bonus) depuis localStorage
   function loadState() {
@@ -61342,7 +61342,7 @@ const EvaluationsView = () => {
         out.push({
           grille: g,
           sequenceId: seq.id,
-          sequenceTitle: seq.title || '(sans titre)',
+          sequenceTitle: seq.titre || seq.title || '(sans titre)', /* RETOUCHE 38 — le titre d'une séquence s'appelle « titre » */
           niveau: seq.niveau || '',
           axe: seq.axe || '',
           createdAt: seq.updatedAt || 0
@@ -73673,7 +73673,7 @@ function hookSeanceExport(){
     el.onclick=function(e){e.preventDefault();menu.style.display='none';cb()};
     return el;
   }
-  menu.appendChild(mkItem('\uD83D\uDDA8\uFE0F','PDF','Impression navigateur (A4)',function(){window.print()}));
+  menu.appendChild(mkItem('\uD83D\uDDA8\uFE0F','PDF','Impression navigateur (A4)',function(){window.__ll_np1Print()}));
   var sep=document.createElement('div');sep.style.cssText='height:1px;background:var(--border);margin:4px 6px';
   menu.appendChild(sep);
   menu.appendChild(mkItem('\uD83D\uDCDD','Document RTF (.rtf)','Format texte \u2014 Word ET LibreOffice',function(){
@@ -73731,7 +73731,7 @@ function openSaveModal(){
       <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:10px">📊 Contenu actuel</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
         ${[
-          ['📝','Séquences',seqs.length],
+          ['📝','Séquences',seqs.filter(function(q){ /* LOT S1 — sans les séquences cachées (séances flash, grilles sans séquence, démo) */ return q && !q.isFlash && !q.isEvalLib && ['__ll_flash_seances__','__ll_eval_grilles__','__ll_tour_demo__'].indexOf(q.id)<0; }).length],
           ['✏️','Séances',totalSeances],
           ['📋','Grilles',totalGrilles],
           ['🎯','Progressions',progs.length],
@@ -75357,6 +75357,39 @@ var LL_EV_COLORS=[
 var _llEvColor=0;
 var _llEditEvId=null;
 
+/* LOT K1 — une sortie, un voyage ou une absence peut concerner toutes les
+   classes ou une seule, et bloquer ou non le placement calcule.
+   Une sortie enregistree avant ce lot n'a ni l'un ni l'autre : elle reste
+   exactement comme avant (elle ne bloque rien) tant qu'on ne la rouvre pas. */
+function llK1Classes(){
+  try{ return (typeof window.llGetClassesEdt==='function') ? (window.llGetClassesEdt().classes||[]) : []; }
+  catch(e){ return []; }
+}
+function llK1NomClasse(c){ return (c && (c.nom||c.name||c.label||c.code)) || ''; }
+function llK1OptionsClasses(existing){
+  var sel = existing && existing.concerne ? existing.concerne : '';
+  var h = '<option value=""'+(sel?'':' selected')+'>Toutes mes classes</option>';
+  llK1Classes().forEach(function(c){
+    var n = llK1NomClasse(c).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+    h += '<option value="'+c.id+'"'+(c.id===sel?' selected':'')+'>'+n+'</option>';
+  });
+  return h;
+}
+function llK1Appliquer(ev, box){
+  var s = box.querySelector('#__ll_ev_cls'), b = box.querySelector('#__ll_ev_bloque');
+  ev.concerne = s ? (s.value||'') : '';
+  var c = llK1Classes().filter(function(x){ return x.id===ev.concerne; })[0];
+  ev.concerneNom = c ? llK1NomClasse(c) : '';
+  ev.bloque = !!(b && b.checked);
+}
+/* Les jours bloques pour une classe donnee : lus par le placement calcule. */
+window.__ll_k1Bloquants = function(classId){
+  var evs; try{ evs = JSON.parse(localStorage.getItem('lessonloom-cal-events')||'[]')||[]; }catch(e){ evs = []; }
+  return evs.filter(function(e){
+    return e && e.bloque===true && e.start && (!e.concerne || e.concerne===classId);
+  });
+};
+
 window.llOpenSortieModal=function(eventId){
   _llEditEvId=eventId||null;
   var existing=null;
@@ -75375,14 +75408,20 @@ window.llOpenSortieModal=function(eventId){
 
   box.innerHTML=
     '<button id="__ll_srt_x" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-muted)">&times;</button>'+
-    '<h2 style="font-family:Playfair Display,serif;font-size:19px;font-weight:800;margin:0 0 4px">'+(existing?'✏️ Modifier':'🚌 Ajouter')+' une sortie / voyage</h2>'+
+    '<h2 style="font-family:Playfair Display,serif;font-size:19px;font-weight:800;margin:0 0 4px;padding-right:28px">'+(existing?'✏️ Modifier':'🚌 Ajouter')+' une sortie, un voyage ou une absence</h2>'+
     '<p style="font-size:12px;color:var(--text-muted);margin:0 0 16px">Bloque une période dans le calendrier.</p>'+
-    '<div style="margin-bottom:10px"><label class="fl">Nom de la sortie / du voyage</label>'+
-    '<input id="__ll_ev_name" class="fi" placeholder="Ex : Sortie musée, Voyage à Londres…" value="'+(existing?existing.title||'':'')+'" /></div>'+
+    '<div style="margin-bottom:10px"><label class="fl">Nom</label>'+
+    '<input id="__ll_ev_name" class="fi" placeholder="Ex : Sortie musée, Formation, Bac blanc…" value="'+(existing?existing.title||'':'')+'" /></div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">'+
       '<div><label class="fl">Date de début</label><input id="__ll_ev_start" class="fi" type="date" value="'+(existing?existing.start||'':'')+'" /></div>'+
       '<div><label class="fl">Date de fin</label><input id="__ll_ev_end" class="fi" type="date" value="'+(existing?existing.end||'':'')+'" /></div>'+
     '</div>'+
+    /* LOT K1 — classe concernée et blocage du placement calculé */
+    '<div style="margin-bottom:10px"><label class="fl">Concerne</label>'+
+    '<select id="__ll_ev_cls" class="fi">'+llK1OptionsClasses(existing)+'</select></div>'+
+    '<label style="display:flex;gap:8px;align-items:flex-start;margin-bottom:12px;cursor:pointer">'+
+    '<input id="__ll_ev_bloque" type="checkbox" style="margin-top:3px"'+((existing?existing.bloque===true:true)?' checked':'')+' />'+
+    '<span style="font-size:13px">Pas de cours ce jour-là<br><span style="font-size:11px;color:var(--text-muted)">Le placement calculé saute ces jours</span></span></label>'+
     '<div style="margin-bottom:12px"><label class="fl">Description (optionnel)</label>'+
     '<textarea id="__ll_ev_desc" class="fi field-textarea" placeholder="Notes…" style="min-height:56px">'+(existing?existing.desc||'':'')+'</textarea></div>'+
     '<div style="margin-bottom:14px"><label class="fl">Couleur</label>'+
@@ -75423,6 +75462,8 @@ window.llOpenSortieModal=function(eventId){
     if(!confirm('Supprimer cette sortie ?'))return;
     llSaveCalEvents(llGetCalEvents().filter(function(e){return e.id!==eventId;}));
     ov.remove(); llRefreshCalBadges();
+    /* LOT K1d */
+    try{ if(typeof window.__ll_k1dSignaler==='function') window.__ll_k1dSignaler(existing, null, 'suppr'); }catch(x){}
   };
 
   box.querySelector('#__ll_ev_save').onclick=function(){
@@ -75437,20 +75478,31 @@ window.llOpenSortieModal=function(eventId){
     if(end<start){err.textContent='⚠️ La fin doit être après le début.';err.style.display='block';return;}
     err.style.display='none';
     var evs=llGetCalEvents();
+    var avantK1d=null;
     if(_llEditEvId){
       var ev=evs.find(function(e){return e.id===_llEditEvId;});
-      if(ev){ev.title=name;ev.start=start;ev.end=end;ev.desc=desc;ev.colorIdx=_llEvColor;}
+      if(ev){ try{ avantK1d=JSON.parse(JSON.stringify(ev)); }catch(x){ avantK1d=null; } }
+      if(ev){ev.title=name;ev.start=start;ev.end=end;ev.desc=desc;ev.colorIdx=_llEvColor;llK1Appliquer(ev,box);}
     }else{
-      evs.push({id:'ll_'+Date.now(),title:name,start:start,end:end,desc:desc,colorIdx:_llEvColor});
+      var nouv={id:'ll_'+Date.now(),title:name,start:start,end:end,desc:desc,colorIdx:_llEvColor};llK1Appliquer(nouv,box);evs.push(nouv);
     }
     llSaveCalEvents(evs);
     ov.remove();
     llRefreshCalBadges();
     llRefreshBiblio();
-    // Toast
-    var t=document.createElement('div');
-    t.textContent='✓ Sortie enregistrée !';
-    window.llToast(t,'ok');
+    /* LOT K1c — si des séances déjà placées tombent sur cette absence, on les
+       liste avec un bouton « Recalculer » ; sinon, le message habituel. */
+    var enregistre=_llEditEvId ? evs.find(function(e){return e.id===_llEditEvId;}) : nouv;
+    var signale=false;
+    try{
+      if(_llEditEvId && avantK1d && typeof window.__ll_k1dSignaler==='function') signale=window.__ll_k1dSignaler(avantK1d, enregistre, 'modif');
+      else signale=(typeof window.__ll_k1cSignaler==='function') && window.__ll_k1cSignaler(enregistre);
+    }catch(e){ signale=false; }
+    if(!signale){
+      var t=document.createElement('div');
+      t.textContent='✓ Enregistré !';
+      window.llToast(t,'ok');
+    }
   };
 };
 
@@ -75476,7 +75528,7 @@ function llRefreshCalBadges(){
         // Main label area (click → edit modal)
         var lbl=document.createElement('div');
         lbl.style.cssText='flex:1;font-size:9px;font-weight:600;color:'+c.tx+';padding:2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0';
-        lbl.textContent='🚌 '+ev.title;
+        lbl.textContent='🚌 '+ev.title+(ev.concerne&&ev.concerneNom?' · '+ev.concerneNom:'');
         lbl.title='Cliquer pour modifier… ('+ev.start+' → '+ev.end+(ev.desc?' — '+ev.desc:'')+')';
 
         // ✕ delete button (always visible)
@@ -75502,9 +75554,12 @@ function llRefreshCalBadges(){
           del.onclick=function(e){
             e.stopPropagation();
             if(!confirm('Supprimer la sortie "« '+evTitle+' »" du calendrier ?')) return;
+            var ancK1d=llGetCalEvents().filter(function(ev){ return ev.id===evId; })[0]||null;
             llSaveCalEvents(llGetCalEvents().filter(function(ev){ return ev.id!==evId; }));
             llRefreshCalBadges();
             llRefreshBiblio();
+            /* LOT K1d */
+            try{ if(ancK1d && typeof window.__ll_k1dSignaler==='function') window.__ll_k1dSignaler(ancK1d, null, 'suppr'); }catch(x){}
           };
         })(ev.id, ev.title);
 
@@ -77622,7 +77677,13 @@ window.llCopyFlashToSeq = function(seaId) {
         createdAt: Date.now()
       });
       var seances = (seq.seances || []).concat([newSea]);
-      upsert(Object.assign({}, seq, { seances: seances }));
+      /* LOT CS2 — on relit la sequence au moment du clic, et ses objectifs
+         recoivent ceux de la seance flash. */
+      var _d = window.__ll_getData ? window.__ll_getData() : null;
+      var _f = _d && (_d.sequences || []).find(function(x) { return x.id === seq.id; });
+      if (_f) seances = (_f.seances || []).concat([newSea]);
+      var _base = _f || seq;
+      upsert(Object.assign({}, _base, { seances: seances, tags: (window.__ll_cs2Tags ? window.__ll_cs2Tags(_base, newSea) : _base.tags) }));
       ov.remove();
       var t = document.createElement('div');
       t.textContent = '✓ Séance ajoutée à la séquence !';
@@ -78050,12 +78111,12 @@ function llInjectSeanceListTickSummary(){
     if (!dash || dash.offsetParent === null) return;
     if (typeof window.__ll_getData !== 'function') return;
 
-    // Sequence courante : on part de la liste affichee, jamais d'un titre.
-    var seq = window.__ll_activeSeq;
-    if (!seq) return;
-    var dAll = window.__ll_getData();
-    var fresh = (dAll.sequences || []).filter(function(s){ return s.id === seq.id; })[0];
-    if (!fresh) return;
+    /* LOT CS2b — chaque carte retrouve SA seance par l'identifiant qu'elle
+       porte. Avant, on supposait que la liste affichee etait celle de la
+       derniere seance ouverte : apres une visite dans une autre sequence,
+       le badge ⚡ Flash apparaissait ou disparaissait sur la mauvaise carte
+       (affichage seul, aucune donnee n'etait touchee). */
+    var trouve = window.__ll_seanceDeCarte;
 
     var grid = dash.querySelector('.grid');
     if (!grid) return;
@@ -78065,7 +78126,8 @@ function llInjectSeanceListTickSummary(){
     css();
 
     cards.forEach(function(card, idx) {
-      var sea = (fresh.seances || [])[idx];
+      var r = (typeof trouve === 'function') ? trouve(card) : null;
+      var sea = r && r.sea;
       if (!sea) return;
       var isFlash = !!sea.fromFlash;
       var existing = card.querySelector('.__ll_flash_card_badge');
@@ -78718,21 +78780,26 @@ function llInjectSeanceListTickSummary(){
   // ── 2. Detail par sequence ────────────────────────────────────────
   function detailHtml(seqs){
     var o = ['<div style="page-break-before:always"></div>'];
-    o.push('<h2 style="font-family:Georgia,serif;font-size:14pt;margin:0 0 10pt;' +
+    o.push('<h2 class="ll-keep" style="font-family:Georgia,serif;font-size:14pt;margin:0 0 10pt;' +
       'border-bottom:2pt solid #cbd5e1;padding-bottom:6pt">D\u00E9tail par s\u00E9quence</h2>');
 
     seqs.forEach(function(s, i){
       var tags = s.tags || {};
-      o.push('<div style="border:1pt solid #cbd5e1;border-radius:4pt;padding:8pt 10pt;margin-bottom:9pt;page-break-inside:avoid">');
+      /* LOT P1 — une sequence qui tient sur une page reste entiere ; une
+         sequence plus haute qu'une page se coupe entre deux rubriques, sans
+         laisser son titre seul (classes ll-pcard / ll-keep / ll-bloc). */
+      o.push('<div class="ll-pcard" style="border:1pt solid #cbd5e1;border-radius:4pt;padding:8pt 10pt;margin-bottom:9pt">');
+      o.push('<div class="ll-keep">');
       o.push('<div style="font-size:8.5pt;font-weight:700;letter-spacing:1pt;color:' + ck('#4f46e5') + '">S\u00C9QUENCE ' + (i+1) + '</div>');
       o.push('<div style="font-family:Georgia,serif;font-size:12pt;font-weight:700;margin:2pt 0 4pt">' + e(s.titre || 'Sans titre') + '</div>');
       if (s.problematique) o.push('<div style="font-style:italic;font-size:9pt;color:#475569;margin-bottom:5pt">\u00AB ' + e(s.problematique) + ' \u00BB</div>');
       if (s.axe) o.push('<div style="font-size:9pt;margin-bottom:5pt"><b>Axe</b> \u2014 ' + e(s.axe) + '</div>');
+      o.push('</div>');
 
       COMPS.forEach(function(c){
         var items = tags[c.k] || [];
         if (!items.length) return;
-        o.push('<div style="font-size:9pt;margin-bottom:3pt"><b style="color:' + ck(c.c) + '">' + e(c.full) + '</b><br>');
+        o.push('<div class="ll-bloc" style="font-size:9pt;margin-bottom:3pt"><b style="color:' + ck(c.c) + '">' + e(c.full) + '</b><br>');
         o.push(items.map(function(it){
           var l = lvl(it);
           return (l ? badge(l, c.c) + ' ' : '') + e(txt(it));
@@ -78743,13 +78810,13 @@ function llInjectSeanceListTickSummary(){
       LING.forEach(function(x){
         var items = (tags[x.k] || []).map(txt).filter(Boolean);
         if (!items.length) return;
-        o.push('<div style="font-size:9pt;margin-bottom:3pt"><b style="color:' + ck(x.c) + '">' + e(x.lbl) + '</b> \u2014 ' +
+        o.push('<div class="ll-bloc" style="font-size:9pt;margin-bottom:3pt"><b style="color:' + ck(x.c) + '">' + e(x.lbl) + '</b> \u2014 ' +
           items.map(e).join(' \u00B7 ') + '</div>');
       });
 
       var tk = tasksOf(s);
       if (tk.length) {
-        o.push('<div style="font-size:9pt"><b>T\u00E2ches</b><br>' + tk.map(function(t){
+        o.push('<div class="ll-bloc" style="font-size:9pt"><b>T\u00E2ches</b><br>' + tk.map(function(t){
           var col = ck(t.f ? C_FIN : C_INT);
           return '<span style="color:' + col + ';font-weight:700">' +
             (t.f ? '\u25C6 T\u00E2che finale' : '\u25C7 T\u00E2che interm\u00E9diaire') + '</span>' +
@@ -78788,7 +78855,7 @@ function llInjectSeanceListTickSummary(){
     });
 
     var o = ['<div style="page-break-before:always"></div>'];
-    o.push('<h2 style="font-family:Georgia,serif;font-size:14pt;margin:0 0 10pt;' +
+    o.push('<h2 class="ll-keep" style="font-family:Georgia,serif;font-size:14pt;margin:0 0 10pt;' +
       'border-bottom:2pt solid #cbd5e1;padding-bottom:6pt">Bilan de r\u00E9emploi des objectifs</h2>');
 
     var any = false;
@@ -78799,8 +78866,9 @@ function llInjectSeanceListTickSummary(){
       any = true;
       keys.sort(function(x,y){ return b[y].n - b[x].n || x.localeCompare(y); });
 
-      o.push('<p style="font-size:10pt;font-weight:700;margin:9pt 0 3pt;color:' + ck(c.c) + '">' + e(c.lbl) + '</p>');
-      o.push('<table><thead><tr>' +
+      o.push('<div class="ll-pcard">');
+      o.push('<p class="ll-keep" style="font-size:10pt;font-weight:700;margin:9pt 0 3pt;color:' + ck(c.c) + '">' + e(c.lbl) + '</p>');
+      o.push('<table class="ll-flow"><thead><tr>' +
         '<th style="width:42%">Objectif</th>' +
         '<th style="width:10%;text-align:center">R\u00E9emploi</th>' +
         '<th style="width:48%">S\u00E9ances</th></tr></thead><tbody>');
@@ -78817,6 +78885,7 @@ function llInjectSeanceListTickSummary(){
           '<td style="font-size:8.5pt">' + wh + '</td></tr>');
       });
       o.push('</tbody></table>');
+      o.push('</div>');
     });
 
     if (!any) o.push('<p style="font-style:italic;color:#475569">Aucun objectif coch\u00E9 dans cette progression.</p>');
@@ -78860,8 +78929,23 @@ function llInjectSeanceListTickSummary(){
       'body{-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
       'tr{break-inside:avoid}' +
       '@media print{body{margin:1cm}@page{margin:1.5cm;size:A4 ' + (opt.land ? 'landscape' : 'portrait') + '}}' +
+      /* LOT P1 — Firefox renvoyait en entier a la page suivante un bloc plus
+         haut qu'une page, en laissant son titre seul. */
+      '.ll-pcard{break-inside:auto;page-break-inside:auto}' +
+      '.ll-pcard.ll-entier,.ll-bloc{break-inside:avoid;page-break-inside:avoid}' +
+      '.ll-pcard.ll-entier table{break-inside:avoid;page-break-inside:avoid}' +
+      '.ll-keep{break-inside:avoid;page-break-inside:avoid}' +
+      '.ll-keep::after{content:"";display:block;height:70pt;margin-bottom:-70pt}' +
       '</style></head><body>' + body +
-      '<scr' + 'ipt>window.onload=function(){setTimeout(function(){window.print()},400)}</scr' + 'ipt>' +
+      '<scr' + 'ipt>' +
+      /* On mesure chaque bloc a la largeur de la page : s'il tient sur une
+         page, il ne sera jamais coupe. */
+      'function llP1(){try{var land=' + (opt.land ? 'true' : 'false') + ';' +
+      'var W=land?247:160,H=land?170:257,mm=96/25.4,b=document.body,old=b.style.cssText;' +
+      'b.style.width=W+"mm";b.style.margin="0";' +
+      'var l=document.querySelectorAll(".ll-pcard");for(var i=0;i<l.length;i++){if(l[i].offsetHeight<H*mm)l[i].classList.add("ll-entier");}' +
+      'b.style.cssText=old;}catch(e){}}' +
+      'window.onload=function(){llP1();setTimeout(function(){window.print()},400)}</scr' + 'ipt>' +
       '</body></html>'
     );
     win.document.close();
@@ -80940,14 +81024,53 @@ llHookAll = function(){
 // FEATURE: Copier une séance vers une autre séquence
 // ═══════════════════════════════════════════════════════════════════
 
-window.llPickSeqForCopy = function(sea) {
+/* LOT CS2 — une seance qui arrive dans une VRAIE sequence (copie, ou
+   seance flash ajoutee) fait monter ses objectifs de lexique, grammaire,
+   phonologie et pragmatique dans la sequence : exactement la regle de
+   l'editeur (sans doublon, rien n'est retire). ⚡ Seances Flash et les
+   coulisses ne recoivent rien : elles restent comme avant. */
+window.__ll_cs2Tags = function(seq, sea) {
+  var tags = (seq && seq.tags) || {};
+  if (!seq || !sea || seq.id === '__ll_flash_seances__' || seq.isFlash || seq.isEvalLib ||
+      seq.id === '__ll_eval_grilles__' || seq.id === '__ll_tour_demo__') return tags;
+  var map = { objLex: 'lexique', objGram: 'grammar', objPhon: 'phono', objPrag: 'pragma' };
+  var out = null;
+  Object.keys(map).forEach(function(k) {
+    var pk = map[k], items = sea[k] || [];
+    if (!items.length) return;
+    var list = (out && out[pk]) || tags[pk] || [];
+    var ajout = [];
+    items.forEach(function(it) {
+      var text = (it && typeof it === 'object') ? it.text : it;
+      var level = (it && typeof it === 'object') ? it.level : undefined;
+      if (!text || !String(text).trim()) return;
+      var deja = list.concat(ajout).some(function(x) {
+        var xt = (x && typeof x === 'object') ? x.text : x;
+        var xl = (x && typeof x === 'object') ? x.level : undefined;
+        return xt === text && (xl || '') === (level || '');
+      });
+      if (!deja) ajout.push(level !== undefined && level !== '' ? { text: text, level: level } : { text: text });
+    });
+    if (ajout.length) {
+      if (!out) out = Object.assign({}, tags);
+      out[pk] = list.concat(ajout);
+    }
+  });
+  return out || tags;
+};
+
+window.llPickSeqForCopy = function(sea, srcSeqId) {
   var data = window.__ll_getData ? window.__ll_getData() : null;
   if (!data) return;
-  var curId = window.__ll_activeSeq ? window.__ll_activeSeq.id : null;
+  /* LOT CS1 — la sequence d'origine est celle qui contient vraiment la
+     seance (et non la derniere seance ouverte) ; ⚡ Seances Flash devient
+     une destination, sauf si la seance en vient deja. */
+  var curId = srcSeqId || (window.__ll_activeSeq ? window.__ll_activeSeq.id : null);
   var others = (data.sequences || []).filter(function(s) {
     return s.id !== curId && !s.isFlash && !s.isEvalLib && s.id !== LL_EVAL_GRILLES_SEQ_ID && s.id !== '__ll_flash_seances__';
   });
-  if (!others.length) { window.llToast('Aucune autre séquence disponible.','info'); return; }
+  var versFlash = curId !== '__ll_flash_seances__';
+  if (!others.length && !versFlash) { window.llToast('Aucune autre séquence disponible.','info'); return; }
   var old = document.getElementById('__ll_copy_sea_modal');
   if (old) old.remove();
   var ov = document.createElement('div');
@@ -80968,6 +81091,15 @@ window.llPickSeqForCopy = function(sea) {
   sub.style.cssText = 'font-size:12px;color:var(--text-muted);margin:0 0 16px';
   sub.innerHTML = 'S\u00E9ance : <strong>' + esc(sea.titre || 'Sans titre') + '</strong>';
   box.appendChild(closeX); box.appendChild(h2); box.appendChild(sub);
+  if (versFlash) {
+    var fBtn = document.createElement('button');
+    fBtn.style.cssText = 'display:block;width:100%;text-align:left;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--card);cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;margin-bottom:4px;color:var(--text)';
+    fBtn.textContent = '\u26A1 S\u00E9ances Flash';
+    fBtn.onmouseenter = function() { this.style.background = 'rgba(108,99,255,.08)'; };
+    fBtn.onmouseleave = function() { this.style.background = 'var(--card)'; };
+    fBtn.onclick = function() { window.llCopySeanceToSeq(sea, '__ll_flash_seances__'); ov.remove(); };
+    box.appendChild(fBtn);
+  }
   // Group by niveau
   var byNiv = {};
   others.forEach(function(s) {
@@ -80998,37 +81130,67 @@ window.llPickSeqForCopy = function(sea) {
 window.llCopySeanceToSeq = function(sea, targetSeqId) {
   var data = window.__ll_getData ? window.__ll_getData() : null;
   if (!data) return;
+  /* LOT CS1 — on copie la version enregistree la plus recente de la seance. */
+  (data.sequences || []).some(function(s) {
+    var f = (s.seances || []).find(function(x) { return x && sea && x.id === sea.id; });
+    if (f) { sea = f; return true; } return false;
+  });
   var tgt = (data.sequences || []).find(function(s) { return s.id === targetSeqId; });
+  if (!tgt && targetSeqId === '__ll_flash_seances__' && window.__ll_upsertSequence) {
+    tgt = { id: '__ll_flash_seances__', titre: '\u26A1 S\u00E9ances Flash', niveau: '__flash__', annee: 'Flash \u2014 standalone',
+      problematique: '', axe: '', objectifCulturel: '', isFlash: true,
+      tags: { grammar:[], phono:[], lexique:[], pragma:[], task:[], inter:[], docs:[], culture:[] },
+      evaluations: { formatives:[], sommatives:[], notesAttendues:[] }, grilles: [], supportsPlus: [], seances: [], issues: [] };
+  }
   if (!tgt) return;
   var copy = JSON.parse(JSON.stringify(sea));
   copy.id = 'sea_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
   copy.titre = (window.__ll_copyName ? window.__ll_copyName(sea.titre || 'S\u00E9ance') : ((sea.titre || 'S\u00E9ance') + ' (copie)'));
   copy.createdAt = Date.now();
   if (window.__ll_upsertSequence) {
-    window.__ll_upsertSequence(Object.assign({}, tgt, { seances: (tgt.seances || []).concat([copy]) }));
+    window.__ll_upsertSequence(Object.assign({}, tgt, { seances: (tgt.seances || []).concat([copy]), tags: window.__ll_cs2Tags(tgt, copy) }));
   }
   var t = document.createElement('div');
   t.textContent = '\u2713 S\u00E9ance copi\u00E9e vers \u00AB ' + (tgt.titre || 'S\u00E9quence') + ' \u00BB';
   window.llToast(t,'info');
 };
 
+/* LOT CS1 — la carte retrouve sa propre seance au moment du clic (par
+   l'identifiant que porte la carte), au lieu de supposer que la liste
+   affichee est celle de la derniere seance ouverte. */
+function llCs1SeanceDeCarte(el) {
+  var k = null, f = null;
+  for (var p in el) { if (p.indexOf('__reactFiber$') === 0) { f = el[p]; break; } }
+  while (f && !k) { if (f.key) k = f.key; f = f.return; }
+  if (!k) return null;
+  var d = window.__ll_getData ? window.__ll_getData() : null;
+  var res = null;
+  ((d && d.sequences) || []).some(function(s) {
+    var x = (s.seances || []).find(function(y) { return y && y.id === k; });
+    if (x) { res = { sea: x, seqId: s.id }; return true; } return false;
+  });
+  return res;
+}
+window.__ll_seanceDeCarte = llCs1SeanceDeCarte;
 function llHookSeanceCopyBtn() {
   var actEls = document.querySelectorAll('[x-id="SeancesView_344_16"]');
   if (!actEls.length) return;
-  var activeSeq = window.__ll_activeSeq;
-  if (!activeSeq) return;
-  var seances = activeSeq.seances || [];
   actEls.forEach(function(actEl, idx) {
     if (actEl.dataset.llCopyHk) return;
+    if (!llCs1SeanceDeCarte(actEl)) return;
     actEl.dataset.llCopyHk = '1';
-    var sea = seances[idx];
-    if (!sea) return;
+    var sea = null;
     var btn = document.createElement('button');
     btn.className = 'pcard-act';
     btn.title = 'Copier vers une autre s\u00E9quence';
     btn.style.cssText = 'color:var(--accent2)';
     btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
-    btn.onclick = function(e) { e.stopPropagation(); window.llPickSeqForCopy(sea); };
+    btn.onclick = function(e) {
+      e.stopPropagation();
+      var r = llCs1SeanceDeCarte(actEl);
+      if (!r) { window.llToast('S\u00E9ance introuvable : rechargez la page et r\u00E9essayez.','warn'); return; }
+      window.llPickSeqForCopy(r.sea, r.seqId);
+    };
     // Insert before first existing button (the lucide Copy icon)
     actEl.insertBefore(btn, actEl.firstChild);
   });
@@ -82030,6 +82192,14 @@ window.llOpenCalEventEditor = function(evtId) {
     swatches.appendChild(sw);
   });
   colorDiv.appendChild(colorLbl);colorDiv.appendChild(swatches);
+  /* LOT F1a — une seance flash peut changer de classe ici. */
+  var estFlash=!evt.sequenceId&&!evt.c72;
+  var clsDiv=null;
+  if(estFlash&&typeof window.__ll_f1OptionsClasses==='function'){
+    clsDiv=document.createElement('div');clsDiv.style.cssText='margin-bottom:12px';
+    clsDiv.innerHTML='<label class="fl" for="__ll_ceed_c">Classe</label><select id="__ll_ceed_c" class="fi">'+window.__ll_f1OptionsClasses(evt.classId||'')+'</select><div id="__ll_ceed_rp" style="margin-top:8px"></div>';
+  }
+  var f1Pan=null;
 
   // Buttons row
   var btnRow=document.createElement('div');btnRow.style.cssText='display:flex;gap:8px;margin-top:6px';
@@ -82038,8 +82208,11 @@ window.llOpenCalEventEditor = function(evtId) {
   delBtn.textContent='\uD83D\uDDD1\uFE0F Supprimer';
   delBtn.onclick=function(){
     if(!confirm('Supprimer cet \u00E9v\u00E9nement du calendrier ?'))return;
+    var _f2a=JSON.parse(JSON.stringify(evt));
     if(window.__ll_deleteCalEvent)window.__ll_deleteCalEvent(evtId);
     ov.remove();
+    /* LOT F2 */
+    setTimeout(function(){try{if(typeof window.__ll_f2Signaler==='function')window.__ll_f2Signaler(_f2a,null,'suppr');}catch(x){}},250);
   };
   var saveBtn=document.createElement('button');saveBtn.className='btn btn-violet';saveBtn.style.cssText='flex:2';saveBtn.textContent='\u2713 Enregistrer';
   saveBtn.onclick=function(){
@@ -82047,8 +82220,19 @@ window.llOpenCalEventEditor = function(evtId) {
     var e=document.getElementById('__ll_ceed_e');
     if(!s||!s.value){window.llToast('La date de d\u00E9but est requise.','warn');return;}
     var updated=Object.assign({},evt,{startDate:s.value,endDate:(e&&e.value)||s.value,color:selColor});
+    var cSel=document.getElementById('__ll_ceed_c');
+    if(clsDiv&&cSel){
+      if(cSel.value){updated.classId=cSel.value;updated.className=(window.__ll_f1NomClasse?window.__ll_f1NomClasse(cSel.value):'')||updated.className||'';}
+      else{delete updated.classId;delete updated.className;}
+      var _r=(window.__ll_f1LireRemplace&&f1Pan)?window.__ll_f1LireRemplace(f1Pan,cSel.value):{f1:null};
+      if(_r.erreur){window.llToast(_r.erreur,'warn');return;}
+      if(cSel.value&&_r.f1)updated.f1=_r.f1;else delete updated.f1;
+    }
     if(window.__ll_upsertCalEvent)window.__ll_upsertCalEvent(updated);
     ov.remove();
+    /* LOT F2 */
+    var _f2b=JSON.parse(JSON.stringify(evt)),_f2n=JSON.parse(JSON.stringify(updated));
+    setTimeout(function(){try{if(typeof window.__ll_f2Signaler==='function')window.__ll_f2Signaler(_f2b,_f2n,'modif');}catch(x){}},250);
     // Toast
     var t=document.createElement('div');t.textContent='\u2713 \u00C9v\u00E9nement mis \u00E0 jour';
     window.llToast(t,'info');
@@ -82056,7 +82240,14 @@ window.llOpenCalEventEditor = function(evtId) {
 
   btnRow.appendChild(cancelBtn);btnRow.appendChild(delBtn);btnRow.appendChild(saveBtn);
   box.appendChild(closeX);box.appendChild(h2);box.appendChild(infoDiv);
-  box.appendChild(fgStart);box.appendChild(fgEnd);box.appendChild(colorDiv);box.appendChild(btnRow);
+  box.appendChild(fgStart);box.appendChild(fgEnd);if(clsDiv)box.appendChild(clsDiv);box.appendChild(colorDiv);box.appendChild(btnRow);
+  /* LOT F1b — case « Remplace une seance » et choix du cours. */
+  if(clsDiv&&typeof window.__ll_f1Panneau==='function'){
+    var _cs=clsDiv.querySelector('#__ll_ceed_c'),_ds=fgStart.querySelector('input');
+    f1Pan=window.__ll_f1Panneau(clsDiv.querySelector('#__ll_ceed_rp'),function(){return _cs?_cs.value:'';},function(){return _ds?_ds.value:'';},evt.f1||null);
+    if(_cs)_cs.addEventListener('change',f1Pan.redessiner);
+    if(_ds)_ds.addEventListener('change',f1Pan.redessiner);
+  }
   ov.appendChild(box);document.body.appendChild(ov);
   ov.addEventListener('click',function(e){if(e.target===ov)ov.remove();});
   document.addEventListener('keydown',function onK(e){if(e.key==='Escape'){ov.remove();document.removeEventListener('keydown',onK);}});
@@ -82093,66 +82284,128 @@ function llPatchFooter(){
   footer.dataset.llFooterPatched='1';
   footer.innerHTML='';
 
-  // ── LOT 9 — Ligne 1 : l'outil et son auteure ──────────────────────
-  var line1=document.createElement('div');
-  line1.style.cssText='display:flex;align-items:baseline;flex-wrap:wrap;justify-content:center;gap:4px';
+  /* LOT L1 — une seule ligne : l'outil, son auteure, la date, puis
+     « Licence et crédits » (fenetre des mentions : licence, absence de
+     garantie, credits, donnees) et « Code source ». */
+  var line=document.createElement('div');
+  line.style.cssText='display:flex;align-items:baseline;flex-wrap:wrap;justify-content:center;gap:4px;font-size:11px';
 
   var GRAD="font-family:'Playfair Display',serif;font-weight:800;"
     + "background:linear-gradient(135deg,var(--accent),var(--accent4));"
     + "-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent";
-
-  var titleSp=document.createElement('span');
-  titleSp.style.cssText=GRAD+';font-size:13px';
-  titleSp.textContent='\uD83E\uDE84 Lesson Loom';
-
-  var midSp=document.createElement('span');
-  midSp.style.cssText='font-size:11px';
-  midSp.textContent='\u2014 Con\u00E7ue et d\u00E9velopp\u00E9e par';
+  var GRAD2="font-family:'Playfair Display',serif;font-weight:800;"
+    + "background:linear-gradient(135deg,#0f9f8f,#0e7490);"
+    + "-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent";
+  function sp(txt,css){var e=document.createElement('span');if(css)e.style.cssText=css;e.textContent=txt;return e;}
+  function sep(){return sp('\u00B7','opacity:.5;margin:0 3px');}
+  var LIEN='color:var(--accent2);font-weight:700;text-decoration:none;cursor:pointer';
 
   var maiLink=document.createElement('a');
   maiLink.href='mailto:contact@lessonloom.fr';
-  maiLink.style.cssText=GRAD+';font-size:11px;font-weight:400;text-decoration:none';
+  maiLink.style.cssText=GRAD2+';font-size:12px;text-decoration:none';
   maiLink.textContent='Ma\u00EFwena Gadegbeku';
 
-  var dateSp=document.createElement('span');
-  dateSp.style.cssText='font-size:11px';
-  dateSp.textContent='\u00B7 \u00A9 Juin 2026';
-
-  line1.appendChild(titleSp);
-  line1.appendChild(midSp);
-  line1.appendChild(maiLink);
-  line1.appendChild(dateSp);
-
-  // ── Ligne 2 : l'origine et la licence ────────────────────────────
-  var line2=document.createElement('div');
-  line2.style.cssText='font-size:10px;opacity:0.6';
-
-  var seqLink=document.createElement('a');
-  seqLink.href='https://forge.apps.education.fr/rollocharlie/le-sequenceur/-/blob/main/CHANGELOG';
-  seqLink.target='_blank';seqLink.rel='noopener noreferrer';
-  seqLink.style.cssText='color:var(--primary);font-weight:700;text-decoration:none';
-  seqLink.textContent='Le S\u00E9quenceur LV';
-
-  var charlieLink=document.createElement('span');
-  charlieLink.style.cssText='color:var(--primary);font-weight:700;text-decoration:none';
-  charlieLink.textContent='Charlie Rollo';
+  var licLink=document.createElement('a');
+  licLink.href='#';
+  licLink.style.cssText=LIEN;
+  licLink.textContent='Licence et cr\u00E9dits';
+  licLink.addEventListener('click',function(e){e.preventDefault();llOpenLicence();});
 
   var srcLink=document.createElement('a');
   srcLink.href='https://github.com/maiwenagadegbeku-art/Lesson-Loom';
   srcLink.target='_blank';srcLink.rel='noopener noreferrer';
-  srcLink.style.cssText='color:var(--primary);font-weight:700;text-decoration:none';
-  srcLink.textContent='Code source de Lesson Loom';
+  srcLink.style.cssText=LIEN;
+  srcLink.textContent='Code source';
 
-  line2.appendChild(document.createTextNode('Bas\u00E9e sur '));
-  line2.appendChild(seqLink);
-  line2.appendChild(document.createTextNode(' de '));
-  line2.appendChild(charlieLink);
-  line2.appendChild(document.createTextNode(' (AGPLv3) \u00B7 '));
-  line2.appendChild(srcLink);
-
-  footer.appendChild(line1);
-  footer.appendChild(line2);
+  line.appendChild(sp('\uD83E\uDE84 Lesson Loom',GRAD+';font-size:12.5px'));
+  line.appendChild(sp('\u2014 Con\u00E7ue et d\u00E9velopp\u00E9e par'));
+  line.appendChild(maiLink);
+  line.appendChild(sep());
+  line.appendChild(sp('\u00A9 Juin 2026'));
+  line.appendChild(sep());
+  line.appendChild(licLink);
+  line.appendChild(sep());
+  line.appendChild(srcLink);
+  footer.appendChild(line);
 }
+
+/* LOT L1 — la fenetre « Licence et credits » (mentions appropriees de
+   l'AGPLv3 : copyright, licence, absence de garantie, code source). */
+function llOpenLicence(){
+  var old=document.getElementById('__ll_lic_ov'); if(old) old.remove();
+  if(!document.getElementById('__ll_lic_css')){
+    var st=document.createElement('style'); st.id='__ll_lic_css';
+    st.textContent=
+      '#__ll_lic_ov{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px}'+
+      '#__ll_lic_ov .lic-box{background:var(--panel);color:var(--text);border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:min(640px,100%);max-height:86vh;display:flex;flex-direction:column;overflow:hidden}'+
+      '#__ll_lic_ov .lic-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 14px;border-bottom:1px solid var(--border)}'+
+      '#__ll_lic_ov .lic-head h2{margin:0;font-family:Playfair Display,serif;font-size:21px;font-weight:800}'+
+      '#__ll_lic_ov .lic-x{background:none;border:none;font-size:24px;color:var(--text-muted);cursor:pointer;line-height:1}'+
+      '#__ll_lic_ov .lic-body{overflow-y:auto;padding:6px 22px 18px}'+
+      '#__ll_lic_ov .lic-sec{padding:12px 0;border-bottom:1px solid var(--border)}'+
+      '#__ll_lic_ov .lic-sec:last-child{border-bottom:none}'+
+      '#__ll_lic_ov .lic-lab{font-size:10.5px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent2);margin-bottom:5px}'+
+      '#__ll_lic_ov p{margin:0 0 5px;font-size:13px;line-height:1.55}'+
+      '#__ll_lic_ov p:last-child{margin-bottom:0}'+
+      '#__ll_lic_ov .lic-muted{color:var(--text-muted)}'+
+      '#__ll_lic_ov a{color:var(--accent2);font-weight:600;text-decoration:none}'+
+      '#__ll_lic_ov a:hover{text-decoration:underline}'+
+      '#__ll_lic_ov .lic-pill{display:inline-block;background:var(--card);border-radius:999px;padding:3px 10px;margin:2px 4px 2px 0;font-size:12px;font-weight:600}'+
+      /* LOT O1 — chaque outil a sa couleur, celle du site lessonloom.fr */
+      '#__ll_lic_ov .lic-pill{font-weight:700}'+
+      '#__ll_lic_ov .lic-ll{background:#EEEDFE;color:#534AB7}#__ll_lic_ov .lic-ws{background:#E6F1FB;color:#185FA5}'+
+      '#__ll_lic_ov .lic-cf{background:#FBEAF0;color:#993556}#__ll_lic_ov .lic-qz{background:#E1F5EE;color:#0F6E56}'+
+      '#__ll_lic_ov .lic-ar{background:#FAEEDA;color:#854F0B}'+
+      '[data-theme="dark"] #__ll_lic_ov .lic-ll{background:rgba(127,119,221,.22);color:#AFA9EC}'+
+      '[data-theme="dark"] #__ll_lic_ov .lic-ws{background:rgba(55,138,221,.2);color:#85B7EB}'+
+      '[data-theme="dark"] #__ll_lic_ov .lic-cf{background:rgba(212,83,126,.2);color:#ED93B1}'+
+      '[data-theme="dark"] #__ll_lic_ov .lic-qz{background:rgba(29,158,117,.2);color:#5DCAA5}'+
+      '[data-theme="dark"] #__ll_lic_ov .lic-ar{background:rgba(186,117,23,.22);color:#EF9F27}'+
+      '#__ll_lic_ov .lic-gar{background:var(--warn-bg);color:var(--warn-text);border-left:3px solid var(--warn-border);border-radius:8px;padding:8px 11px;font-size:12.5px;line-height:1.5}'+
+      '#__ll_lic_ov .lic-foot{padding:10px 22px 14px;border-top:1px solid var(--border);text-align:right}';
+    document.head.appendChild(st);
+  }
+  function lien(url,txt){return '<a href="'+url+'" target="_blank" rel="noopener noreferrer">'+txt+'</a>';}
+  var ov=document.createElement('div'); ov.id='__ll_lic_ov'; ov.className='ll-ov';
+  ov.innerHTML=
+    '<div class="lic-box" role="dialog" aria-labelledby="__ll_lic_t">'+
+      '<div class="lic-head"><h2 id="__ll_lic_t">Licence et cr\u00E9dits</h2><button class="lic-x" aria-label="Fermer">&times;</button></div>'+
+      '<div class="lic-body">'+
+        '<div class="lic-sec"><div class="lic-lab">\u00C9ditrice</div>'+
+          '<p><b>Ma\u00EFwena Gadegbeku</b> \u2014 professeure d\u2019anglais, acad\u00E9mie de Rennes</p>'+
+          '<p><a href="mailto:contact@lessonloom.fr">contact@lessonloom.fr</a></p></div>'+
+        '<div class="lic-sec"><div class="lic-lab">H\u00E9bergement du site lessonloom.fr</div>'+
+          '<p>OVH SAS \u2014 2 rue Kellermann, 59100 Roubaix</p>'+
+          '<p class="lic-muted">Diffusion assur\u00E9e via Cloudflare.</p></div>'+
+        '<div class="lic-sec"><div class="lic-lab">Licence</div>'+
+          '<p>GNU Affero General Public License v3.0 (AGPLv3).</p>'+
+          '<p>Lesson Loom est une refonte et une extension du <b>S\u00E9quenceur LV</b> de Charlie Rollo (AGPLv3), dont elle conserve le noyau. Travail engag\u00E9 en juin 2026, poursuivi depuis.</p>'+
+          '<p>Toute redistribution ou modification doit citer les auteurs d\u2019origine. Toute mise \u00E0 disposition en ligne d\u2019une version modifi\u00E9e impose d\u2019en publier le code source.</p>'+
+          '<p>Code source de Lesson Loom\u00A0: '+lien('https://github.com/maiwenagadegbeku-art/Lesson-Loom','github.com/maiwenagadegbeku-art/Lesson-Loom')+'</p>'+
+          '<p>Texte de la licence\u00A0: '+lien('https://www.gnu.org/licenses/agpl-3.0.html','gnu.org/licenses/agpl-3.0.html')+'</p></div>'+
+        '<div class="lic-sec"><div class="lic-lab">Absence de garantie</div>'+
+          '<div class="lic-gar">Lesson Loom est fourni tel quel, gratuitement et sans garantie d\u2019aucune sorte. Son utilisation rel\u00E8ve de la responsabilit\u00E9 de l\u2019utilisateur. Voir le texte de la licence pour les d\u00E9tails.</div></div>'+
+        '<div class="lic-sec"><div class="lic-lab">Cr\u00E9dits</div>'+
+          '<p><b>Charlie Rollo</b> (acad\u00E9mie de Versailles) \u2014 auteur du S\u00E9quenceur LV, point de d\u00E9part de Lesson Loom.</p>'+
+          '<p>Code source\u00A0: '+lien('https://forge.apps.education.fr/rollocharlie/le-sequenceur','forge.apps.education.fr/rollocharlie/le-sequenceur')+'</p></div>'+
+        '<div class="lic-sec"><div class="lic-lab">Donn\u00E9es personnelles</div>'+
+          '<p>Lesson Loom ne collecte aucune donn\u00E9e. Tout est enregistr\u00E9 localement dans votre navigateur, et les fichiers que vous exportez restent sur votre ordinateur.</p>'+
+          '<p class="lic-muted">\u00C0 l\u2019ouverture, les polices de caract\u00E8res sont charg\u00E9es depuis Google Fonts\u00A0; le t\u00E9l\u00E9chargement des notes en PDF charge ses outils depuis jsDelivr. Ces services re\u00E7oivent, comme pour toute page web, l\u2019adresse de connexion, mais aucune de vos donn\u00E9es.</p></div>'+
+        '<div class="lic-sec"><div class="lic-lab">Les cinq outils</div>'+
+          '<p><span class="lic-pill lic-ll">Lesson Loom</span><span class="lic-pill lic-ws">WordSmith Profs</span><span class="lic-pill lic-cf">CorrectForme Loom</span><span class="lic-pill lic-qz">QuizLoom</span><span class="lic-pill lic-ar">The Loom Arcade</span></p>'+
+          '<p>'+lien('https://lessonloom.fr','lessonloom.fr')+'</p></div>'+
+      '</div>'+
+      '<div class="lic-foot"><button class="btn btn-ghost" data-lic-ok>Fermer</button></div>'+
+    '</div>';
+  document.body.appendChild(ov);
+  function fermer(){ ov.remove(); document.removeEventListener('keydown',esc); }
+  function esc(e){ if(e.key==='Escape') fermer(); }
+  ov.addEventListener('click',function(e){ if(e.target===ov) fermer(); });
+  ov.querySelector('.lic-x').onclick=fermer;
+  ov.querySelector('[data-lic-ok]').onclick=fermer;
+  document.addEventListener('keydown',esc);
+}
+window.llOpenLicence=llOpenLicence;
 
 var _llPreFooterHookAll=llHookAll;
 llHookAll=function(){_llPreFooterHookAll();llPatchFooter();};
@@ -84537,7 +84790,11 @@ llHookAll = function() {
         btn.style.cssText = 'background:none;border:none;padding:0;font:inherit;color:inherit;cursor:pointer';
         btn.textContent = cl.name;
         btn.title = 'Charger cette liste';
-        btn.addEventListener('click', function(e) {
+        /* LOT C1b — toute la pastille charge la liste, pas seulement le nom :
+           elle s'allume et montre la main au survol, elle doit repondre partout.
+           La croix arrete son propre clic : elle ne charge jamais la liste. */
+        chip.title = 'Charger cette liste';
+        chip.addEventListener('click', function(e) {
           e.preventDefault(); e.stopPropagation();
           setTextarea(llClsZone(ta), cl.raw || '');
         });
@@ -85049,7 +85306,7 @@ llHookAll = function() {
   function secHead(label, bg, fg) {
     return '<div style="background:' + bg + ';color:' + fg + ';padding:4pt 10pt;font-size:10pt;' +
       'font-weight:800;text-transform:uppercase;letter-spacing:1pt;border-radius:4pt;' +
-      'margin:12pt 0 4pt;page-break-after:avoid">' + label + '</div>';
+      'margin:12pt 0 4pt;page-break-after:avoid" class="ll-keep">' + label + '</div>';
   }
 
   // ── Grille — meme rendu que l'export d'origine ────────────────────
@@ -85096,13 +85353,15 @@ llHookAll = function() {
   // ── Une séance ────────────────────────────────────────────────────
   function seanceHtml(s, idx, seq, opt) {
     var o = [];
-    var brk = opt.aere ? 'page-break-before:always;' : 'page-break-inside:avoid;';
+    /* LOT EX1 — en mode aere, la premiere seance suit le titre « Seances
+       detaillees » sur la meme page (le titre ne reste plus seul). */
+    var brk = opt.aere ? (idx > 0 ? 'page-break-before:always;' : '') : 'page-break-inside:avoid;';
     o.push('<div style="' + brk + 'margin-bottom:14pt">');
 
     // Bandeau de la séance
     var accent = s.isTacheFinale ? '#f59e0b' : s.isTacheInter ? '#0ea5e9' : '#6c63ff';
     var accentBg = s.isTacheFinale ? '#fffbeb' : s.isTacheInter ? '#f0f9ff' : '#f5f4ff';
-    o.push('<table style="margin-bottom:6pt;page-break-after:avoid"><tbody><tr>' +
+    o.push('<div class="ll-keep"><table style="margin-bottom:6pt;page-break-after:avoid"><tbody><tr>' +
       '<td style="background:' + accentBg + ';border:1pt solid ' + accent + ';border-left:4pt solid ' + accent + ';padding:6pt 10pt">');
     o.push('<div style="display:flex;align-items:baseline;gap:8pt">');
     o.push('<span style="background:' + accent + ';color:#fff;padding:2pt 9pt;border-radius:10pt;' +
@@ -85119,7 +85378,7 @@ llHookAll = function() {
     if (s.objectif) {
       o.push('<div style="font-style:italic;color:#475569;font-size:10pt;margin-top:4pt;line-height:1.45">' + e(s.objectif) + '</div>');
     }
-    o.push('</td></tr></tbody></table>');
+    o.push('</td></tr></tbody></table></div>');
 
     // Image
     if (opt.images && s.imageUrl) {
@@ -85181,7 +85440,7 @@ llHookAll = function() {
     // Déroulé
     var acts = s.activites || [];
     if (acts.length) {
-      o.push('<table style="margin-bottom:4pt">' +
+      o.push('<table class="ll-flow" style="margin-bottom:4pt">' +
         '<colgroup><col style="width:6%"><col style="width:27%"><col style="width:58%"><col style="width:9%"></colgroup>' +
         '<thead><tr>' +
         '<th style="background:#fef3c7;color:#92400e;font-size:9pt">#</th>' +
@@ -85229,6 +85488,8 @@ llHookAll = function() {
       ].filter(function(f) { return (_dsp[f[0]] || '').trim(); });
       if (_DF.length) {
         var _fin = !!s.isTacheFinale;
+        /* LOT EX1b — titre et tableau du dispositif : un seul bloc. */
+        o.push('<div style="break-inside:avoid;page-break-inside:avoid">');
         o.push(secHead('Dispositif de la tâche', _fin ? '#fef3c7' : '#dbeafe', _fin ? '#b45309' : '#1d4ed8'));
         o.push('<table style="margin-bottom:4pt;page-break-inside:avoid;table-layout:fixed;width:100%"><tbody>');
         _DF.forEach(function(f) {
@@ -85238,6 +85499,7 @@ llHookAll = function() {
             '<td style="font-size:9.5pt;white-space:pre-wrap;word-wrap:break-word;overflow-wrap:anywhere;word-break:break-word">' + e(_dsp[f[0]]) + '</td></tr>');
         });
         o.push('</tbody></table>');
+        o.push('</div>');
       }
     }
 
@@ -85245,8 +85507,12 @@ llHookAll = function() {
     if (opt.grilles && s.grilleId) {
       var g = (seq.grilles || []).find(function(x) { return x.id === s.grilleId; });
       if (g) {
+        /* LOT EX1 — le titre et la grille forment un seul bloc : la grille
+           ne se coupe jamais, son titre ne doit pas rester seul. */
+        o.push('<div style="break-inside:avoid;page-break-inside:avoid">');
         o.push(secHead('Grille d\'évaluation de la tâche', '#fef3c7', '#b45309'));
         o.push(grilleHtml(g));
+        o.push('</div>');
       }
     }
 
@@ -85259,6 +85525,9 @@ llHookAll = function() {
     var seances = seq.seances || [];
     if (!seances.length) return '';
     var o = [];
+    /* LOT EX1b — le titre et le tableau du sommaire forment un seul bloc :
+       le tableau ne se coupe pas, son titre ne doit pas rester seul. */
+    o.push('<div style="break-inside:avoid;page-break-inside:avoid">');
     o.push(secHead('Sommaire des séances', '#f1f5f9', '#1e293b'));
     o.push('<table style="margin-bottom:8pt;page-break-inside:avoid">' +
       '<colgroup><col style="width:8%"><col style="width:38%"><col style="width:40%"><col style="width:14%"></colgroup><tbody>');
@@ -85274,6 +85543,7 @@ llHookAll = function() {
         badge + (badge && tt ? '<br>' : '') + (tt > 0 ? tt + ' min' : '') + '</td></tr>');
     });
     o.push('</tbody></table>');
+    o.push('</div>');
     return o.join('');
   }
 
@@ -85308,6 +85578,14 @@ llHookAll = function() {
     var title = String(seq.titre || 'Séquence').replace(/[<>"]/g, '');
     var win = window.open('', '_blank', 'width=980,height=740');
     if (!win) { window.llToast('Autorisez les fenêtres surgissantes pour exporter en PDF.','warn'); return; }
+    /* LOT EX3 — le pied de page de l'apercu A4 (« Lesson Loom — fiche de
+       bord · annee · nom ») repete en bas de chaque page. Une ligne de
+       tableau vide, repetee a chaque page, lui reserve sa place : il ne
+       recouvre jamais le contenu. */
+    var _pNom = '';
+    try { _pNom = (JSON.parse(localStorage.getItem('le-sequenceur-prefs-v1') || '{}') || {}).profName || ''; } catch (x) {}
+    var _pied = '\uD83E\uDE84 Lesson Loom \u2014 fiche de bord' +
+      (seq.annee ? ' \u00B7 ' + seq.annee : '') + (_pNom ? ' \u00B7 ' + _pNom : '');
     win.document.write(
       '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>' + e(title) + '</title><style>' +
       '*{box-sizing:border-box}' +
@@ -85318,7 +85596,22 @@ llHookAll = function() {
       'th{font-weight:700;background:#f1f5f9}' +
       'img{max-width:100%}' +
       '@media print{body{margin:1cm}@page{margin:1.5cm;size:A4}}' +
-      '</style></head><body>' + body +
+      /* LOT EX1 — couleurs imprimees partout ; un titre ne reste jamais seul
+         en bas de page (il emmene avec lui la place de quelques lignes) ;
+         un tableau ou une ligne ne se coupe plus, sauf le deroule. */
+      '*{-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
+      'tr{break-inside:avoid;page-break-inside:avoid}' +
+      'table:not(.ll-flow){break-inside:avoid;page-break-inside:avoid}' +
+      '.ll-keep,div[style*="letter-spacing:1pt;border-radius:4pt"]{break-inside:avoid;page-break-inside:avoid}' +
+      '.ll-keep::after,div[style*="letter-spacing:1pt;border-radius:4pt"]::after{content:"";display:block;height:90pt;margin-bottom:-90pt}' +
+      'table.ll-pg,table.ll-pg>tbody>tr,table.ll-pg>tbody>tr>td,table.ll-pg>tfoot>tr>td{border:none!important;padding:0!important;margin:0!important;break-inside:auto!important;page-break-inside:auto!important;vertical-align:top}' +
+      'table.ll-pg{table-layout:auto}' +
+      '.ll-pied{display:none}' +
+      '@media print{.ll-pied{display:block;position:fixed;left:0;right:0;bottom:0;height:16pt;padding-top:4pt;border-top:1pt solid #e2e8f0;text-align:center;font-size:8pt;color:#94a3b8;background:#fff}.ll-pied-place{height:22pt}}' +
+      '</style></head><body>' +
+      '<table class="ll-pg ll-flow"><tbody><tr><td>' + body + '</td></tr></tbody>' +
+      '<tfoot><tr><td><div class="ll-pied-place"></div></td></tr></tfoot></table>' +
+      '<div class="ll-pied">' + e(_pied) + '</div>' +
       '<scr' + 'ipt>window.onload=function(){setTimeout(function(){window.print()},400)}</scr' + 'ipt>' +
       '</body></html>'
     );
@@ -86353,10 +86646,10 @@ window.addEventListener('load',function(){
        visible et centré. Seules les marges sont resserrées — le pied passe
        d\'environ 66 px à 46 px sans rien perdre. */
     '.app-footer {',
-    '  padding: 6px 20px !important;',
+    '  padding: 5px 20px !important;',  /* LOT L1 — une seule ligne */
     '  gap: 1px !important;',
     '  line-height: 1.35 !important;',
-    '  min-height: 46px !important;',   /* hauteur réservée : aucun sursaut */
+    '  min-height: 29px !important;',   /* hauteur réservée : aucun sursaut */
     '  justify-content: center !important;',
     '}',
     '.app-footer > div:last-child { font-size: 11px; }',
@@ -87850,6 +88143,22 @@ function llIcsAnalyse(texte){
     var j1 = new Date(t.getFullYear(), 0, 4);
     return 1 + Math.round(((t - j1) / 86400000 - 3 + ((j1.getDay() + 6) % 7)) / 7);
   }
+  /* LOT Q1 — LES SEMAINES A ET B SE COMPTENT DEPUIS LA RENTREE.
+     Le numero officiel de la semaine ne suffit pas : certaines annees en
+     comptent 53 (2026, puis 2032). La semaine 53 et la semaine 1 sont alors
+     toutes deux impaires, et l'alternance s'inverserait au 1er janvier,
+     alors que l'etablissement, lui, alterne sans interruption. On compte
+     donc les semaines depuis celle du 1er septembre, en partant de la
+     parite officielle de cette semaine-la : de septembre a decembre, le
+     resultat est exactement l'ancien ; ensuite, il continue sans sauter.
+     Les parites deja enregistrees gardent donc leur sens. */
+  function pariteScolaire(d){
+    var y = d.getMonth() >= 7 ? d.getFullYear() : d.getFullYear() - 1;
+    var r = new Date(y, 8, 1); r.setDate(r.getDate() - ((r.getDay() + 6) % 7));
+    var l = new Date(d.getFullYear(), d.getMonth(), d.getDate()); l.setDate(l.getDate() - ((l.getDay() + 6) % 7));
+    var n = Math.round((l - r) / 604800000);
+    return (((semaineIso(r) + n) % 2) + 2) % 2;
+  }
 
   var brut = [], annees = {};
 
@@ -87876,13 +88185,25 @@ function llIcsAnalyse(texte){
       groupe = libelle.slice(libelle.indexOf('>') + 1).replace(/\\,/g, ',').trim();
       if(groupe === code) groupe = '';                 /* pas un demi-groupe */
     }
+    /* LOT I2 — un cours qui reunit des eleves de PLUSIEURS classes (DNL,
+       section europeenne, option) : Pronote liste toutes les classes
+       d'origine entre chevrons, « <206> DNL HG, <205> DNL HG… ». Le groupe
+       est alors l'unite, pas la classe : c'est le nom entre crochets qui fait
+       foi, « [2 DNL HG] », exactement comme dans un emploi du temps recopie a
+       la main. Un seul chevron reste un demi-groupe ordinaire, inchange. */
+    var chevrons = libelle.match(/<\s*[^>]+?\s*>/g) || [];
+    var crochets = libelle.match(/\[\s*([^\]]+?)\s*\]/);
+    if(chevrons.length > 1 && crochets){
+      code = '[' + crochets[1].trim() + ']';
+      groupe = '';
+    }
 
     annees[deb.getFullYear() + '-' + (deb.getMonth() >= 7 ? deb.getFullYear()+1 : deb.getFullYear())] = 1;
     res.cours++;
     brut.push({
       code: code, groupe: groupe, jour: deb.getDay(),
       debut: hhmm(deb), fin: hhmm(fin),
-      sem: semaineIso(deb), date: deb.getFullYear()+'-'+deb.getMonth()+'-'+deb.getDate()
+      sem: semaineIso(deb), par: pariteScolaire(deb), date: deb.getFullYear()+'-'+deb.getMonth()+'-'+deb.getDate()
     });
   });
 
@@ -87901,7 +88222,7 @@ function llIcsAnalyse(texte){
     if(r.groupe) c.groupes[r.groupe] = (c.groupes[r.groupe] || 0) + 1;
     var cle = (r.groupe ? 'G' + r.groupe : 'C') + '|' + r.jour + '@' + r.debut;
     var k = c.creneaux[cle] || (c.creneaux[cle] = { jour:r.jour, debut:r.debut, fin:r.fin, groupe:r.groupe, n:0, sems:{}, dates:{} });
-    k.n++; k.sems[r.sem % 2] = 1; k.dates[r.date] = 1;
+    k.n++; k.sems[r.par] = 1; k.dates[r.date] = 1;      /* LOT Q1 — parite comptee depuis la rentree */
     if(r.fin > k.fin) k.fin = r.fin;
   });
 
@@ -89063,6 +89384,16 @@ function llIcsAnalyse(texte){
         var semaine = !p.getAttribute('data-cedit');
         var ev = parId[p.getAttribute('data-cedit') || p.getAttribute('data-cev')];
         if(!ev) return;
+        /* LOT F1a-bis — la vue Semaine ecrit le titre d'une seance flash sans
+           l'eclair ⚡ que la vue Mois affiche. On l'ajoute, une seule fois :
+           rien n'est ecrit si l'eclair est deja la (aucun emballement). */
+        if(semaine && !ev.sequenceId && !ev.c72 && !p.querySelector('.__ll_f1_ico')){
+          var ico = document.createElement('span');
+          ico.className = '__ll_f1_ico';
+          ico.textContent = '\u26A1 ';
+          var tg = p.querySelector('.__ll_calcls_tag');
+          p.insertBefore(ico, tg ? tg.nextSibling : p.firstChild);
+        }
         var nom = ev.className || '';
 
         /* Empreinte : on ne retouche la pastille que si le nom de la
@@ -90168,7 +90499,23 @@ function llIcsAnalyse(texte){
   }
   /* La semaine A est, par convention, celle de la rentree de septembre. */
   function pariteA(y1){ return semaineIso(new Date(y1, 8, 1)) % 2; }
-  function lettre(d, y1){ return (semaineIso(d) % 2 === pariteA(y1)) ? 'A' : 'B'; }
+  /* LOT Q1 — LES SEMAINES A ET B SE COMPTENT DEPUIS LA RENTREE.
+     Le numero officiel de la semaine ne suffit pas : certaines annees en
+     comptent 53 (2026, puis 2032). La semaine 53 et la semaine 1 sont alors
+     toutes deux impaires, et l'alternance s'inverserait au 1er janvier,
+     alors que l'etablissement, lui, alterne sans interruption. On compte
+     donc les semaines depuis celle du 1er septembre, en partant de la
+     parite officielle de cette semaine-la : de septembre a decembre, le
+     resultat est exactement l'ancien ; ensuite, il continue sans sauter.
+     Les parites deja enregistrees gardent donc leur sens. */
+  function pariteScolaire(d){
+    var y = d.getMonth() >= 7 ? d.getFullYear() : d.getFullYear() - 1;
+    var r = new Date(y, 8, 1); r.setDate(r.getDate() - ((r.getDay() + 6) % 7));
+    var l = new Date(d.getFullYear(), d.getMonth(), d.getDate()); l.setDate(l.getDate() - ((l.getDay() + 6) % 7));
+    var n = Math.round((l - r) / 604800000);
+    return (((semaineIso(r) + n) % 2) + 2) % 2;
+  }
+  function lettre(d, y1){ return (pariteScolaire(d) === pariteA(y1)) ? 'A' : 'B'; }
 
   function p2(n){ return n<10 ? '0'+n : ''+n; }
   function iso(d){ return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate()); }
@@ -90244,10 +90591,16 @@ function llIcsAnalyse(texte){
     var an = anneeScolaire().split('-');
     var y1 = +an[0], y2 = +an[1];
     var jf = {}; feries(y1).concat(feries(y2)).forEach(function(d){ jf[d] = 1; });
+    /* LOT K1 — sorties et absences qui bloquent cette classe */
+    var abs = (typeof window.__ll_k1Bloquants === 'function') ? window.__ll_k1Bloquants(cl.id) : [];
     function enVacances(j){
       for(var i=0;i<vac.length;i++){
         var v = vac[i];
         if(j >= v.start && j <= (v.end || v.start)) return v.label || 'vacances';
+      }
+      for(var a=0;a<abs.length;a++){
+        var e = abs[a];
+        if(j >= e.start && j <= (e.end || e.start)) return e.title || 'absence';
       }
       return '';
     }
@@ -90273,6 +90626,14 @@ function llIcsAnalyse(texte){
     }
     function faites(){ return demi ? moinsAvance() : poses.length; }
 
+    /* LOT F1b — les seances flash de cette classe qui remplacent un cours :
+       date -> { 'debut|groupe' : titre }. */
+    var flashPris = {}, flashSautes = {};
+    evenements().forEach(function(e){
+      if(!e || e.sequenceId || e.c72 || e.classId !== cl.id || !e.f1 || !e.f1.remplace) return;
+      var m = flashPris[e.startDate] || (flashPris[e.startDate] = {});
+      (e.f1.cours || []).forEach(function(k){ m[k] = e.title || 'flash'; });
+    });
     var poses = [], quinz = {}, coupures = {}, manque = false;
     var derniereVac = '', ferieSaute = false, aVerifier = false;
 
@@ -90281,8 +90642,16 @@ function llIcsAnalyse(texte){
       var jour = (cur.getDay()+6)%7;
       var v = enVacances(j);
       if(v || jf[j]){
-        if(poses.length){
-          if(v) derniereVac = v;
+        /* LOT K1c — un jour saute n'est signale que si la classe y avait
+           cours : un stage un lundi sans cours, ou un ferie un mercredi
+           libre, ne coupent rien et n'ont pas a figurer dans le message. */
+        if(poses.length && creneaux.some(function(k){ return k.day === jour; })){
+          if(v){
+            /* LOT K1 — deux coupures de suite (une absence puis des vacances,
+               par exemple) : la premiere n'est plus effacee par la seconde. */
+            if(derniereVac && derniereVac !== v) coupures[derniereVac] = 1;
+            derniereVac = v;
+          }
           else ferieSaute = true;
         }
         cur.setDate(cur.getDate()+1);
@@ -90295,7 +90664,7 @@ function llIcsAnalyse(texte){
           if(k.parite === 0 || k.parite === 1){
             /* La vraie semaine du creneau, telle qu'elle a ete lue dans
                Pronote. Aucune supposition. */
-            if(semaineIso(cur) % 2 !== k.parite) continue;
+            if(pariteScolaire(cur) !== k.parite) continue;   /* LOT Q1 */
           } else {
             /* Creneau importe avant ce lot : on ne connait pas sa semaine.
                On alterne a partir du depart, et on le signale. */
@@ -90305,6 +90674,11 @@ function llIcsAnalyse(texte){
             if(quinz[cle] % 2 !== 0) continue;
           }
         }
+
+        /* LOT F1b — ce cours est pris par une seance flash : il ne compte
+           pas comme une seance de la sequence, on passe au suivant. */
+        var _fp = flashPris[j] && flashPris[j][(k.start || '') + '|' + (k.groupe || '')];
+        if(_fp){ flashSautes[_fp] = 1; continue; }
 
         /* Quel numero de seance pour ce creneau ? */
         var rang, g = k.groupe || '';
@@ -90342,6 +90716,7 @@ function llIcsAnalyse(texte){
       demi: demi, groupes: groupes, faites: faites(), aVerifier: aVerifier, y1: y1,
       poses: poses, manque: manque, ferie: ferieSaute,
       coupures: Object.keys(coupures),
+      flashs: Object.keys(flashSautes),
       quinzaine: creneaux.some(function(k){ return k.rythme === 'quinzaine'; })
     };
   }
@@ -90592,8 +90967,10 @@ function llIcsAnalyse(texte){
     var vac = vacances();
     var an = anneeScolaire().split('-');
     var jf = {}; feries(+an[0]).concat(feries(+an[1])).forEach(function(j){ jf[j]=1; });
+    var absK1 = (typeof window.__ll_k1Bloquants === 'function') ? window.__ll_k1Bloquants(etat.classId) : [];
     function enVac(j){
       for(var i=0;i<vac.length;i++){ var v=vac[i]; if(j>=v.start && j<=(v.end||v.start)) return v.label||'Vacances'; }
+      for(var a=0;a<absK1.length;a++){ var e=absK1[a]; if(j>=e.start && j<=(e.end||e.start)) return e.title||'Absence'; }
       return '';
     }
 
@@ -90674,15 +91051,85 @@ function llIcsAnalyse(texte){
     }
     box.appendChild(bil);
 
+    /* LOT K1c — « Ce qui change » : quand un placement est deja pose pour
+       cette sequence et cette classe, on montre les seances que le nouveau
+       calcul deplacerait, avec leur ancienne et leur nouvelle date. */
+    if(res && res.poses && etat.depart){
+      var anciens = posees(etat.seqId, etat.classId);
+      if(anciens.length){
+        /* Une seance est un contenu, pas un creneau : on compare seance par
+           seance, quel que soit le demi-groupe (regle du lot 72 A bis). */
+        var cleK1c = function(rang, groupe, reserve){ return (reserve ? 'R' : 'S') + rang; };
+        var avK1c = {}, apK1c = {}, clesK1c = [];
+        anciens.forEach(function(e){
+          var k = cleK1c(e.c72.rang, e.c72.groupe, e.c72.reserve);
+          if(!avK1c[k] && !apK1c[k]) clesK1c.push(k);
+          (avK1c[k] = avK1c[k] || []).push(e.startDate);
+        });
+        res.poses.forEach(function(p){
+          var k = cleK1c(p.rang, p.groupe, p.reserve);
+          if(!avK1c[k] && !apK1c[k]) clesK1c.push(k);
+          (apK1c[k] = apK1c[k] || []).push(p.date);
+        });
+        clesK1c.sort(function(a, b){
+          var ra = a.charAt(0) === 'R' ? 1 : 0, rb = b.charAt(0) === 'R' ? 1 : 0;
+          return (ra - rb) || (parseInt(a.slice(1), 10) - parseInt(b.slice(1), 10)) || a.localeCompare(b);
+        });
+        var changes = [];
+        clesK1c.forEach(function(k){
+          var uniq = function(t){ return t.filter(function(v, i){ return t.indexOf(v) === i; }).sort(); };
+          var x = uniq(avK1c[k] || []), y = uniq(apK1c[k] || []);
+          if(x.join(',') === y.join(',')) return;
+          var nom = k;
+          var de = x.length ? x.map(lisible).join(', ') : 'non plac\u00e9e';
+          var vers = y.length ? y.map(lisible).join(', ') : 'non plac\u00e9e';
+          changes.push({ nom:nom, de:de, vers:vers });
+        });
+        var cc = el('div');
+        cc.style.cssText = 'background:rgba(108,99,255,.08);border:1px solid rgba(108,99,255,.28);border-radius:10px;padding:10px 12px;margin:8px 0;font-size:12px;line-height:1.5';
+        var tt = el('div');
+        tt.style.cssText = 'font-weight:800;margin-bottom:4px';
+        if(!changes.length){
+          tt.textContent = 'Aucun changement par rapport au placement enregistr\u00e9.';
+          cc.appendChild(tt);
+        } else {
+          tt.textContent = 'Ce qui change par rapport au placement enregistr\u00e9 (' + changes.length
+            + ' s\u00e9ance' + (changes.length>1?'s':'') + ')';
+          cc.appendChild(tt);
+          var MAXK1c = 10;
+          changes.slice(0, MAXK1c).forEach(function(c){
+            var li = el('div');
+            var nb = document.createElement('strong'); nb.textContent = c.nom + ' \u00a0';
+            var ad = document.createElement('span'); ad.style.cssText = 'text-decoration:line-through;opacity:.6'; ad.textContent = c.de;
+            var fl = document.createTextNode(' \u2192 ');
+            var nv = document.createElement('span'); nv.style.cssText = 'color:#047857;font-weight:700'; nv.textContent = c.vers;
+            li.appendChild(nb); li.appendChild(ad); li.appendChild(fl); li.appendChild(nv);
+            cc.appendChild(li);
+          });
+          if(changes.length > MAXK1c){
+            var reste = el('div');
+            reste.style.cssText = 'opacity:.75;margin-top:2px';
+            reste.textContent = 'et ' + (changes.length - MAXK1c) + ' autre' + (changes.length - MAXK1c > 1 ? 's' : '') + ' s\u00e9ance' + (changes.length - MAXK1c > 1 ? 's' : '') + ' d\u00e9cal\u00e9e' + (changes.length - MAXK1c > 1 ? 's' : '') + '.';
+            cc.appendChild(reste);
+          }
+        }
+        box.appendChild(cc);
+      }
+    }
+
     /* Les signalements. */
     if(res && etat.depart){
       var messages = [];
       if(res.coupures && res.coupures.length){
-        messages.push('La s\u00e9quence d\u00e9borde apr\u00e8s les vacances\u00a0: '
+        messages.push('La s\u00e9quence est coup\u00e9e par\u00a0: '
           + res.coupures.join(', ') + '. Les s\u00e9ances reprennent au retour.');
       }
       if(res.ferie){
         messages.push('Un jour f\u00e9ri\u00e9 a \u00e9t\u00e9 saut\u00e9\u00a0: il ne consomme pas de s\u00e9ance.');
+      }
+      if(res.flashs && res.flashs.length){
+        messages.push('Une s\u00e9ance flash prend la place d\u2019un cours\u00a0: '
+          + res.flashs.join(', ') + '. La s\u00e9quence reprend au cours suivant.');
       }
       if(res.manque){
         messages.push('Il manque ' + res.manque + ' cr\u00e9neau'
@@ -90922,9 +91369,263 @@ function llIcsAnalyse(texte){
   window.__ll_semaineIso = semaineIso;
   window.__ll_pariteSemaineA = pariteA;
   window.__ll_lettreSemaine = lettre;
+  window.__ll_pariteScolaire = pariteScolaire;      /* LOT Q1 */
 
   window.__ll_calc72Ouvrir = ouvrir;
   window.__ll_calc72Calculer = calculer;
+
+  /* LOT K1c — UNE ABSENCE AJOUTEE APRES COUP SIGNALE LES SEANCES TOUCHEES
+     Le placement calcule ne surveille pas le calendrier apres coup. Quand une
+     absence qui bloque est enregistree, on cherche les seances deja posees
+     par lui ces jours-la, pour la ou les classes concernees, et on les liste,
+     une ligne par sequence et par classe, avec un bouton qui ouvre la fenetre
+     du placement deja remplie. Rien n'est deplace sans un clic sur Valider. */
+  /* Les seances posees par le placement calcule qui tombent sur une absence,
+     pour les classes qu'elle concerne. Les deux demi-groupes d'une meme seance,
+     le meme jour, ne comptent qu'une fois. */
+  function k1Touchees(ev){
+    if(!ev || ev.bloque !== true || !ev.start) return [];
+    var fin = ev.end || ev.start, vues = {};
+    return evenements().filter(function(e){
+      if(!(e && e.c72 && e.startDate && e.startDate >= ev.start && e.startDate <= fin
+           && (!ev.concerne || e.c72.cls === ev.concerne))) return false;
+      var k = e.c72.seq + '|' + e.c72.cls + '|' + (e.c72.reserve ? 'R' : 'S') + e.c72.rang + '|' + e.startDate;
+      if(vues[k]) return false;
+      vues[k] = 1; return true;
+    }).sort(function(a,b){ return String(a.startDate).localeCompare(String(b.startDate)); });
+  }
+
+  /* LOT K1d — les placements qu'une absence a pu couper : leurs seances
+     commencent avant elle et finissent apres. Une fois l'absence retiree,
+     ses jours sont vides : c'est la seule trace qui reste. */
+  function k1Coupes(ev){
+    if(!ev || ev.bloque !== true || !ev.start) return [];
+    var fin = ev.end || ev.start, pl = {}, ordre = [];
+    evenements().forEach(function(e){
+      if(!(e && e.c72 && e.startDate) || (ev.concerne && e.c72.cls !== ev.concerne)) return;
+      var k = e.c72.seq + '|' + e.c72.cls;
+      if(!pl[k]){ pl[k] = { seq:e.c72.seq, cls:e.c72.cls, nomCls:e.className || '', min:e.startDate, max:e.startDate }; ordre.push(k); }
+      if(e.startDate < pl[k].min) pl[k].min = e.startDate;
+      if(e.startDate > pl[k].max) pl[k].max = e.startDate;
+    });
+    return ordre.map(function(k){ return pl[k]; })
+      .filter(function(p){ return p.min < ev.start && p.max > fin; });
+  }
+
+  /* Le panneau commun : une ligne par sequence et par classe, un bouton
+     « Recalculer » qui ouvre la fenetre du placement deja remplie. */
+  function k1Panneau(titre, avert, groupes, note){
+    var parCls = {}; classes().forEach(function(c){ parCls[c.id] = c.name; });
+    var parSeq = {}; sequences().forEach(function(s){ parSeq[s.id] = s.titre || 'Sans titre'; });
+    groupes.sort(function(ga, gb){
+      return String(parCls[ga.cls] || ga.nomCls).localeCompare(String(parCls[gb.cls] || gb.nomCls), 'fr', { numeric:true })
+        || String(parSeq[ga.seq] || '').localeCompare(String(parSeq[gb.seq] || ''), 'fr');
+    });
+
+    var vieux = document.getElementById('__ll_k1c_ov'); if(vieux) vieux.remove();
+    var ov = document.createElement('div'); ov.id = '__ll_k1c_ov';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:10000;display:flex;align-items:center;justify-content:center';
+    var box = document.createElement('div');
+    box.style.cssText = 'background:var(--panel);color:var(--text);border-radius:16px;padding:22px 24px;width:460px;max-width:94vw;max-height:86vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.35);font-family:inherit';
+    function ferme(){ ov.remove(); }
+    ov.addEventListener('click', function(e){ if(e.target === ov) ferme(); });
+
+    var t1 = document.createElement('div');
+    t1.style.cssText = 'font-size:16px;font-weight:800;margin-bottom:4px';
+    t1.textContent = titre;
+    box.appendChild(t1);
+    var t2 = document.createElement('div');
+    t2.style.cssText = 'font-size:13px;color:#b45309;margin-bottom:10px';
+    t2.textContent = '\u26a0\ufe0f ' + avert;
+    box.appendChild(t2);
+
+    groupes.forEach(function(g){
+      var lig = document.createElement('div');
+      lig.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--border)';
+      var txt = document.createElement('div');
+      var a = document.createElement('div');
+      a.style.cssText = 'font-size:13px;font-weight:700';
+      a.textContent = (parCls[g.cls] || g.nomCls || 'Classe') + ' \u00b7 ' + (parSeq[g.seq] || 'S\u00e9quence');
+      var b = document.createElement('div');
+      b.style.cssText = 'font-size:12px;color:var(--text-muted);margin-top:2px';
+      b.textContent = g.detail;
+      txt.appendChild(a); txt.appendChild(b);
+      var bt = document.createElement('button');
+      bt.type = 'button';
+      bt.className = 'btn btn-sm';
+      bt.style.cssText = 'background:#6c63ff;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit';
+      bt.textContent = 'Recalculer';
+      bt.onclick = function(){
+        if(!parSeq[g.seq] || !parCls[g.cls]){
+          alert('Cette s\u00e9quence ou cette classe n\u2019existe plus : le placement ne peut pas \u00eatre recalcul\u00e9.');
+          return;
+        }
+        ferme(); ouvrir(g.seq, g.cls);
+      };
+      lig.appendChild(txt); lig.appendChild(bt);
+      box.appendChild(lig);
+    });
+
+    var nt = document.createElement('div');
+    nt.style.cssText = 'font-size:11px;color:var(--text-muted);margin:10px 0 12px';
+    nt.textContent = note;
+    box.appendChild(nt);
+    var pied = document.createElement('div');
+    pied.style.cssText = 'text-align:right';
+    var plus = document.createElement('button');
+    plus.type = 'button';
+    plus.className = 'btn btn-ghost btn-sm';
+    plus.textContent = 'Plus tard';
+    plus.onclick = ferme;
+    pied.appendChild(plus);
+    box.appendChild(pied);
+
+    ov.appendChild(box);
+    document.body.appendChild(ov);
+    return true;
+  }
+  var K1_NOTE = 'Rien n\u2019est d\u00e9plac\u00e9 sans votre accord\u00a0: \u00ab\u00a0Recalculer\u00a0\u00bb ouvre le placement, vous v\u00e9rifiez, puis vous validez.';
+
+  /* Les seances touchees, regroupees par sequence et par classe. */
+  function k1GroupesTouchees(touchees){
+    var g = {}, ordre = [];
+    touchees.forEach(function(e){
+      var k = e.c72.seq + '|' + e.c72.cls;
+      if(!g[k]){ g[k] = { seq:e.c72.seq, cls:e.c72.cls, nomCls:e.className || '', items:[] }; ordre.push(k); }
+      g[k].items.push(e);
+    });
+    return ordre.map(function(k){
+      var x = g[k];
+      x.detail = x.items.map(function(e){ return (e.c72.reserve ? 'R' : 'S') + e.c72.rang + ' le ' + lisible(e.startDate); }).join(' \u00b7 ');
+      return x;
+    });
+  }
+
+  /* LOT K1c — une absence ajoutee apres coup signale les seances touchees. */
+  window.__ll_k1cSignaler = function(ev){
+    var touchees = k1Touchees(ev);
+    if(!touchees.length) return false;
+    var n = touchees.length;
+    return k1Panneau(
+      '\u2713 \u00ab ' + (ev.title || 'Absence') + ' \u00bb enregistr\u00e9e',
+      n + ' s\u00e9ance' + (n>1?'s':'') + ' d\u00e9j\u00e0 plac\u00e9e' + (n>1?'s':'') + ' tombe' + (n>1?'nt':'') + ' sur cette absence.',
+      k1GroupesTouchees(touchees), K1_NOTE);
+  };
+
+  /* LOT K1d — une absence supprimee ou modifiee propose de rapprocher les
+     placements qu'elle a pu decaler. mode : 'suppr' ou 'modif'. */
+  window.__ll_k1dSignaler = function(ancien, nouveau, mode){
+    var groupes = [], cles = {};
+    function ajoute(g){
+      var k = g.seq + '|' + g.cls;
+      if(cles[k]){ if(g.items && g.items.length) cles[k].detail = g.detail; return; }
+      cles[k] = g; groupes.push(g);
+    }
+    /* Ce que la nouvelle version de l'absence touche, comme a l'ajout. */
+    if(mode === 'modif' && nouveau && nouveau.bloque === true){
+      k1GroupesTouchees(k1Touchees(nouveau)).forEach(ajoute);
+    }
+    /* Ce que l'ancienne version a pu couper, si elle bloquait et a change. */
+    var aChange = !nouveau || nouveau.bloque !== true
+      || nouveau.start !== ancien.start || (nouveau.end || nouveau.start) !== (ancien.end || ancien.start)
+      || (nouveau.concerne || '') !== (ancien.concerne || '');
+    if(ancien && ancien.bloque === true && (mode === 'suppr' || aChange)){
+      k1Coupes(ancien).forEach(function(p){
+        p.detail = 'S\u00e9ances du ' + lisible(p.min) + ' au ' + lisible(p.max) + ' : elles peuvent revenir en arri\u00e8re';
+        ajoute(p);
+      });
+    }
+    if(!groupes.length) return false;
+    var n = groupes.length;
+    var nom = '\u00ab ' + ((nouveau && nouveau.title) || (ancien && ancien.title) || 'Absence') + ' \u00bb';
+    return k1Panneau(
+      '\u2713 ' + nom + (mode === 'suppr' ? ' supprim\u00e9e' : ' modifi\u00e9e'),
+      n + ' placement' + (n>1?'s':'') + ' \u00e0 v\u00e9rifier.',
+      groupes,
+      K1_NOTE + ' Si rien ne bouge, l\u2019encadr\u00e9 l\u2019indiquera\u00a0: fermez simplement.');
+  };
+
+  /* LOT F2 — UNE SEANCE FLASH QUI REMPLACE UN COURS PREVIENT, COMME UNE ABSENCE.
+     A l'ajout, a la modification et a la suppression (bouton de la fenetre
+     ET croix de la pastille), le meme panneau « Recalculer / Plus tard »
+     s'ouvre si des placements de la classe sont concernes. Une flash sans
+     classe ou en simple ajout ne declenche jamais rien. Rien ne bouge sans
+     un clic sur Remplacer dans le placement. */
+  function f2Actif(ev){
+    return !!(ev && !ev.sequenceId && !ev.c72 && ev.classId && ev.f1 && ev.f1.remplace
+      && (ev.f1.cours || []).length && ev.startDate);
+  }
+  function f2Touchees(ev){
+    if(!f2Actif(ev)) return [];
+    var vues = {};
+    return evenements().filter(function(e){
+      if(!(e && e.c72 && e.startDate === ev.startDate && e.c72.cls === ev.classId)) return false;
+      var k = e.c72.seq + '|' + e.c72.cls + '|' + (e.c72.reserve ? 'R' : 'S') + e.c72.rang + '|' + e.startDate;
+      if(vues[k]) return false;
+      vues[k] = 1; return true;
+    });
+  }
+  function f2Coupes(ev){
+    if(!f2Actif(ev)) return [];
+    var pl = {}, ordre = [];
+    evenements().forEach(function(e){
+      if(!(e && e.c72 && e.startDate) || e.c72.cls !== ev.classId) return;
+      var k = e.c72.seq + '|' + e.c72.cls;
+      if(!pl[k]){ pl[k] = { seq:e.c72.seq, cls:e.c72.cls, nomCls:e.className || '', min:e.startDate, max:e.startDate }; ordre.push(k); }
+      if(e.startDate < pl[k].min) pl[k].min = e.startDate;
+      if(e.startDate > pl[k].max) pl[k].max = e.startDate;
+    });
+    return ordre.map(function(k){ return pl[k]; })
+      .filter(function(p){ return p.min <= ev.startDate && p.max >= ev.startDate; });
+  }
+  function f2Empreinte(ev){
+    return f2Actif(ev) ? (ev.startDate + '|' + ev.classId + '|' + (ev.f1.cours || []).slice().sort().join(',')) : '';
+  }
+  /* mode : 'ajout', 'modif' ou 'suppr'. */
+  window.__ll_f2Signaler = function(ancien, nouveau, mode){
+    try{
+      var avant = f2Empreinte(ancien), apres = (mode === 'suppr') ? '' : f2Empreinte(nouveau);
+      if(avant === apres) return false;                     /* rien de ce qui compte n'a change */
+      var groupes = [], cles = {};
+      function ajoute(g){
+        var k = g.seq + '|' + g.cls;
+        if(cles[k]) return;
+        cles[k] = g; groupes.push(g);
+      }
+      if(apres) k1GroupesTouchees(f2Touchees(nouveau)).forEach(ajoute);
+      if(avant){
+        f2Coupes(ancien).forEach(function(p){
+          p.detail = 'S\u00e9ances du ' + lisible(p.min) + ' au ' + lisible(p.max) + ' : elles peuvent revenir en arri\u00e8re';
+          ajoute(p);
+        });
+      }
+      if(!groupes.length) return false;
+      var n = groupes.length;
+      var nom = '\u00ab ' + ((nouveau && nouveau.title) || (ancien && ancien.title) || 'Flash') + ' \u00bb';
+      var fin = mode === 'ajout' ? ' enregistr\u00e9e' : (mode === 'suppr' ? ' supprim\u00e9e' : ' modifi\u00e9e');
+      return k1Panneau('\u2713 ' + nom + fin,
+        n + ' placement' + (n>1?'s':'') + ' \u00e0 v\u00e9rifier.',
+        groupes,
+        K1_NOTE + ' Si rien ne bouge, l\u2019encadr\u00e9 l\u2019indiquera\u00a0: fermez simplement.');
+    }catch(e){ return false; }
+  };
+
+  /* La croix d'une pastille flash : on retient la flash avant que
+     l'application ne l'efface, puis on signale une fois qu'elle a disparu. */
+  document.addEventListener('click', function(e){
+    try{
+      var x = e.target && e.target.closest ? e.target.closest('[data-cdel]') : null;
+      if(!x) return;
+      var id = x.getAttribute('data-cdel');
+      var ev = evenements().filter(function(z){ return z && z.id === id; })[0];
+      if(!f2Actif(ev)) return;
+      var copie = JSON.parse(JSON.stringify(ev));
+      setTimeout(function(){
+        var reste = evenements().some(function(z){ return z && z.id === id; });
+        if(!reste) window.__ll_f2Signaler(copie, null, 'suppr');
+      }, 350);
+    }catch(err){}
+  }, true);
 })();
 </script>
 
@@ -91173,7 +91874,12 @@ function llIcsAnalyse(texte){
          donc environ 15,4 cm pour les semaines, et non 16,2 : c'est ce
          demi-centimetre de trop qui faisait basculer la derniere semaine
          sur une seconde page. */
-      var dispo = 15.4;                                  /* centimetres */
+      /* LOT C1 — le calcul de 73 ter oubliait la marge du document lui-meme
+         (1 cm en haut et 1 cm en bas, en plus des 1,2 cm de la page) : il
+         passait dans un Chrome reglé sans marges, pas dans un navigateur qui
+         respecte les marges (Firefox). On compte desormais les deux : la
+         grille tient sur une page quel que soit le reglage. */
+      var dispo = 13.4;                                  /* centimetres */
       var parSemaine = dispo / Math.max(nbSem, 1);
       var CM = 28.35;                                    /* points par centimetre */
       /* Place restante pour les lignes, une fois le numero du jour pose. */
@@ -91276,7 +91982,19 @@ function llIcsAnalyse(texte){
       '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>'
       + esc(r.titre) + '</title><style>' + style + '</style></head><body>'
       + r.html
-      + '<scr' + 'ipt>window.onload=function(){setTimeout(function(){window.print()},400)}</scr' + 'ipt>'
+      /* LOT C1 — derniere verification avant d'imprimer : on mesure la grille
+         a la taille reelle de la page (A4 paysage, marges comprises). Si elle
+         depasse, le texte des seances diminue par petits pas, jusqu'au plancher
+         de lisibilite (6 pt) ; en dernier recours, les cases ne gardent que la
+         hauteur de leur contenu. Rien ne change si la grille tient deja. */
+      + '<scr' + 'ipt>function llC1(){try{var t=document.querySelector("table.gri");if(!t||' + (paysage ? 'false' : 'true') + ')return;'
+      + 'var mm=96/25.4,b=document.body,old=b.style.cssText;b.style.width="253mm";b.style.margin="0";'
+      + 'var H=162*mm,st=document.createElement("style");document.head.appendChild(st);'
+      + 'var s0=t.querySelector(".sea"),size=s0?parseFloat(getComputedStyle(s0).fontSize)*0.75:8.5;'
+      + 'while(b.scrollHeight>H&&size>6){size=Math.max(6,size-0.25);st.textContent=".gri .sea{font-size:"+size+"pt!important}";}'
+      + 'if(b.scrollHeight>H){st.textContent+=".gri td{height:auto!important}";}'
+      + 'b.style.cssText=old;}catch(e){}}'
+      + 'window.onload=function(){llC1();setTimeout(function(){window.print()},400)}</scr' + 'ipt>'
       + '</body></html>'
     );
     win.document.close();
@@ -96479,6 +97197,563 @@ function llIcsAnalyse(texte){
   };
 })();
 </script>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════
+   LOT K1b — « MES PÉRIODES » SE REPLIE
+   La liste des périodes ajoutées à la main (vacances, grèves, ponts…) est
+   dessinée par le calendrier et peut devenir longue. On pose une flèche sur
+   son titre après chaque affichage, avec le nombre de périodes, et on retient
+   le choix. Repliée par défaut.
+   Bloc autonome : le supprimer suffit à revenir en arrière.
+   ══════════════════════════════════════════════════════════════════════ */
+(function(){
+  if (window.__ll_k1b_ready) return;
+  window.__ll_k1b_ready = true;
+  var CLE = 'll-cal-periodes-ouvert';
+  function ouvert(){ try{ return localStorage.getItem(CLE) === '1'; }catch(e){ return false; } }
+  function memoriser(v){ try{ localStorage.setItem(CLE, v ? '1' : '0'); }catch(e){} }
+
+  function appliquer(){
+    var titres = document.querySelectorAll('div[style*="letter-spacing:1px"]');
+    for (var i = 0; i < titres.length; i++){
+      var t = titres[i];
+      if (t.getAttribute('data-k1b') || t.children.length) continue;
+      if ((t.textContent || '').trim() !== 'Mes p\u00e9riodes') continue;
+      var liste = t.nextElementSibling;
+      if (!liste) continue;
+      t.setAttribute('data-k1b', '1');
+      var n = liste.children.length;
+      var fl = document.createElement('span');
+      fl.style.cssText = 'display:inline-block;width:14px;margin-right:2px';
+      t.textContent = '';
+      t.appendChild(fl);
+      t.appendChild(document.createTextNode('Mes p\u00e9riodes (' + n + ')'));
+      t.style.cursor = 'pointer';
+      t.style.userSelect = 'none';
+      t.title = 'Replier ou d\u00e9plier';
+      (function(t, liste, fl){
+        function peindre(){
+          var o = ouvert();
+          liste.style.display = o ? '' : 'none';
+          fl.textContent = o ? '\u25BE' : '\u25B8';
+        }
+        t.addEventListener('click', function(e){ e.stopPropagation(); memoriser(!ouvert()); peindre(); });
+        peindre();
+      })(t, liste, fl);
+    }
+  }
+
+  var attente = null;
+  function plusTard(){ if (attente) return; attente = setTimeout(function(){ attente = null; appliquer(); }, 60); }
+  function demarrer(){
+    appliquer();
+    try{ new MutationObserver(plusTard).observe(document.body, { childList:true, subtree:true }); }catch(e){}
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer);
+  else demarrer();
+})();
+</script>
+
+<script>
+/* LOT NP1 — le PDF d'une seance porte son propre nom :
+   « Titre de la sequence — Seance 03 ». Le titre de la page est change
+   juste le temps de l'impression, puis remis tel quel. Seances flash :
+   « Seance flash — titre ». Rien d'autre n'est touche. */
+(function(){
+  function nomPdf(){
+    var sea = window.__ll_activeSeance, sq = window.__ll_activeSeq;
+    if (!sea) return '';
+    if (sq && (sq.id === '__ll_flash_seances__' || sq.isFlash)) {
+      return 'S\u00E9ance flash \u2014 ' + String(sea.titre || 'Sans titre').trim();
+    }
+    var liste = (sq && sq.seances) || [];
+    var n = 0;
+    for (var i = 0; i < liste.length; i++) { if (liste[i] && liste[i].id === sea.id) { n = i + 1; break; } }
+    var t = String((sq && sq.titre) || '').trim() || 'S\u00E9quence';
+    return t + (n ? ' \u2014 S\u00E9ance ' + (n < 10 ? '0' + n : String(n)) : '');
+  }
+  window.__ll_np1Print = function(){
+    var avant = document.title, nom = '';
+    try { nom = nomPdf(); } catch (e) {}
+    var remis = false;
+    function remettre(){ if (remis) return; remis = true; document.title = avant; window.removeEventListener('afterprint', remettre); }
+    if (nom) { document.title = nom; window.addEventListener('afterprint', remettre); }
+    window.print();
+    if (nom) setTimeout(remettre, 120000); /* filet de securite si « afterprint » ne vient pas */
+  };
+})();
+</script>
+
+<script>
+/* LOT F1a — LA SEANCE FLASH DU CALENDRIER PEUT ETRE RATTACHEE A UNE CLASSE.
+   Le bouton ⚡ Flash ouvre une fenetre (comme 🚌 Sortie / Voyage) au lieu du
+   petit formulaire : titre, date, couleur, et Classe (facultatif). La flash
+   est enregistree comme avant ; quand une classe est choisie, elle porte en
+   plus le nom de la classe, ce qui l'affiche dans la pastille (« 206 · … »)
+   et la fait entrer dans le filtre par classe du calendrier.
+   Le placement calcule n'est PAS touche dans ce lot.
+   Bloc autonome : le supprimer suffit a revenir en arriere. */
+(function(){
+  if (window.__ll_f1a_ready) return;
+  window.__ll_f1a_ready = true;
+
+  var COULEURS = ['#6c63ff','#3ecf8e','#f97316','#06b6d4','#ec4899','#facc15','#ef4444','#a855f7'];
+
+  function esc(x){ return String(x == null ? '' : x).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function classes(){
+    try{
+      var l = (typeof window.llGetClassesEdt === 'function') ? (window.llGetClassesEdt().classes || []) : [];
+      return l.slice().sort(function(a,b){ return String(a.name||'').localeCompare(String(b.name||''), 'fr', {numeric:true}); });
+    }catch(e){ return []; }
+  }
+  function p2(n){ return n < 10 ? '0' + n : '' + n; }
+  function iso(d){ return d.getFullYear() + '-' + p2(d.getMonth()+1) + '-' + p2(d.getDate()); }
+  /* La date proposee : aujourd'hui s'il est affiche, sinon le premier jour affiche. */
+  function dateProposee(){
+    var auj = iso(new Date());
+    try{
+      var cases = document.querySelectorAll('.cal-day[data-date], .__ll_week_day[data-date]');
+      if (!cases.length) return auj;
+      for (var i = 0; i < cases.length; i++) if (cases[i].getAttribute('data-date') === auj) return auj;
+      return cases[0].getAttribute('data-date') || auj;
+    }catch(e){ return auj; }
+  }
+  function optionsClasses(selId){
+    var h = '<option value="">Aucune \u2014 simple rep\u00e8re</option>';
+    classes().forEach(function(c){
+      h += '<option value="' + esc(c.id) + '"' + (c.id === selId ? ' selected' : '') + '>' + esc(c.name || c.code || c.id) + '</option>';
+    });
+    return h;
+  }
+  function nomClasse(id){
+    var c = classes().filter(function(x){ return x.id === id; })[0];
+    return c ? (c.name || c.code || '') : '';
+  }
+  window.__ll_f1OptionsClasses = optionsClasses;
+  window.__ll_f1NomClasse = nomClasse;
+
+  /* LOT F1b — les cours d'une classe a une date donnee (semaines A/B
+     respectees), et le panneau « Remplace une seance ». */
+  function coursDuJour(classId, dateIso){
+    var c = classes().filter(function(x){ return x.id === classId; })[0];
+    if (!c || !dateIso) return [];
+    var p = dateIso.split('-'); var d = new Date(+p[0], +p[1]-1, +p[2]);
+    var jour = (d.getDay() + 6) % 7;
+    var par = (typeof window.__ll_pariteScolaire === 'function') ? window.__ll_pariteScolaire(d) : null;
+    var l = [];
+    (c.slots || []).forEach(function(k){
+      if (k.day !== jour) return;
+      if (k.rythme === 'quinzaine' && (k.parite === 0 || k.parite === 1) && par !== null && par !== k.parite) return;
+      var cle = (k.start || '') + '|' + (k.groupe || '');
+      if (l.some(function(x){ return x.cle === cle; })) return;
+      l.push({ cle: cle, start: k.start || '', label: String(k.start || '').replace(':', 'h') + ' \u00b7 ' + (k.groupe || 'classe enti\u00e8re') });
+    });
+    return l.sort(function(a,b){ return String(a.start).localeCompare(String(b.start)); });
+  }
+  window.__ll_f1CoursDuJour = coursDuJour;
+
+  /* hote : element ou dessiner ; lireClasse / lireDate : fonctions ;
+     init : { remplace, cours }. Retourne une fonction qui donne l'etat. */
+  function panneauRemplace(hote, lireClasse, lireDate, init){
+    var st = { remplace: !!(init && init.remplace), cours: ((init && init.cours) || []).slice() };
+    function dessiner(){
+      var cid = lireClasse(), dt = lireDate();
+      if (!cid){ hote.innerHTML = ''; return; }
+      var liste = coursDuJour(cid, dt);
+      st.cours = st.cours.filter(function(k){ return liste.some(function(x){ return x.cle === k; }); });
+      var h = '<label style="display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;cursor:pointer">'
+        + '<input type="checkbox" data-f1r' + (st.remplace ? ' checked' : '') + ' style="margin-top:3px" />'
+        + '<span style="font-size:13px">Remplace une s\u00e9ance <span style="font-size:11px;color:var(--text-muted)">(la s\u00e9quence se d\u00e9cale)</span></span></label>';
+      if (st.remplace){
+        var nom = nomClasse(cid);
+        if (!liste.length){
+          h += '<div style="font-size:11.5px;color:var(--text-muted);margin:0 0 10px 24px">La ' + esc(nom) + ' n\u2019a pas cours ce jour-l\u00e0\u00a0: la flash reste un simple rep\u00e8re.</div>';
+        } else if (liste.length === 1){
+          st.cours = [liste[0].cle];
+          h += '<div style="font-size:11.5px;color:var(--text-muted);margin:0 0 10px 24px">La flash remplace le cours de\u00a0: <b>' + esc(liste[0].label) + '</b></div>';
+        } else {
+          h += '<div style="font-size:11.5px;color:var(--text-muted);margin:0 0 4px 24px">La flash remplace le cours de\u00a0:</div><div style="display:flex;flex-wrap:wrap;gap:6px 16px;margin:0 0 10px 24px">';
+          liste.forEach(function(x){
+            h += '<label style="display:flex;gap:6px;align-items:center;font-size:12.5px;cursor:pointer"><input type="checkbox" data-f1k="' + esc(x.cle) + '"' + (st.cours.indexOf(x.cle) >= 0 ? ' checked' : '') + ' />' + esc(x.label) + '</label>';
+          });
+          h += '</div>';
+        }
+      }
+      hote.innerHTML = h;
+      var cb = hote.querySelector('[data-f1r]');
+      if (cb) cb.onchange = function(){ st.remplace = cb.checked; dessiner(); };
+      Array.prototype.forEach.call(hote.querySelectorAll('[data-f1k]'), function(i){
+        i.onchange = function(){
+          var k = i.getAttribute('data-f1k');
+          st.cours = st.cours.filter(function(x){ return x !== k; });
+          if (i.checked) st.cours.push(k);
+        };
+      });
+      st.nbCours = liste.length;
+    }
+    dessiner();
+    return { redessiner: dessiner, etat: function(){ return st; } };
+  }
+  window.__ll_f1Panneau = panneauRemplace;
+  /* Ce que la flash enregistre, ou un message si un choix manque. */
+  function lireRemplace(p, cid){
+    if (!p || !cid) return { f1: null };
+    var st = p.etat();
+    if (!st.remplace || !st.nbCours) return { f1: null };
+    if (!st.cours.length) return { erreur: 'Cochez le cours que la flash remplace.' };
+    return { f1: { remplace: true, cours: st.cours.slice() } };
+  }
+  window.__ll_f1LireRemplace = lireRemplace;
+
+  function ouvrir(){
+    var old = document.getElementById('__ll_f1_modal'); if (old) old.remove();
+    var couleur = COULEURS[4];
+    var ov = document.createElement('div');
+    ov.id = '__ll_f1_modal';
+    ov.className = 'll-ov';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+    var box = document.createElement('div');
+    box.style.cssText = 'background:var(--panel);border-radius:18px;padding:26px 28px;min-width:420px;max-width:94vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.4);position:relative';
+    box.innerHTML =
+      '<button id="__ll_f1_x" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-muted)">&times;</button>' +
+      '<h2 style="font-family:Playfair Display,serif;font-size:19px;font-weight:800;margin:0 0 4px;padding-right:28px">\u26A1 S\u00e9ance flash</h2>' +
+      '<p style="font-size:12px;color:var(--text-muted);margin:0 0 16px">Hors s\u00e9quence.</p>' +
+      '<div style="margin-bottom:10px"><label class="fl">Titre</label><input id="__ll_f1_t" class="fi" placeholder="Ex : Halloween activity" /></div>' +
+      '<div style="margin-bottom:10px"><label class="fl">Date</label><input id="__ll_f1_d" class="fi" type="date" value="' + esc(dateProposee()) + '" /></div>' +
+      '<div style="margin-bottom:10px"><label class="fl">Classe</label><select id="__ll_f1_c" class="fi">' + optionsClasses('') + '</select></div>' +
+      '<div id="__ll_f1_rp"></div>' +
+      '<div style="margin-bottom:14px"><label class="fl">Couleur</label><div id="__ll_f1_pal" style="display:flex;gap:7px;flex-wrap:wrap"></div></div>' +
+      '<div style="display:flex;gap:8px">' +
+        '<button id="__ll_f1_no" class="btn btn-ghost" style="flex:1">Annuler</button>' +
+        '<button id="__ll_f1_ok" class="btn btn-pink" style="flex:2">\u2713 Ajouter</button>' +
+      '</div>';
+    ov.appendChild(box); document.body.appendChild(ov);
+    function palette(){
+      var pal = box.querySelector('#__ll_f1_pal'); pal.innerHTML = '';
+      COULEURS.forEach(function(c){
+        var b = document.createElement('button'); b.type = 'button'; b.title = c;
+        b.style.cssText = 'width:28px;height:28px;border-radius:50%;background:' + c + ';border:' + (c === couleur ? '3px solid var(--text)' : '2px solid ' + c) + ';cursor:pointer';
+        b.onclick = function(){ couleur = c; palette(); };
+        pal.appendChild(b);
+      });
+    }
+    palette();
+    var pan = panneauRemplace(box.querySelector('#__ll_f1_rp'),
+      function(){ return box.querySelector('#__ll_f1_c').value; },
+      function(){ return box.querySelector('#__ll_f1_d').value; }, null);
+    box.querySelector('#__ll_f1_c').addEventListener('change', pan.redessiner);
+    box.querySelector('#__ll_f1_d').addEventListener('change', pan.redessiner);
+    function fermer(){ ov.remove(); }
+    ov.addEventListener('click', function(e){ if (e.target === ov) fermer(); });
+    box.querySelector('#__ll_f1_x').onclick = fermer;
+    box.querySelector('#__ll_f1_no').onclick = fermer;
+    box.querySelector('#__ll_f1_ok').onclick = function(){
+      var t = box.querySelector('#__ll_f1_t').value.trim();
+      var d = box.querySelector('#__ll_f1_d').value;
+      var c = box.querySelector('#__ll_f1_c').value;
+      if (!t){ window.llToast && window.llToast('Saisissez un titre.', 'warn'); return; }
+      if (!d){ window.llToast && window.llToast('Choisissez une date.', 'warn'); return; }
+      var r = lireRemplace(pan, c);
+      if (r.erreur){ window.llToast && window.llToast(r.erreur, 'warn'); return; }
+      var ev = { id: 'flash_' + Date.now(), title: t, color: couleur, sequenceId: null, startDate: d, endDate: d };
+      if (c){ ev.classId = c; ev.className = nomClasse(c); }
+      if (c && r.f1) ev.f1 = r.f1;
+      if (typeof window.__ll_upsertCalEvent === 'function') window.__ll_upsertCalEvent(ev);
+      fermer();
+      /* LOT F2 */
+      setTimeout(function(){ try{ if (typeof window.__ll_f2Signaler === 'function') window.__ll_f2Signaler(null, ev, 'ajout'); }catch(x){} }, 250);
+    };
+    setTimeout(function(){ var i = box.querySelector('#__ll_f1_t'); if (i) i.focus(); }, 60);
+  }
+  window.__ll_f1Ouvrir = ouvrir;
+
+  /* Le bouton ⚡ Flash du calendrier : on ouvre la fenetre a la place du
+     petit formulaire. Ecoute en capture, comme l'editeur d'evenement. */
+  document.addEventListener('click', function(e){
+    var t = e.target && e.target.closest ? e.target.closest('[data-cflash]') : null;
+    if (!t) return;
+    e.stopPropagation(); e.preventDefault();
+    ouvrir();
+  }, true);
+})();
+</script>
+
+<script>
+/* LOT SP — LE FICHIER DE SEQUENCE PARTAGEE DIT LA VERITE.
+   Le fichier envoye a une collegue promettait deux boutons qui ne peuvent
+   pas marcher (« Importer dans mon Lesson Loom », « Copier la sequence ») et
+   un lien de bas de page qui ne menait nulle part. Au moment exact ou le
+   fichier est fabrique (clic sur « Partager (HTML) »), on en corrige le
+   texte : seul « Imprimer / PDF » reste, l'encadre indique le vrai chemin
+   d'import, le lien mene a lessonloom.fr. A l'impression : fiche seule,
+   couleurs, titres jamais seuls, marges sures, pied de page sur chaque page.
+   LES DONNEES DE LA SEQUENCE (SEQ_B64) NE SONT PAS TOUCHEES : l'import les
+   relit a l'identique. Le coeur n'est pas modifie. Bloc autonome. */
+(function(){
+  if (window.__ll_sp_ready) return;
+  window.__ll_sp_ready = true;
+
+  function esc(x){ return String(x == null ? '' : x).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function pied(html){
+    var annee = '', nom = '';
+    try{
+      var m = html.match(/var SEQ_B64 = "([A-Za-z0-9+\/=]+)"/);
+      if (m){ var sq = JSON.parse(decodeURIComponent(escape(atob(m[1])))); annee = sq.annee || ''; }
+    }catch(e){}
+    try{ nom = (JSON.parse(localStorage.getItem('le-sequenceur-prefs-v1') || '{}') || {}).profName || ''; }catch(e){}
+    return '\uD83E\uDE84 Lesson Loom \u2014 fiche de bord' + (annee ? ' \u00b7 ' + annee : '') + (nom ? ' \u00b7 ' + nom : '');
+  }
+  var CSS =
+    '@media screen{table.ll-pg,table.ll-pg>tbody,table.ll-pg>tbody>tr,table.ll-pg>tbody>tr>td{display:block;border:none;padding:0;margin:0}table.ll-pg>tfoot,table.ll-pg>thead{display:none}}' +
+    '@media print{' +
+    '@page{size:A4;margin:0.6cm}' +
+    'html,body{background:#fff!important}' +
+    '.share-wrap{padding:0!important;max-width:none!important;margin:0!important}' +
+    '.share-banner,.share-actions,.import-hint,.share-footer{display:none!important}' +
+    '.share-card{box-shadow:none!important;border:none!important;padding:0!important;border-radius:0!important;background:#fff!important}' +
+    '*{-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
+    'tr{break-inside:avoid;page-break-inside:avoid}' +
+    'table:not(.ll-pg){break-inside:avoid;page-break-inside:avoid}' +
+    'div[style*="letter-spacing:1pt;border-radius:4pt"]{break-inside:avoid;page-break-inside:avoid}' +
+    'div[style*="letter-spacing:1pt;border-radius:4pt"]::after{content:"";display:block;height:90pt;margin-bottom:-90pt}' +
+    'table.ll-pg,table.ll-pg>tbody,table.ll-pg>tbody>tr,table.ll-pg>tbody>tr>td,table.ll-pg>tfoot>tr>td,table.ll-pg>thead>tr>td{border:none!important;margin:0!important;break-inside:auto!important;page-break-inside:auto!important;width:100%}' +
+    'table.ll-pg>tbody>tr>td,table.ll-pg>tfoot>tr>td,table.ll-pg>thead>tr>td{padding:0 0.8cm!important}' +
+    'table.ll-pg>thead{display:table-header-group}' +
+    '.ll-haut-place{height:0.6cm}' +
+    '.ll-pied-bas{margin-top:10pt;padding-top:4pt;border-top:1pt solid #e2e8f0;text-align:center;font-size:8pt;color:#94a3b8}' +
+    '}';
+
+  function corriger(html){
+    if (typeof html !== 'string' || html.indexOf('id="ll-import-btn"') < 0 || html.indexOf('var SEQ_B64 =') < 0) return html;
+    var h = html;
+    h = h.replace(/<div class="share-actions">[\s\S]*?<\/div>/,
+      '<div class="share-actions">\n      <button class="share-btn secondary" onclick="window.print()">\uD83D\uDDA8\uFE0F Imprimer / PDF</button>\n    </div>');
+    h = h.replace(/<div class="import-hint">[\s\S]*?<\/div>/,
+      '<div class="import-hint">\n      <b>Pour l\u2019ajouter \u00e0 votre Lesson Loom&nbsp;:</b> ouvrez Lesson Loom, cliquez sur <b>\uD83D\uDCE5 Importer une s\u00e9quence partag\u00e9e</b> (page d\u2019accueil, ou en bas de la fen\u00eatre \uD83D\uDCBE), puis choisissez ce fichier. Vous n\u2019avez pas Lesson Loom&nbsp;? <a href="https://lessonloom.fr" target="_blank" rel="noopener" style="color:inherit;font-weight:700">lessonloom.fr</a>\n    </div>');
+    h = h.replace(/<div class="share-footer">[\s\S]*?<\/div>/,
+      '<div class="share-footer">\n      Document autonome \u2014 fonctionne hors ligne. Cr\u00e9\u00e9 avec <a href="https://lessonloom.fr" target="_blank" rel="noopener">Lesson Loom</a>, l\u2019outil de s\u00e9quences p\u00e9dagogiques pour profs d\u2019anglais.\n    </div>');
+    var i = h.indexOf('<main class="share-card">'), j = h.lastIndexOf('</main>');
+    if (i >= 0 && j > i){
+      var debut = i + '<main class="share-card">'.length;
+      h = h.slice(0, debut)
+        + '<table class="ll-pg"><thead><tr><td><div class="ll-haut-place"></div></td></tr></thead><tbody><tr><td>'
+        + h.slice(debut, j)
+        + '</td></tr></tbody><tfoot><tr><td><div class="ll-pied-bas">' + esc(pied(html)) + '</div></td></tr></tfoot></table>'
+        + h.slice(j);
+    }
+    var k = h.indexOf('</style>');
+    if (k >= 0) h = h.slice(0, k) + CSS + h.slice(k);
+    /* Garde-fou : si les donnees ont bouge, on livre le fichier d'origine. */
+    var a = html.match(/var SEQ_B64 = "[A-Za-z0-9+\/=]+"/), b = h.match(/var SEQ_B64 = "[A-Za-z0-9+\/=]+"/);
+    if (!a || !b || a[0] !== b[0]) return html;
+    return h;
+  }
+  window.__ll_spCorriger = corriger;
+
+  /* Le temps du clic sur « Partager (HTML) » seulement, la fabrique du
+     fichier passe par notre correction. */
+  document.addEventListener('click', function(e){
+    try{
+      var bt = e.target && e.target.closest ? e.target.closest('button') : null;
+      if (!bt || (bt.textContent || '').indexOf('Partager (HTML)') < 0) return;
+      var B = window.Blob;
+      if (B.__llSp) return;
+      var W = function(parts, opt){
+        try{ if (parts && typeof parts[0] === 'string') parts = [corriger(parts[0])].concat(Array.prototype.slice.call(parts, 1)); }catch(x){}
+        return new B(parts, opt);
+      };
+      W.prototype = B.prototype; W.__llSp = true;
+      window.Blob = W;
+      setTimeout(function(){ if (window.Blob === W) window.Blob = B; }, 0);
+    }catch(err){}
+  }, true);
+})();
+</script>
+
+<script>
+/* LOT E2 — ONGLET ÉVALUATIONS RANGÉ PAR NIVEAU, PUIS PAR SÉQUENCE.
+   Les cartes restent celles de l'application, avec leurs boutons : on ne
+   les déplace pas, on les ordonne (propriété « order » de la grille
+   d'affichage) et on intercale des titres repliables. Les niveaux masqués
+   dans l'onglet Séquences sont masqués ici aussi. Ce qui est replié est
+   retenu d'une ouverture à l'autre. Pendant une recherche, tout ce qui
+   correspond s'affiche, sans toucher à ce qui est retenu.
+   Bloc autonome : le supprimer suffit à revenir à l'affichage d'avant. */
+(function(){
+  if (window.__ll_e2_ready) return;
+  window.__ll_e2_ready = true;
+
+  var CLE = '__ll_e2_fermes';
+  var ORDRE = ['Seconde','Première','Terminale','DNL','6ème','5ème','4ème','3ème',
+    'Première_AMC','Terminale_AMC','Première_LLCER','Terminale_LLCER','Première_Techno','Terminale_Techno','Autre'];
+  var SANS = 'Grilles sans séquence';
+
+  function lireFermes(){ try{ var l = JSON.parse(localStorage.getItem(CLE) || '[]'); return Array.isArray(l) ? l : []; }catch(e){ return []; } }
+  function ecrireFermes(l){ try{ localStorage.setItem(CLE, JSON.stringify(l)); }catch(e){} }
+  function reduire(n){ return String(n || '').replace(/\([^)]*\)/g,' ').replace(/_/g,' ').replace(/\s+/g,' ').trim().toLowerCase(); }
+  function masques(){ try{ var r = localStorage.getItem('__ll_hidden_niveaux'); return ((r ? JSON.parse(r) : []) || []).map(reduire).filter(Boolean); }catch(e){ return []; } }
+  function libelleNiveau(n){ return n ? String(n).replace(/_/g,' ') : SANS; }
+  function rangNiveau(n){ if(!n) return 999; var i = ORDRE.indexOf(n); return i < 0 ? 500 : i; }
+  function esc(x){ return String(x == null ? '' : x).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+  /* Lit, sur la carte, « Titre de la séquence · Niveau ». */
+  function lireCarte(carte){
+    var sp = carte.querySelector('[x-source-var="sequenceTitle"]');
+    var t = sp ? sp.textContent : '';
+    var i = t.lastIndexOf(' · ');
+    var seq = t, niv = '';
+    if (i >= 0){
+      var fin = t.slice(i + 3).trim();
+      if (ORDRE.indexOf(fin) >= 0 || /^[0-9A-Za-zÀ-ÿ_ ]+$/.test(fin)){ seq = t.slice(0, i); niv = fin; }
+    }
+    seq = seq.trim();
+    if (/Grilles d.évaluation/.test(seq) && !niv) seq = '';
+    return { seq: seq, niv: niv };
+  }
+
+  function chevron(){ return '<svg viewBox="0 0 16 16" width="14" height="14" style="flex:none;transition:transform .15s"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2"/></svg>'; }
+
+  function style(){
+    if (document.getElementById('__ll_e2_css')) return;
+    var st = document.createElement('style'); st.id = '__ll_e2_css';
+    st.textContent =
+      '[data-e2-cache="1"]{display:none!important}' +
+      '.ll-e2-h{grid-column:1/-1;display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none}' +
+      '.ll-e2-h.niv{padding:10px 2px 7px;border-bottom:2px solid rgba(108,99,255,.25);margin-top:6px;color:var(--accent2)}' +
+      '.ll-e2-h.niv .t{font-size:13px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase}' +
+      '.ll-e2-h.seq{padding:4px 2px 0 12px;color:var(--text)}' +
+      '.ll-e2-h.seq .t{font-size:14.5px;font-weight:800}' +
+      '.ll-e2-h .n{font-size:11.5px;font-weight:700;color:var(--text-muted);background:var(--card);border-radius:999px;padding:2px 9px}' +
+      '.ll-e2-h.ferme svg{transform:rotate(-90deg)}' +
+      /* LOT E2b — deux liens discrets dans la barre, qui garde sa taille d'origine. */
+      '.ll-e2-tout{border:none;background:transparent;color:var(--accent2);padding:0 4px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap}' +
+      '.ll-e2-tout:hover{text-decoration:underline}' +
+      '#__ll_e2_ouvrir::after{content:"\u00B7";margin-left:8px;color:var(--text-muted);display:inline-block}';
+    document.head.appendChild(st);
+  }
+
+  var enCours = false;
+  function appliquer(){
+    var g = document.querySelector('[x-id="EvaluationsView_83_8"]');
+    if (!g) return;
+    enCours = true;
+    try{
+      style();
+      var champ = document.querySelector('input[placeholder^="Filtrer les grilles"]');
+      var recherche = !!(champ && champ.value.trim());
+      ajouterBoutons(champ);
+      var fermes = lireFermes(), msq = masques();
+      var cartes = Array.prototype.filter.call(g.children, function(c){ return !c.classList.contains('ll-e2-h'); });
+
+      /* Les groupes, dans l'ordre : niveau, puis séquence par ordre alphabétique. */
+      var groupes = {}, niveaux = {};
+      cartes.forEach(function(c){
+        var info = lireCarte(c);
+        var kn = info.niv || '', ks = kn + '|' + info.seq;
+        if (!niveaux[kn]) niveaux[kn] = { niv: kn, seqs: [] , nb: 0 };
+        if (!groupes[ks]){ groupes[ks] = { cle: ks, niv: kn, seq: info.seq, cartes: [] }; niveaux[kn].seqs.push(groupes[ks]); }
+        groupes[ks].cartes.push(c);
+      });
+      var listeNiv = Object.keys(niveaux).map(function(k){ return niveaux[k]; })
+        .filter(function(n){ return !(n.niv && msq.indexOf(reduire(n.niv)) >= 0); })
+        .sort(function(a,b){ return rangNiveau(a.niv) - rangNiveau(b.niv) || String(a.niv).localeCompare(String(b.niv),'fr'); });
+      /* Cartes des niveaux masqués : cachées. */
+      Object.keys(niveaux).forEach(function(k){
+        var n = niveaux[k];
+        if (n.niv && msq.indexOf(reduire(n.niv)) >= 0) n.seqs.forEach(function(s){ s.cartes.forEach(function(c){ marquer(c, '1', 0); }); });
+      });
+
+      var vus = {}, ordre = 0;
+      listeNiv.forEach(function(n){
+        n.seqs.sort(function(a,b){ return String(a.seq).localeCompare(String(b.seq),'fr'); });
+        var total = n.seqs.reduce(function(s,x){ return s + x.cartes.length; }, 0);
+        var cleN = 'N:' + n.niv, nFerme = !recherche && fermes.indexOf(cleN) >= 0;
+        titre(g, cleN, 'niv', libelleNiveau(n.niv), total + ' grille' + (total > 1 ? 's' : ''), nFerme, ++ordre, false); vus[cleN] = 1;
+        n.seqs.forEach(function(s){
+          var cleS = 'S:' + s.cle, sFerme = !recherche && fermes.indexOf(cleS) >= 0;
+          var avecTitre = !!s.seq;
+          if (avecTitre){ titre(g, cleS, 'seq', s.seq, String(s.cartes.length), sFerme, ++ordre, nFerme); vus[cleS] = 1; }
+          s.cartes.forEach(function(c){ marquer(c, (nFerme || sFerme) ? '1' : '0', ++ordre); });
+        });
+      });
+      /* Titres devenus inutiles. */
+      Array.prototype.slice.call(g.querySelectorAll(':scope > .ll-e2-h')).forEach(function(h){ if (!vus[h.dataset.cle]) h.remove(); });
+    } finally { enCours = false; }
+  }
+
+  function marquer(c, cache, ordre){
+    if (c.getAttribute('data-e2-cache') !== cache) c.setAttribute('data-e2-cache', cache);
+    var o = String(ordre);
+    if (c.style.order !== o) c.style.order = o;
+  }
+
+  function titre(g, cle, type, texte, nb, ferme, ordre, cacheParent){
+    var h = null;
+    Array.prototype.some.call(g.children, function(x){ if (x.classList && x.classList.contains('ll-e2-h') && x.dataset.cle === cle){ h = x; return true; } return false; });
+    if (!h){
+      h = document.createElement('div');
+      h.className = 'll-e2-h ' + type;
+      h.dataset.cle = cle;
+      h.innerHTML = chevron() + '<span class="t"></span><span class="n"></span>';
+      h.addEventListener('click', function(){
+        var l = lireFermes(), i = l.indexOf(cle);
+        if (i >= 0) l.splice(i,1); else l.push(cle);
+        ecrireFermes(l); appliquer();
+      });
+      g.appendChild(h);
+    }
+    var t = h.querySelector('.t'), n = h.querySelector('.n');
+    if (t.textContent !== texte) t.textContent = texte;
+    if (n.textContent !== nb) n.textContent = nb;
+    h.classList.toggle('ferme', !!ferme);
+    var cache = cacheParent ? '1' : '0';
+    if (h.getAttribute('data-e2-cache') !== cache) h.setAttribute('data-e2-cache', cache);
+    var o = String(ordre);
+    if (h.style.order !== o) h.style.order = o;
+  }
+
+  function ajouterBoutons(champ){
+    if (!champ || document.getElementById('__ll_e2_ouvrir')) return;
+    var parent = champ.parentElement;
+    if (!parent) return;
+    function bouton(id, txt, ouvrir){
+      var b = document.createElement('button');
+      b.id = id; b.type = 'button'; b.className = 'll-e2-tout'; b.textContent = txt;
+      b.addEventListener('click', function(){
+        if (ouvrir){ ecrireFermes([]); }
+        else {
+          var tout = Array.prototype.map.call(document.querySelectorAll('.ll-e2-h'), function(h){ return h.dataset.cle; });
+          ecrireFermes(tout);
+        }
+        appliquer();
+      });
+      return b;
+    }
+    var zone = document.createElement('span');
+    zone.style.cssText = 'display:inline-flex;gap:8px;margin-left:10px;vertical-align:middle';
+    zone.appendChild(bouton('__ll_e2_ouvrir', 'Tout déplier', true));
+    zone.appendChild(bouton('__ll_e2_fermer', 'Tout replier', false));
+    champ.insertAdjacentElement('afterend', zone);
+  }
+
+  var prevu = false;
+  function plusTard(){ if (prevu || enCours) return; prevu = true; requestAnimationFrame(function(){ prevu = false; appliquer(); }); }
+  function demarrer(){
+    appliquer();
+    try{ new MutationObserver(function(){ if (!enCours) plusTard(); }).observe(document.body, { childList:true, subtree:true }); }catch(e){}
+    document.addEventListener('input', function(e){ if (e.target && e.target.matches && e.target.matches('input[placeholder^="Filtrer les grilles"]')) plusTard(); }, true);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer); else demarrer();
+})();
+</script>
+
+<style id="__ll_ev1">
+/* LOT EV1 — le compteur « N evenements » de la legende du calendrier est
+   masque : il additionnait tout ce qui avait ete place, toutes annees
+   confondues. Rien d'autre n'est touche. */
+span[style="color:var(--accent2);font-weight:600"]{display:none!important}
+</style>
 
 </body>
 </html>

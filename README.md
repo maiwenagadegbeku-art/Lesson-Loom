@@ -27,7 +27,8 @@ imprimer ce qu'il faut pour la classe.
 Fiches de séquence complètes — niveau, classe, année scolaire, axes du
 programme, problématique, tâche finale. Séances détaillées avec objectifs,
 supports, activités langagières et déroulé. Séances flash pour ce qui ne rentre
-pas dans une séquence.
+pas dans une séquence. Une séance se copie vers une autre séquence ou vers les
+séances flash, et ses objectifs remontent dans la fiche de la séquence d'arrivée.
 
 **Le référentiel CECRL officiel**
 Les 292 descripteurs du Volume complémentaire, neuf compétences, avec le texte
@@ -41,10 +42,15 @@ officielles du baccalauréat, grille LLCER, marqueurs de positionnement, analyse
 de cohérence, et distribution aux élèves.
 
 **Calendrier et placement sur l'année**
-Import de l'emploi du temps depuis Pronote, ou saisie à la main. Placement
-calculé des séances sur les créneaux réels d'une classe : vacances et jours
-fériés sautés, semaines A et B, demi-groupes. Impression du calendrier par
-classe, en grille ou en liste.
+Import de l'emploi du temps depuis Pronote, ou saisie à la main ; les cours qui
+réunissent plusieurs classes — DNL, section européenne, option — sont importés
+sous le nom de leur groupe. Placement calculé des séances sur les créneaux réels
+d'une classe : vacances, jours fériés, absences et sorties sautés, semaines A et
+B justes toute l'année, demi-groupes. Une absence ajoutée, déplacée ou supprimée
+après coup signale les séances touchées et propose de recalculer, en montrant ce
+qui change. Une séance flash peut être rattachée à une classe et remplacer un
+cours : la séquence de cette classe se décale d'autant, et le calendrier propose
+de recalculer. Impression du calendrier par classe, en grille ou en liste.
 
 **Bibliothèque**
 Comparatifs des manuels d'anglais du collège, du lycée, de la spécialité LLCER
@@ -55,7 +61,10 @@ d'avancement, corbeille et archivage par année scolaire.
 Fiches de séquence et de séance, progressions, calendriers, grilles vierges ou
 remplies. Tout est pensé pour tenir sur une page et rester lisible en noir et
 blanc. Les fiches sont organisées par composantes du CECRL, ce qui les rend directement
-présentables en inspection.
+présentables en inspection. L'export de la séquence complète s'imprime aussi
+proprement sous Firefox que sous Chrome, avec un pied de page sur chaque page ;
+le PDF d'une séance porte le nom de sa séquence et son numéro. Une séquence
+partagée s'imprime comme une fiche.
 
 **Guide**
 Un guide en dix diapositives et un tour guidé de vingt-deux étapes, qui
@@ -108,7 +117,8 @@ Le texte complet de la licence figure dans le fichier [LICENSE](LICENSE).
 
 **Attribution.** Lesson Loom est née du *Séquenceur LV* de Charlie Rollo,
 publié sous AGPLv3, dont elle conserve le noyau. Cette mention figure également
-dans le pied de page de l'application.
+dans la page « Licence et crédits » de l'application, accessible depuis son pied
+de page.
 
 **Dépôt public :**
 [github.com/maiwenagadegbeku-art/Lesson-Loom](https://github.com/maiwenagadegbeku-art/Lesson-Loom)
@@ -126,12 +136,12 @@ développement s'est poursuivi ensuite directement dans le fichier HTML unique :
 
 ## État du projet
 
-**Version de référence :** volet 9 (13 septembre 2026), couverture du programme au collège et en voie technologique.
+**Version de référence :** volet 11 (21 octobre 2026) — séances flash par classe dans le placement calculé, copie de séances, impressions soignées sous Firefox, fichier de séquence partagée corrigé.
 
-**Versions précédentes :** volet 8 (17 août 2026) · campagne de publication (21 août 2026) · revue finale avant mise en ligne (24 août 2026).
+**Versions précédentes :** volet 10 (20 octobre 2026), absences et sorties dans le placement calculé, cours à plusieurs classes, semaines A et B · volet 9 (13 septembre 2026) · volet 8 (17 août 2026) · campagne de publication (21 août 2026) · revue finale avant mise en ligne (24 août 2026).
 
-Fichier unique de 5 165 317 octets. Cœur compilé React : 33 retouches,
-dont deux portant uniquement sur des données. 24 blocs autonomes.
+Fichier unique de 5 242 548 octets. Cœur compilé React : 38 retouches,
+dont deux portant uniquement sur des données. 30 blocs autonomes.
 
 Le développement suit une méthode stricte : un lot à la fois, diagnostic avant
 tout code, banc d'essai passé sur la version défectueuse avant d'être cru sur
