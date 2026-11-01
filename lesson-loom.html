@@ -73381,6 +73381,24 @@ p.dash-sub { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px; li
 /* Cas 3 : tout grid qui a une pcard avec cursor:default (pour couvrir variantes CSS) */
 .grid:has(.pcard[style*="cursor:default"]) .__ll_flash_pcard { display: none !important; }
 </style>
+<style id="__ll_p2_badge">
+/* LOT P2 — le numero de seance (badge du coeur, SeancesView_343_16) etait
+   cache derriere les boutons de la carte. On le deplace a cote de la poignee
+   et on l affiche en pastille, comme les badges du calendrier : S1, S2...
+   Feuille de style seule : le coeur et le numero qu il calcule restent intacts. */
+[x-id="SeancesView_343_16"] {
+  left: 28px !important; right: auto !important; top: 9px !important;
+  background: rgba(6,182,212,.12) !important; color: #0e7490 !important;
+  border: 1px solid rgba(6,182,212,.35);
+  border-radius: 10px !important;
+  font-size: 0 !important; line-height: 1.4 !important;
+  padding: 1px 8px !important; letter-spacing: 0 !important;
+  pointer-events: none;
+}
+[x-id="SeancesView_343_16"]::before { content: "S"; font-size: 10.5px; font-weight: 700; }
+[x-id="SeancesView_343_16_expr1"] { font-size: 10.5px; font-weight: 700; }
+[data-theme="dark"] [x-id="SeancesView_343_16"] { color: #67e8f9 !important; border-color: rgba(103,232,249,.35); }
+</style>
 <script>
 (function(){
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
