@@ -16,6 +16,9 @@ Un **fichier HTML unique**, à télécharger et à ouvrir dans un navigateur. Pa
 d'installation, pas de compte, pas de serveur. Vos données restent sur votre
 ordinateur.
 
+Lesson Loom s'utilise aussi **directement en ligne**, sans téléchargement ni
+mot de passe : vos données restent alors dans votre navigateur.
+
 Lesson Loom accompagne la préparation d'une année : concevoir des séquences,
 détailler des séances, s'appuyer sur le référentiel CECRL officiel, construire
 des grilles d'évaluation, placer les séances sur le calendrier scolaire, et
@@ -67,11 +70,17 @@ le PDF d'une séance porte le nom de sa séquence et son numéro. Une séquence
 partagée s'imprime comme une fiche.
 
 **Guide**
-Un guide en dix diapositives et un tour guidé de vingt-deux étapes, qui
-parcourt l'application elle-même. Tous deux accessibles à tout moment depuis
+Un guide en dix diapositives et un tour guidé en quatre chapitres et
+vingt-quatre étapes, qui parcourt l'application elle-même. Tous deux accessibles à tout moment depuis
 le bouton d'aide du bandeau.
 
 ## Comment l'utiliser
+
+**En ligne, sans mot de passe :**
+[lessonloom.fr/app/lesson-loom.html](https://lessonloom.fr/app/lesson-loom.html).
+Toujours à jour.
+
+**Ou téléchargé :**
 
 1. Téléchargez le fichier HTML depuis la page **Obtenir** de
    [lessonloom.fr](https://lessonloom.fr).
@@ -84,6 +93,9 @@ figure dans [GUIDE.md](GUIDE.md).
 La zone de téléchargement est protégée par un mot de passe. Écrivez à
 [contact@lessonloom.fr](mailto:contact@lessonloom.fr) pour l'obtenir.
 
+La version en ligne et le fichier téléchargé ne partagent pas leurs données :
+pour passer de l'un à l'autre, faites une sauvegarde, puis restaurez-la.
+
 ## Vos données
 
 Elles sont enregistrées **dans votre navigateur**, sur votre ordinateur. Rien
@@ -92,7 +104,9 @@ n'est effectuée.
 
 L'application fonctionne sans connexion. Seuls les dessins des caractères de la
 police sont chargés à l'ouverture : hors connexion, l'apparence est légèrement
-différente, et tout le reste fonctionne à l'identique.
+différente, et tout le reste fonctionne à l'identique. La version en ligne
+demande une connexion pour s'ouvrir ; une fois ouverte, elle fonctionne comme
+le fichier téléchargé.
 
 Cela implique une contrepartie : **pensez à faire des sauvegardes.** Le bouton
 de sauvegarde produit un fichier que vous conservez où vous voulez, et qui se
@@ -112,6 +126,11 @@ supplémentaire, au titre de l'article 7(b) de l'AGPLv3 : toute version modifié
 diffusée publiquement ou mise à disposition sur un serveur doit créditer
 visiblement les deux auteurs, dans son interface ou dans sa documentation. Ce
 crédit ne peut être ni retiré, ni dissimulé aux utilisateurs.
+
+**Le nom.** Le nom « Lesson Loom » et son logo n'entrent pas dans cette
+licence : toute version modifiée diffusée doit porter un autre nom. Cette
+condition figure également dans le fichier [LICENSE](LICENSE), au titre de
+l'article 7(e) de l'AGPLv3.
 
 Le texte complet de la licence figure dans le fichier [LICENSE](LICENSE).
 
@@ -136,12 +155,9 @@ développement s'est poursuivi ensuite directement dans le fichier HTML unique :
 
 ## État du projet
 
-**Version de référence :** volet 11 (21 octobre 2026) — séances flash par classe dans le placement calculé, copie de séances, impressions soignées sous Firefox, fichier de séquence partagée corrigé.
+**Version de référence :** novembre 2026 (mise en ligne le 22 novembre 2026) — Lesson Loom s'utilise en ligne ; le guide et le rappel de sauvegarde sont adaptés à la version en ligne ; tour guidé refait en quatre chapitres ; données mieux protégées (alerte quand le navigateur est plein, filet de sécurité à la restauration) ; une pastille ⚡ du calendrier peut ouvrir sa séance flash ; barres du calendrier plus douces. Fichier unique de 5 780 668 octets.
 
-**Versions précédentes :** volet 10 (20 octobre 2026), absences et sorties dans le placement calculé, cours à plusieurs classes, semaines A et B · volet 9 (13 septembre 2026) · volet 8 (17 août 2026) · campagne de publication (21 août 2026) · revue finale avant mise en ligne (24 août 2026).
-
-Fichier unique de 5 242 548 octets. Cœur compilé React : 38 retouches,
-dont deux portant uniquement sur des données. 30 blocs autonomes.
+**Versions précédentes :** volet 11 (21 octobre 2026), séances flash par classe dans le placement calculé, copie de séances, impressions soignées sous Firefox, fichier de séquence partagée corrigé ; fichier unique de 5 242 548 octets, cœur compilé React : 38 retouches, dont deux portant uniquement sur des données, 30 blocs autonomes · volet 10 (20 octobre 2026), absences et sorties dans le placement calculé, cours à plusieurs classes, semaines A et B · volet 9 (13 septembre 2026) · volet 8 (17 août 2026) · campagne de publication (21 août 2026) · revue finale avant mise en ligne (24 août 2026).
 
 Le développement suit une méthode stricte : un lot à la fois, diagnostic avant
 tout code, banc d'essai passé sur la version défectueuse avant d'être cru sur
@@ -153,7 +169,7 @@ pourquoi.
 
 Lesson Loom fait partie de la **Lesson Loom Suite**. Tous les outils se
 téléchargent depuis la page **Obtenir** de
-[lessonloom.fr](https://lessonloom.fr).
+[lessonloom.fr](https://lessonloom.fr) ; Lesson Loom s'utilise aussi en ligne.
 
 | Outil | Ce qu'il fait | Licence |
 |---|---|---|
